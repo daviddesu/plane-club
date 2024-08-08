@@ -9,39 +9,31 @@ new class extends Component
 {
     use WithFileUploads;
 
-    #[Validate([
-        'logs.*.image' => 'required|image|max:1024',
-        'logs.*.aircraft_type' => 'string|max:10',
-        'logs.*.airport' => 'string|max:10',
-        'logs.*.airline' => 'string|max:10',
-    ])]
-    public array $logs = [];
+    #[Validate('required')]
+    public string $loggedAt;
+    #[Validate('required')]
+    public int $airport;
 
     public array $images = [];
 
     public function store()
     {
-        // Images are just temp, we want the log image. So these can be reset first
-        try{
-            $validated = $this->validate();
 
-        }catch(\Exception $e){
-            dd($e);
-        }
-        dd($_POST);
-        dd($validated);
+        $validated = $this->validate();
 
-        // var_dump($this->logs);die;
-
-        foreach ($this->logs as $log) {
-            $newAircraftLog = auth()->user()->aircraftLogs()->create($log);
-            $storedFilePath = $log['image']->storePublicly('public/aircraft');
-            auth()->user()->images()->create(
+        foreach ($this->images as $image) {
+            $storedFilePath = $image->storePublicly('public/aircraft');
+            $image = auth()->user()->images()->create(
                 [
-                    "aircraft_log_id" => $newAircraftLog->id,
                     "path" => str_replace("public/", "", $storedFilePath),
                 ]
-        );
+            );
+            $newAircraftLog = auth()->user()->aircraftLogs()->create([
+                "image_id" => $image.id,
+                "airport" => $this->airport,
+                "logged_at" => $this->loggedAt,
+            ]);
+
         }
 
         $this->logs = [];
@@ -68,9 +60,32 @@ new class extends Component
 ?>
 
 <div>
-    <x-modal-card title="Create log" name="logModal">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <x-modal-card title="Add photos" name="logModal">
+        <form wire:submit='store'>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-datetime-picker
+                    class="pd-2"
+                    wire:model="loggedAt"
+                    label="Date"
+                    placeholder="Date"
+                    without-time
+                />
 
+                <x-select
+                    class="pd-2"
+                    wire.model='airport'
+                    label="Airport"
+                    placeholder="Airport"
+                    {{-- :async-data="route('api.users.index')" --}}
+                    option-label="name"
+                    option-value="id"
+                    :options="[
+                        ['name' => 'EGPH - Edinburgh', 'id' => 1],
+                        ['name' => 'EGPF - Glasgow', 'id' => 2],
+                    ]"
+                />
+            </div>
 
                 @if(!$images)
                     {{-- File upload --}}
@@ -81,7 +96,17 @@ new class extends Component
                         x-on:livewire-upload-error="isUploading = false"
                         x-on:livewire-upload-progress="progress = $event.detail.progress"
                     >
-                        <input type="file" wire:model="images" multiple>
+                        <label for="images">
+                            <div
+                                class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
+                                <div class="flex flex-col items-center justify-center">
+                                    <p class="text-blue-600 dark:text-teal-600">
+                                        <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" /> Add photos
+                                    </p>
+                                </div>
+                            </div>
+                        </label>
+                        <input type="file" id="images" wire:model="images" multiple hidden>
 
                         @error('images.*')
                             <span class="error">{{ $message }}</span>
@@ -93,43 +118,34 @@ new class extends Component
                         </div>
                     </div>
                 @endif
-                <form wire:submit='store'>
 
                 @if ($images)
                 {{-- Log Preview --}}
                     @foreach ($images as $key => $image)
                         <div wire:key="{{ $key++ }}" class="grid grid-cols-2 gap-4">
-                            <div>
-                                <img src="{{ $image->temporaryUrl() }}">
-                                <x-heroicons::outline.x-circle
-                                    wire:key='{{ $image->temporaryUrl() }}'
-                                    wire:click="removePreviewImage('{{ $image->temporaryUrl() }}')" class="text-red-500 size-6" />
-                            </div>
-                            <div>
-                                <input type="hidden" wire:model.lazy='logs.*.image' name="image" value="{{ $image->temporaryUrl() }}" />
-                                <select wire:model.lazy='logs.*.airport'>
-                                    <option value="egph">EGPH - Edinburgh</option>
-                                    <option value="egpf">EGPF - Glasgow</option>
-                                </select>
-                                <input wire:model='logs.*.registration' name="registration" type="text" />
-                                <select wire:model='logs.*.aircraft_type'>
-                                    <option value="b738">Boeing 737-800</option>
-                                    <option value="a321">Airbus a321</option>
-                                </select>
-                                <select wire:model='logs.*.airline'>
-                                    <option value="BA">British Airways</option>
-                                    <option value="EZ">Easyjet</option>
-                                </select>
-                            </div>
+                            <img src="{{ $image->temporaryUrl() }}">
+                            <x-heroicons::outline.x-circle
+                                wire:key='{{ $image->temporaryUrl() }}'
+                                wire:click="removePreviewImage('{{ $image->temporaryUrl() }}')" class="text-red-500 size-6" />
                         </div>
                     @endforeach
                 @endif
-
-
                 <x-input-error :messages="$errors->get('message')" class="mt-2" />
+        </div>
+        <x-slot name="footer" class="flex justify-between gap-x-4">
+            <div class="flex gap-x-4">
+
+                </div>
+        </x-slot>
+        <x-slot name="footer" class="flex justify-between gap-x-4">
+            <x-button flat negative label="Delete" x-on:click="close" />
+
+            <div class="flex gap-x-4">
+                <x-button flat label="Cancel" x-on:click="close" />
 
                 <x-primary-button class="mt-4">{{ __('Add') }}</x-primary_button>
-            </form>
-        </div>
+            </div>
+        </x-slot>
+    </form>
     </x-model-card>
 </div>

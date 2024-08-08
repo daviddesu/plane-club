@@ -1,7 +1,8 @@
 # TODO
 
-[ ] Finsh image upload log form and convert to modal
+[x] Finsh image upload log form and convert to modal
 [ ] Finish log list grid and display
+[ ] Make airports list dynamic
 [ ] Create individual log modal/page
 [ ] Edit log
 [ ] Delete log

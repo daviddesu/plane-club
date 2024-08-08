@@ -37,6 +37,5 @@
             </main>
         </div>
         @livewireScripts
-        {{-- <script src="//unpkg.com/alpinejs" defer></script> <!-- Remove this line if present --> --}}
     </body>
 </html>
