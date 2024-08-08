@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->bigInteger('aircraft_log_id');
-            $table->foreign('aircraft_log_id')->references('id')->on('aircraft_logs')->cascadeOnDelete();
+            $table->string("path");
             $table->timestamps();
         });
     }

@@ -12,7 +12,6 @@ class Image extends Model
 
     protected $fillable = [
         'path',
-        'aircraft_log_id',
     ];
 
     public function user(): BelongsTo
