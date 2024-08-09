@@ -37,7 +37,7 @@ $logout = function (Logout $logout) {
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-button label="Upload photos" x-on:click="$openModal('logModal')" primary />
+                <x-icon name="arrow-up-tray" class="w-5 h-5 text-gray-800 cursor-pointer dark:text-gray-200" x-on:click="$openModal('logModal')" />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -73,6 +73,9 @@ $logout = function (Logout $logout) {
 
             <!-- Hamburger -->
             <div class="flex items-center -me-2 sm:hidden">
+                <div class="p-4">
+                <x-icon name="arrow-up-tray" class="w-5 h-5 text-gray-800 cursor-pointer dark:text-gray-200" x-on:click="$openModal('logModal')" />
+                </div>
                 <button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400">
                     <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -100,6 +103,7 @@ $logout = function (Logout $logout) {
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
+
             <div class="px-4">
                 <div class="text-base font-medium text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->name]) }}"
                     x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>

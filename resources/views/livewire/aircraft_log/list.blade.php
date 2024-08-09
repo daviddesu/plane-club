@@ -29,7 +29,7 @@ new class extends Component
 
 ?>
 
-<div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-3 xl:grid-cols-4">
+<div class="grid-cols-1 gap-4 p-4 maxgrid md:grid-cols-3 xl:grid-cols-4">
     @foreach ($aircraftLogs as $aircraftLog)
         <div class='h-auto max-w-full' wire:key='{{ $aircraftLog->id }}'>
             {{-- <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600 -scale-x-100" fill="none"
