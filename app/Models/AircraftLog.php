@@ -24,8 +24,13 @@ class AircraftLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function image(): HasOne
+    public function image(): BelongsTo
     {
-        return $this->hasOne(Image::class);
+        return $this->belongsTo(Image::class);
+    }
+
+    public function airport(): BelongsTo
+    {
+        return $this->belongsTo(Airport::class);
     }
 }

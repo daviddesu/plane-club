@@ -21,7 +21,7 @@ new class extends Component
     #[on('aircraft_log-created')]
     public function getAircraftLogs(): void
     {
-        $this->aircraftLogs = AircraftLog::with('user', 'images')->latest()->get();
+        $this->aircraftLogs = AircraftLog::with('user', 'image')->latest()->get();
     }
 
 }
@@ -29,26 +29,86 @@ new class extends Component
 
 ?>
 
-<div class="grid-cols-1 gap-4 p-4 maxgrid md:grid-cols-3 xl:grid-cols-4">
-    @foreach ($aircraftLogs as $aircraftLog)
-        <div class='h-auto max-w-full' wire:key='{{ $aircraftLog->id }}'>
-            {{-- <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600 -scale-x-100" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg> --}}
-            @foreach ($aircraftLog->images as $aircraftImage)
-                <img class="object-cover h-48 w-70" src="{{ asset('storage/' . $aircraftImage->path) }}" />
-            @endforeach
-            <div class="items-center justify-between">
-                <div>
-                    <span class="text-gray-800">{{ $aircraftLog->user->name }}</span>
-                    <small
-                        class="ml-2 text-sm text-gray-600">{{ $aircraftLog->created_at->format('j M Y, g:i a') }}</small>
-                </div>
-            </div>
-            <p class="mt-4 text-lg text-gray-900">{{ $aircraftLog->message }}</p>
-        </div>
-    @endforeach
 
+<div x-data="{
+    imageGalleryOpened: false,
+    imageGalleryActiveUrl: null,
+    imageGalleryImageIndex: null,
+    imageGallery: [
+    @foreach ($aircraftLogs as $aircraftLog)
+        {
+            'photo': '{{ asset('storage/' .  $aircraftLog->image->path) }}',
+            'user': '{{ $aircraftLog->user->name }}',
+            'date': '{{ $aircraftLog->logged_at }}',
+            'airport': '{{ $aircraftLog->airport->name }}'
+        },
+    @endforeach
+    ],
+    imageGalleryOpen(event) {
+        this.imageGalleryImageIndex = event.target.dataset.index;
+        this.imageGalleryActiveUrl = event.target.src;
+        this.imageGalleryOpened = true;
+    },
+    imageGalleryClose() {
+        this.imageGalleryOpened = false;
+        setTimeout(() => this.imageGalleryActiveUrl = null, 300);
+    },
+    imageGalleryNext(){
+        this.imageGalleryImageIndex = (this.imageGalleryImageIndex == this.imageGallery.length) ? 1 : (parseInt(this.imageGalleryImageIndex) + 1);
+        this.imageGalleryActiveUrl = this.$refs.gallery.querySelector('[data-index=\'' + this.imageGalleryImageIndex + '\']').src;
+    },
+    imageGalleryPrev() {
+        this.imageGalleryImageIndex = (this.imageGalleryImageIndex == 1) ? this.imageGallery.length : (parseInt(this.imageGalleryImageIndex) - 1);
+        this.imageGalleryActiveUrl = this.$refs.gallery.querySelector('[data-index=\'' + this.imageGalleryImageIndex + '\']').src;
+
+    }
+}"
+@image-gallery-next.window="imageGalleryNext()"
+@image-gallery-prev.window="imageGalleryPrev()"
+@keyup.right.window="imageGalleryNext();"
+@keyup.left.window="imageGalleryPrev();"
+class="w-full h-full select-none">
+<div class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+    <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-5">
+        <template x-for="(image, index) in imageGallery">
+            <li>
+                <img x-on:click="imageGalleryOpen" :src="image.photo" :alt="image.alt" :data-index="index+1" class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-zoom-in aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]">
+                <div>
+                    <span class="text-gray-800" x-text="image.airport"></span>
+                    <small class="ml-2 text-xs text-gray-600" x-text="image.user"></small>
+                    <small
+                        class="ml-2 text-xs text-gray-600" x-text="image.date"></small>
+                </div>
+            </li>
+        </template>
+    </ul>
+</div>
+<template x-teleport="body">
+    <div
+        x-show="imageGalleryOpened"
+        x-transition:enter="transition ease-in-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:leave="transition ease-in-in duration-300"
+        x-transition:leave-end="opacity-0"
+        @click="imageGalleryClose"
+        @keydown.window.escape="imageGalleryClose"
+        x-trap.inert.noscroll="imageGalleryOpened"
+        class="fixed inset-0 z-[99] flex items-center justify-center bg-black bg-opacity-50 select-none cursor-zoom-out" x-cloak>
+        <div class="relative flex items-center justify-center w-11/12 xl:w-4/5 h-11/12">
+            <div @click="$event.stopPropagation(); $dispatch('image-gallery-prev')" class="absolute left-0 flex items-center justify-center text-white translate-x-10 rounded-full cursor-pointer xl:-translate-x-24 2xl:-translate-x-32 bg-white/10 w-14 h-14 hover:bg-white/20">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </div>
+            <img
+                x-show="imageGalleryOpened"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-50"
+                x-transition:leave="transition ease-in-in duration-300"
+                x-transition:leave-end="opacity-0 transform scale-50"
+                class="object-contain object-center w-full h-full select-none cursor-zoom-out" :src="imageGalleryActiveUrl" alt="" style="display: none;">
+            <div @click="$event.stopPropagation(); $dispatch('image-gallery-next');" class="absolute right-0 flex items-center justify-center text-white -translate-x-10 rounded-full cursor-pointer xl:translate-x-24 2xl:translate-x-32 bg-white/10 w-14 h-14 hover:bg-white/20">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </div>
+        </div>
+    </div>
+</template>
 </div>
