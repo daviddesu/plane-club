@@ -1,7 +1,8 @@
 # TODO
 
 [x] Finsh image upload log form and convert to modal
-[ ] show delete icons over image and make them more apparent
+[x] Allow image preview delete and modal clear
+[x] Improve upload bar
 [ ] Finish log list grid and display
 [ ] Make airports list dynamic`
 [ ] Create individual log modal/page

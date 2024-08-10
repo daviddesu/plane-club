@@ -14,7 +14,9 @@ class AircraftLog extends Model
 
     protected $fillable = [
         'description',
-        'image',
+        'image_id',
+        'airport_id',
+        'logged_at',
     ];
 
     public function user(): BelongsTo
