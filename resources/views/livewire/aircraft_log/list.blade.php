@@ -53,15 +53,6 @@ new class extends Component
         this.imageGalleryOpened = false;
         setTimeout(() => this.imageGalleryActiveUrl = null, 300);
     },
-    imageGalleryNext(){
-        this.imageGalleryImageIndex = (this.imageGalleryImageIndex == this.imageGallery.length) ? 1 : (parseInt(this.imageGalleryImageIndex) + 1);
-        this.imageGalleryActiveUrl = this.$refs.gallery.querySelector('[data-index=\'' + this.imageGalleryImageIndex + '\']').src;
-    },
-    imageGalleryPrev() {
-        this.imageGalleryImageIndex = (this.imageGalleryImageIndex == 1) ? this.imageGallery.length : (parseInt(this.imageGalleryImageIndex) - 1);
-        this.imageGalleryActiveUrl = this.$refs.gallery.querySelector('[data-index=\'' + this.imageGalleryImageIndex + '\']').src;
-
-    }
 }"
 @image-gallery-next.window="imageGalleryNext()"
 @image-gallery-prev.window="imageGalleryPrev()"
@@ -84,32 +75,7 @@ class="w-full h-full select-none">
     </ul>
 </div>
 <template x-teleport="body">
-    {{-- <div
-        x-show="imageGalleryOpened"
-        x-transition:enter="transition ease-in-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:leave="transition ease-in-in duration-300"
-        x-transition:leave-end="opacity-0"
-        @click="imageGalleryClose"
-        @keydown.window.escape="imageGalleryClose"
-        x-trap.inert.noscroll="imageGalleryOpened"
-        class="fixed inset-0 z-[99] flex items-center justify-center bg-black bg-opacity-50 select-none cursor-zoom-out" x-cloak>
-        <div class="relative flex items-center justify-center w-11/12 xl:w-4/5 h-11/12">
-            <div @click="$event.stopPropagation(); $dispatch('image-gallery-prev')" class="absolute left-0 flex items-center justify-center text-white translate-x-10 rounded-full cursor-pointer xl:-translate-x-24 2xl:-translate-x-32 bg-white/10 w-14 h-14 hover:bg-white/20">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </div>
-            <img
-                x-show="imageGalleryOpened"
-                x-transition:enter="transition ease-in-out duration-300"
-                x-transition:enter-start="opacity-0 transform scale-50"
-                x-transition:leave="transition ease-in-in duration-300"
-                x-transition:leave-end="opacity-0 transform scale-50"
-                class="object-contain object-center w-full h-full select-none cursor-zoom-out" :src="imageGalleryActiveUrl" alt="" style="display: none;">
-            <div @click="$event.stopPropagation(); $dispatch('image-gallery-next');" class="absolute right-0 flex items-center justify-center text-white -translate-x-10 rounded-full cursor-pointer xl:translate-x-24 2xl:translate-x-32 bg-white/10 w-14 h-14 hover:bg-white/20">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </div>
-        </div>
-    </div> --}}
+
     <div
             x-show="imageGalleryOpened"
             x-transition:enter="transition ease-out duration-100"
@@ -118,19 +84,19 @@ class="w-full h-full select-none">
             x-transition:leave="transition ease-in duration-100"
             x-transition:leave-start="opacity-80"
             x-transition:leave-end="opacity-0"
-            class="flex fixed inset-0 z-[99] w-screen h-screen bg-white opacity-96"
+            class="flex fixed inset-0 z-[99] w-screen h-screen bg-white opacity-96 overflow-scroll"
             @keydown.window.escape="imageGalleryClose"
             >
             <button @click="imageGalleryOpened=false" class="absolute top-0 right-0 z-30 flex items-center justify-center px-3 py-2 mt-3 mr-3 space-x-1 text-xs font-medium uppercase border rounded-md border-neutral-200 text-neutral-600 hover:bg-neutral-100">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 <span>Close</span>
             </button>
-            <div class="grid grid-cols-1 md:flex">
+            <div class="grid grid-cols-1 md:grid-cols-3">
 
-                <div class="relative top-0 bottom-0 right-0 flex-shrink-0 bg-cover md:w-3/4 md:border-r-2 overlow-hidden lg:block">
+                <div class="relative top-0 bottom-0 right-0 flex-shrink-0 bg-cover md:col-span-2 md:border-r-2 overlow-scroll lg:block">
 
 
-                    <div class="absolute inset-0 z-20 w-full h-full opacity-70"></div>
+                    {{-- <div class="absolute inset-0 z-20 w-full h-full opacity-70"></div> --}}
                     <img
                     x-show="imageGalleryOpened"
                     x-transition:enter="transition ease-in-out duration-300"
@@ -140,7 +106,7 @@ class="w-full h-full select-none">
                     class="object-contain object-center w-full h-full bg-opacity-100 cursor-pointer select-none" :src="imageGalleryActiveUrl" alt="" style="display: none;">
 
                 </div>
-                <div class="relative flex flex-wrap items-center w-full h-full px-8">
+                <div class="relative flex flex-wrap items-center w-full h-full px-8 md:col-span-1">
 
                     <div class="relative w-full max-w-sm mx-auto lg:mb-0">
                         <div class="relative text-center">
