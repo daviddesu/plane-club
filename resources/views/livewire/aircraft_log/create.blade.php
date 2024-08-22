@@ -81,13 +81,9 @@ new class extends Component
                     class="pd-2"
                     label="Airport"
                     placeholder="Please select"
-                    {{-- :async-data="route('api.users.index')" --}}
+                    :async-data="route('airports')"
                     option-label="name"
                     option-value="id"
-                    :options="[
-                        ['name' => 'EGPH - Edinburgh', 'id' => 1],
-                        ['name' => 'EGPF - Glasgow', 'id' => 2],
-                    ]"
                     wire:model='airport'
 
                 />
