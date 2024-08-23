@@ -9,6 +9,10 @@ Route::get('/', [AircraftLogController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('aircraft_logs');
 
+Route::get('/log/{id}', [AircraftLogController::class, 'viewAircraftLog'])
+    ->middleware(['auth', 'verified'])
+    ->name('aircraft_log');
+
 Route::get('/airports', [AirportController::class, 'getAirportsSearch'])
     ->middleware(['auth', 'verified'])
     ->name('airports');

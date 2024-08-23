@@ -4,8 +4,8 @@
 [x] Allow image preview delete and modal clear
 [x] Improve upload bar
 [x] Finish log list grid and display
-[ ] Make airports list dynamic
-[ ] Create individual log modal/page
+[x] Make airports list dynamic
+[x] Create individual log modal/page
 [ ] Edit log
 [ ] Delete log
 [ ] Images on s3
