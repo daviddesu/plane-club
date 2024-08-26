@@ -7,6 +7,7 @@
 [x] Make airports list dynamic
 [x] Create individual log modal/page
 [ ] Edit log
+[ ] Finish log view
 [ ] Delete log
 [ ] Images on s3
 [ ] Allow logs to be made public
