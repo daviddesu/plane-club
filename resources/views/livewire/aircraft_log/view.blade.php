@@ -61,7 +61,7 @@ new class extends Component
         $this->editing = false;
         $this->aircraftLog->update($validated);
         $this->dispatch('aircraft_log-updated');
-        $this->dispatch('close_aircraft_log');
+        $this->dispatch('close_aircraft_log_modal');
     }
 
 }
@@ -76,13 +76,16 @@ new class extends Component
             alt=""
         />
     </div>
-    <div class="relative flex flex-wrap items-center w-full h-full px-8 md:col-span-1">
+    <div class="relative flex flex-wrap items-center w-full h-full px-8 pt-2 md:col-span-1">
+        <div class="relative w-full max-w-sm mx-auto lg:mb-0">
+
         @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
-            <x-primary-button wire:click='startEdit' flat class="justify-center mt-4">{{ __('Edit') }}</x-primary-button>
+            <x-button class="float-right" wire:click='startEdit' icon="pencil" label="Edit" />
         @endif
+        </div>
 
         <div class="relative w-full max-w-sm mx-auto lg:mb-0">
-            <div class="relative text-center">
+            <div class="relative text-left">
                 <div class="flex flex-col mb-6 space-y-2">
                     @if($editing)
                         <form wire:submit='update'>
@@ -96,10 +99,15 @@ new class extends Component
                             wire:model='airport'
                         />
                     @else
-                        <h1 class="text-2xl font-semibold tracking-tight">{{ $aircraftLog?->airport->name }}</h1>
+                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft }}</h1>
+                        <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</h1>
+                        <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</h1>
+                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }}</h1>
+                        <p class="text-sm text-neutral-500">{{ $aircraftLog?->description }}</h1>
                     @endif
-                    <p class="text-sm text-neutral-500">{{ $aircraftLog?->user->name }}</p>
-                    <p class="text-sm text-neutral-500">{{ $aircraftLog?->logged_at }}</p>
+
+                    <p class="text-sm text-neutral-500">by {{ $aircraftLog?->user->name }}</p>
+                    <p class="text-sm text-neutral-500">{{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
 
                     @if($editing)
                             <x-button flat class="justify-center mt-4" label="Cancel" wire:click='stopEdit' />

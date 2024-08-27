@@ -39,12 +39,17 @@ new class extends Component
     },
 }"
 @open-modal.window="openModal"
+@close-modal.window="modalClose"
 class="w-full h-full select-none">
 @script
             <script>
                 $wire.on('open_aircraft_log_modal', ({ id }) => {
                     window.history.pushState({}, '', '/log/' + id);
                     $dispatch('open-modal');
+                });
+
+                $wire.on('close_aircraft_log_modal', () => {
+                    $dispatch('close-modal');
                 });
             </script>
         @endscript
