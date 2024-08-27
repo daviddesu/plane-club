@@ -16,7 +16,7 @@ class AirportController extends Controller
         $search = strtolower($request->get('search'));
         $airports = empty($search) ?
             Airport::all() :
-            DB::table('airports')
+            DB::table('airport')
             ->whereRaw("LOWER(name) LIKE '%$search%' OR LOWER(code) LIKE '%$search%'")
             ->get();
 

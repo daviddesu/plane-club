@@ -17,6 +17,9 @@ class AircraftLog extends Model
         'image_id',
         'airport_id',
         'logged_at',
+        'airline_id',
+        'registration',
+        'aircraft_id'
     ];
 
     public function user(): BelongsTo
@@ -32,5 +35,15 @@ class AircraftLog extends Model
     public function airport(): BelongsTo
     {
         return $this->belongsTo(Airport::class);
+    }
+
+    public function airline(): BelongsTo
+    {
+        return $this->belongsTo(Airline::class);
+    }
+
+    public function aircraft(): BelongsTo
+    {
+        return $this->belongsTo(Aircraft::class);
     }
 }

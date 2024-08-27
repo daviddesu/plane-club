@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('aircraft_logs', function (Blueprint $table) {
-            $table->bigInteger('airport_id');
-            $table->foreign('airport_id')->references('id')->on('airport')->cascadeOnDelete();
+        Schema::create('airlines', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+            $table->string('name');
+            $table->string('callsign');
         });
     }
 
@@ -22,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('aircraft_logs', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('airlines');
     }
 };

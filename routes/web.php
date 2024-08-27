@@ -17,6 +17,14 @@ Route::get('/airports', [AirportController::class, 'getAirportsSearch'])
     ->middleware(['auth', 'verified'])
     ->name('airports');
 
+Route::get('/airlines', [AirportController::class, 'getAirlinesSearch'])
+    ->middleware(['auth', 'verified'])
+    ->name('airlines');
+
+Route::get('/aircraft', [AirportController::class, 'getAircraftSearch'])
+    ->middleware(['auth', 'verified'])
+    ->name('aircraft');
+
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('aircraft_logs', function (Blueprint $table) {
-            $table->bigInteger('airport_id');
-            $table->foreign('airport_id')->references('id')->on('airport')->cascadeOnDelete();
+            $table->string('registration')->nullable();
+            $table->bigInteger('airline_id')->nullable();
+            $table->foreign('airline_id')->references('id')->on('airlines')->cascadeOnDelete();
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('aircraft_logs', function (Blueprint $table) {
+        Schema::table('aircraft_log', function (Blueprint $table) {
             //
         });
     }

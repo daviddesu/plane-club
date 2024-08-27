@@ -25,7 +25,7 @@ new class extends Component
     public function loadAircraftLog($id): void
     {
         $this->id = $id;
-        $this->aircraftLog = AircraftLog::with('user', 'image', 'airport')->where('id', $id)->first();
+        $this->aircraftLog = AircraftLog::with('user', 'image', 'airport', 'airline', 'aircraft')->where('id', $id)->first();
         $this->loggedAt = $this->aircraftLog->logged_at;
         $this->airport = $this->aircraftLog->airport;
         $this->description = $this->aircraftLog->description;
@@ -76,17 +76,19 @@ new class extends Component
             alt=""
         />
     </div>
-    <div class="relative flex flex-wrap items-center w-full h-full px-8 pt-2 md:col-span-1">
+    <div class="relative flex flex-wrap w-full h-full px-8 pt-2 md:col-span-1">
         <div class="relative w-full max-w-sm mx-auto lg:mb-0">
-
-        @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
-            <x-button class="float-right" wire:click='startEdit' icon="pencil" label="Edit" />
-        @endif
+            @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
+                <x-button class="float-left" wire:click='startEdit' icon="pencil" label="Edit" />
+            @endif
         </div>
 
         <div class="relative w-full max-w-sm mx-auto lg:mb-0">
             <div class="relative text-left">
                 <div class="flex flex-col mb-6 space-y-2">
+                    <div class="pb-4">
+                        <p class="text-sm text-neutral-500">by {{ $aircraftLog?->user->name }} {{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
+                    </div>
                     @if($editing)
                         <form wire:submit='update'>
                         <x-select
@@ -102,12 +104,10 @@ new class extends Component
                         <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft }}</h1>
                         <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</h1>
                         <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</h1>
-                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }}</h1>
+                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</h1>
                         <p class="text-sm text-neutral-500">{{ $aircraftLog?->description }}</h1>
                     @endif
 
-                    <p class="text-sm text-neutral-500">by {{ $aircraftLog?->user->name }}</p>
-                    <p class="text-sm text-neutral-500">{{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
 
                     @if($editing)
                             <x-button flat class="justify-center mt-4" label="Cancel" wire:click='stopEdit' />

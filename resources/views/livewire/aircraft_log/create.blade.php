@@ -10,13 +10,26 @@ new class extends Component
     use WithFileUploads;
 
     #[Validate('required')]
-    public string|null $loggedAt;
-    #[Validate('required')]
-    public string|null $airport;
+    public ?string $loggedAt;
 
+    #[Validate('required')]
+    public ?string $airport;
+
+    #[Validate]
+    public ?string $airline;
+
+    #[Validate]
+    public ?string $aircraft;
+
+    #[Validate]
     public string $description = "";
 
+    #[Validate]
+    public string $registration = "";
+
     public array $images = [];
+
+    public bool $moreDetails = false;
 
     public function store()
     {
@@ -34,6 +47,9 @@ new class extends Component
                 "airport_id" => $this->airport,
                 "logged_at" => $this->loggedAt,
                 "description" => $this->description,
+                "airline_id" => $this->airline,
+                "registration" => $this->registration,
+                "aircraft_id" => $this->aircraft,
             ]);
 
         }
@@ -60,6 +76,15 @@ new class extends Component
         $this->images = [];
         $this->description = "";
     }
+
+    public function toggleMoreDetails()
+    {
+        if($this->moreDetails){
+            $this->moreDetails = true;
+        }else{
+            $this->moreDetails = false;
+        }
+    }
 }
 
 
@@ -85,8 +110,41 @@ new class extends Component
                     option-label="name"
                     option-value="id"
                     wire:model='airport'
+                />
+
+                @if(count($images) != 1)
+                    <x-toggle id="label" label="More details..." name="toggle" wire:click='toggleMoreDetails' wire:model='moreDetails' />
+                @endif
+
+                @if(count($images) == 1 || $moreDetails)
+                <x-select
+                    class="pd-2"
+                    label="Airline"
+                    placeholder="Please select"
+                    :async-data="route('airlines')"
+                    option-label="name"
+                    option-value="id"
+                    wire:model='airline'
 
                 />
+
+                <x-select
+                    class="pd-2"
+                    label="Aircraft"
+                    placeholder="Please select"
+                    :async-data="route('aircraft')"
+                    option-label="name"
+                    option-value="id"
+                    wire:model='aircraft'
+
+                />
+
+                <x-input
+                    label="Registration"
+                    placeholder="G-PNCB"
+                    wire:model='registration'
+                />
+                @endif
             </div>
 
             @if(!$images)
