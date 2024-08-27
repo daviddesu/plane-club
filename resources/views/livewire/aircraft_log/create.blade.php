@@ -48,7 +48,7 @@ new class extends Component
                 "logged_at" => $this->loggedAt,
                 "description" => $this->description,
                 "airline_id" => $this->airline,
-                "registration" => $this->registration,
+                "registration" => strtoupper($this->registration),
                 "aircraft_id" => $this->aircraft,
             ]);
 
@@ -143,6 +143,7 @@ new class extends Component
                     label="Registration"
                     placeholder="G-PNCB"
                     wire:model='registration'
+                    style="text-transform: uppercase"
                 />
                 @endif
             </div>

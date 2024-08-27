@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aircraft;
 use App\Models\Airline;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class AircraftController extends Controller
     {
         $search = strtolower($request->get('search'));
         $aircraft = empty($search) ?
-            Airline::all() :
+            Aircraft::all() :
             DB::table('aircraft')
             ->whereRaw("LOWER(manufacturer) LIKE '%$search%' OR LOWER(model) LIKE '%$search%' OR LOWER(varient) LIKE '%$search%'")
             ->get();
@@ -23,7 +24,7 @@ class AircraftController extends Controller
 
         return response()->json(
             array_map(function ($craft) {
-                return ['id' => $craft->id, 'name' => "{$craft->manufacturer} {$craft->make}-{$craft->model}"];
+                return ['id' => $craft->id, 'name' => "{$craft->manufacturer} {$craft->model}-{$craft->varient}"];
             }, $aircraft->all())
         );
     }

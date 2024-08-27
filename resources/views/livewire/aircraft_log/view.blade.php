@@ -101,7 +101,7 @@ new class extends Component
                             wire:model='airport'
                         />
                     @else
-                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft }}</h1>
+                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft->manufacturer }} {{ $aircraftLog?->aircraft->model }}-{{ $aircraftLog?->aircraft->varient }}</h1>
                         <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</h1>
                         <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</h1>
                         <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</h1>
