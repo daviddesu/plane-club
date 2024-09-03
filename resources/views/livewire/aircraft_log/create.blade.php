@@ -16,10 +16,10 @@ new class extends Component
     public ?string $airport;
 
     #[Validate]
-    public ?string $airline;
+    public ?string $airline = null;
 
     #[Validate]
-    public ?string $aircraft;
+    public ?string $aircraft = null;
 
     #[Validate]
     public string $description = "";
@@ -73,6 +73,8 @@ new class extends Component
     {
         $this->loggedAt = null;
         $this->airport = null;
+        $this->airline = null;
+        $this->aircraft = null;
         $this->images = [];
         $this->description = "";
     }

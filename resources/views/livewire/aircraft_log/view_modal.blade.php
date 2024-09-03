@@ -35,7 +35,6 @@ new class extends Component
     modalClose() {
         this.modalOpened = false;
         $wire.dispatch('close_aircraft_log');
-        window.history.back();
     },
 }"
 @open-modal.window="openModal"
@@ -44,7 +43,6 @@ class="w-full h-full select-none">
 @script
             <script>
                 $wire.on('open_aircraft_log_modal', ({ id }) => {
-                    window.history.pushState({}, '', '/log/' + id);
                     $dispatch('open-modal');
                 });
 

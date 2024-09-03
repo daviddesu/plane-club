@@ -13,10 +13,22 @@ new class extends Component
 
     #[Validate('required')]
     public string|null $loggedAt;
-    #[Validate('required')]
-    public string|null $airport;
 
+    #[Validate('required')]
+    public ?string $airport_id;
+
+    #[Validate]
+    public ?string $airline_id = null;
+
+    #[Validate]
+    public ?string $aircraft_id = null;
+
+    #[Validate]
     public string $description = "";
+
+    #[Validate]
+    public string $registration = "";
+
 
     public bool $editing = false;
 
@@ -27,8 +39,11 @@ new class extends Component
         $this->id = $id;
         $this->aircraftLog = AircraftLog::with('user', 'image', 'airport', 'airline', 'aircraft')->where('id', $id)->first();
         $this->loggedAt = $this->aircraftLog->logged_at;
-        $this->airport = $this->aircraftLog->airport;
+        $this->airport_id = $this->aircraftLog->airport?->id;
         $this->description = $this->aircraftLog->description;
+        $this->airline_id = $this->aircraftLog->airline?->id;
+        $this->aircraft_id = $this->aircraftLog->aircraft?->id;
+        $this->registration = $this->aircraftLog->registration;
     }
 
     public function mount(int $id = null){
@@ -59,7 +74,15 @@ new class extends Component
         $this->authorize('update', $this->aircraftLog);
         $validated = $this->validate();
         $this->editing = false;
-        $this->aircraftLog->update($validated);
+
+        $this->aircraftLog->update([
+            "airport_id" => $this->airport_id,
+            "logged_at" => $this->loggedAt,
+            "description" => $this->description,
+            "airline_id" => $this->airline_id,
+            "registration" => strtoupper($this->registration),
+            "aircraft_id" => $this->aircraft_id,
+        ]);
         $this->dispatch('aircraft_log-updated');
         $this->dispatch('close_aircraft_log_modal');
     }
@@ -80,6 +103,8 @@ new class extends Component
         <div class="relative w-full max-w-sm mx-auto lg:mb-0">
             @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
                 <x-button class="float-left" wire:click='startEdit' icon="pencil" label="Edit" />
+                <x-button class="float-left" wire:click='startEdit' icon="clipboard" label="Copy link" />
+                <x-button class="float-left" wire:click='startEdit' icon="trash" label="Delete" />
             @endif
         </div>
 
@@ -91,6 +116,14 @@ new class extends Component
                     </div>
                     @if($editing)
                         <form wire:submit='update'>
+                            <x-datetime-picker
+                            class="pd-2"
+                            wire:model="loggedAt"
+                            label="Date"
+                            placeholder="Date"
+                            without-time
+                        />
+
                         <x-select
                             class="pd-2"
                             label="Airport"
@@ -98,10 +131,39 @@ new class extends Component
                             :async-data="route('airports')"
                             option-label="name"
                             option-value="id"
-                            wire:model='airport'
+                            wire:model='airport_id'
+                        />
+
+                        <x-select
+                            class="pd-2"
+                            label="Airline"
+                            placeholder="Please select"
+                            :async-data="route('airlines')"
+                            option-label="name"
+                            option-value="id"
+                            wire:model='airline_id'
+
+                        />
+
+                        <x-select
+                            class="pd-2"
+                            label="Aircraft"
+                            placeholder="Please select"
+                            :async-data="route('aircraft')"
+                            option-label="name"
+                            option-value="id"
+                            wire:model='aircraft_id'
+
+                        />
+
+                        <x-input
+                            label="Registration"
+                            placeholder="G-PNCB"
+                            wire:model='registration'
+                            style="text-transform: uppercase"
                         />
                     @else
-                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft->manufacturer }} {{ $aircraftLog?->aircraft->model }}-{{ $aircraftLog?->aircraft->varient }}</h1>
+                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</h1>
                         <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</h1>
                         <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</h1>
                         <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</h1>
