@@ -1,12 +1,21 @@
 <?php
 use App\Models\AircraftLog;
+use App\Models\Aircraft;
+use App\Models\Airline;
+use App\Models\Airport;
 use Livewire\Volt\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
+use Illuminate\Database\Eloquent\Collection;
+
 
 
 new class extends Component
 {
+    public Collection $airports;
+    public Collection $airlines;
+    public Collection $aircraft;
+
     public ?int $id;
 
     public ?AircraftLog $aircraftLog;
@@ -24,10 +33,10 @@ new class extends Component
     public ?string $aircraft_id = null;
 
     #[Validate]
-    public string $description = "";
+    public ?string $description = "";
 
     #[Validate]
-    public string $registration = "";
+    public ?string $registration = "";
 
 
     public bool $editing = false;
@@ -50,6 +59,9 @@ new class extends Component
         if(!is_null($id)){
             $this->loadAircraftLog($id);
         }
+        $this->airports = Airport::all();
+        $this->aircraft = Aircraft::all();
+        $this->airlines = Airline::all();
     }
 
     #[On('close_aircraft_log')]
@@ -57,6 +69,7 @@ new class extends Component
     {
         $this->id = null;
         $this->aircraftLog = null;
+        $this->editing = false;
     }
 
     public function startEdit()
@@ -100,11 +113,11 @@ new class extends Component
         />
     </div>
     <div class="relative flex flex-wrap w-full h-full px-8 pt-2 md:col-span-1">
-        <div class="relative w-full max-w-sm mx-auto lg:mb-0">
+        <div class="relative float-left w-full max-w-sm mx-auto space-x-1 lg:mb-0">
             @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
-                <x-button class="float-left" wire:click='startEdit' icon="pencil" label="Edit" />
-                <x-button class="float-left" wire:click='startEdit' icon="clipboard" label="Copy link" />
-                <x-button class="float-left" wire:click='startEdit' icon="trash" label="Delete" />
+                <x-button wire:click='startEdit' icon="pencil" />
+                <x-button wire:click='startEdit' icon="clipboard" />
+                <x-button wire:click='startEdit' icon="trash" />
             @endif
         </div>
 
@@ -115,7 +128,7 @@ new class extends Component
                         <p class="text-sm text-neutral-500">by {{ $aircraftLog?->user->name }} {{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
                     </div>
                     @if($editing)
-                        <form wire:submit='update'>
+                        <form class="flex flex-wrap" wire:submit='update'>
                             <x-datetime-picker
                             class="pd-2"
                             wire:model="loggedAt"
@@ -128,33 +141,40 @@ new class extends Component
                             class="pd-2"
                             label="Airport"
                             placeholder="Please select"
-                            :async-data="route('airports')"
-                            option-label="name"
-                            option-value="id"
                             wire:model='airport_id'
-                        />
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($airports as $airport)
+                                <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
+                            @endforeach
+                        </x-select>
 
                         <x-select
                             class="pd-2"
                             label="Airline"
                             placeholder="Please select"
-                            :async-data="route('airlines')"
-                            option-label="name"
-                            option-value="id"
                             wire:model='airline_id'
-
-                        />
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($airline as $airline)
+                                <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
+                            @endforeach
+                        </x-select>
 
                         <x-select
                             class="pd-2"
                             label="Aircraft"
                             placeholder="Please select"
-                            :async-data="route('aircraft')"
-                            option-label="name"
-                            option-value="id"
                             wire:model='aircraft_id'
-
-                        />
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($aircraft as $aircraftType)
+                                <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer }} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
+                            @endforeach
+                        </x-select>
 
                         <x-input
                             label="Registration"
@@ -163,11 +183,11 @@ new class extends Component
                             style="text-transform: uppercase"
                         />
                     @else
-                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</h1>
-                        <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</h1>
-                        <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</h1>
-                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</h1>
-                        <p class="text-sm text-neutral-500">{{ $aircraftLog?->description }}</h1>
+                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
+                        <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</p>
+                        <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</p>
+                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</p>
+                        <p class="text-sm text-neutral-500">{{ $aircraftLog?->description }}</p>
                     @endif
 
 

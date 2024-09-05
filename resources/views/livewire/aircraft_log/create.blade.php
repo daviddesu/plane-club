@@ -3,11 +3,18 @@
 use Livewire\Volt\Component;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
-
+use Illuminate\Database\Eloquent\Collection;
+use App\Models\Aircraft;
+use App\Models\Airline;
+use App\Models\Airport;
 
 new class extends Component
 {
     use WithFileUploads;
+
+    public Collection $airports;
+    public Collection $airlines;
+    public Collection $aircraftCollection;
 
     #[Validate('required')]
     public ?string $loggedAt;
@@ -30,6 +37,13 @@ new class extends Component
     public array $images = [];
 
     public bool $moreDetails = false;
+
+    public function mount()
+    {
+        $this->airports = Airport::all();
+        $this->aircraftCollection = Aircraft::all();
+        $this->airlines = Airline::all();
+    }
 
     public function store()
     {
@@ -108,11 +122,14 @@ new class extends Component
                     class="pd-2"
                     label="Airport"
                     placeholder="Please select"
-                    :async-data="route('airports')"
-                    option-label="name"
-                    option-value="id"
                     wire:model='airport'
-                />
+                    searchable="true"
+                    min-items-for-search="2"
+                >
+                    @foreach ($airports as $airport)
+                        <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
+                    @endforeach
+                </x-select>
 
                 @if(count($images) != 1)
                     <x-toggle id="label" label="More details..." name="toggle" wire:click='toggleMoreDetails' wire:model='moreDetails' />
@@ -123,23 +140,27 @@ new class extends Component
                     class="pd-2"
                     label="Airline"
                     placeholder="Please select"
-                    :async-data="route('airlines')"
-                    option-label="name"
-                    option-value="id"
                     wire:model='airline'
-
-                />
+                    searchable="true"
+                    min-items-for-search="2"
+                >
+                    @foreach ($airline as $airline)
+                        <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
+                    @endforeach
+                </x-select>
 
                 <x-select
                     class="pd-2"
                     label="Aircraft"
                     placeholder="Please select"
-                    :async-data="route('aircraft')"
-                    option-label="name"
-                    option-value="id"
                     wire:model='aircraft'
-
-                />
+                    searchable="true"
+                    min-items-for-search="2"
+                >
+                    @foreach ($aircraftCollection as $aircraftType)
+                        <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer}} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
+                    @endforeach
+                </x-select>
 
                 <x-input
                     label="Registration"
