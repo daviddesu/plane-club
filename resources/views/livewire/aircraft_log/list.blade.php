@@ -20,6 +20,7 @@ new class extends Component
 
     #[On('aircraft_log-created')]
     #[On('aircraft_log-updated')]
+    #[On('aircraft_log-deleted')]
     public function getAircraftLogs(): void
     {
         $this->aircraftLogs = AircraftLog::with('user', 'image', 'airline', 'airport', 'aircraft')->latest()->get();

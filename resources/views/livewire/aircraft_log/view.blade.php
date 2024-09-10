@@ -100,6 +100,13 @@ new class extends Component
         $this->dispatch('close_aircraft_log_modal');
     }
 
+    public function delete()
+    {
+        $this->aircraftLog->delete();
+        $this->dispatch('close_aircraft_log_modal');
+        $this->dispatch('aircraft_log-deleted');
+    }
+
 }
 ?>
 
@@ -115,9 +122,11 @@ new class extends Component
     <div class="relative flex flex-wrap w-full h-full px-8 pt-2 md:col-span-1">
         <div class="relative float-left w-full max-w-sm mx-auto space-x-1 lg:mb-0">
             @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
-                <x-button wire:click='startEdit' icon="pencil" />
-                <x-button wire:click='startEdit' icon="clipboard" />
-                <x-button wire:click='startEdit' icon="trash" />
+                <x-mini-button rounded wire:click='startEdit' icon="pencil" />
+                {{-- <x-mini-button rounded wire:click='copyLink' icon="link" />
+                <x-mini-button rounded wire:click='publishToFacebook' icon="facebook" />
+                <x-mini-button rounded wire:click='publishToTwitter' icon="twitter" /> --}}
+                <x-mini-button rounded negative wire:click='delete' icon="trash" />
             @endif
         </div>
 
@@ -125,7 +134,7 @@ new class extends Component
             <div class="relative text-left">
                 <div class="flex flex-col mb-6 space-y-2">
                     <div class="pb-4">
-                        <p class="text-sm text-neutral-500">by {{ $aircraftLog?->user->name }} {{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
+                        <p class="text-md text-neutral-500">{{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
                     </div>
                     @if($editing)
                         <form class="flex flex-wrap" wire:submit='update'>
@@ -158,7 +167,7 @@ new class extends Component
                             searchable="true"
                             min-items-for-search="2"
                         >
-                            @foreach ($airline as $airline)
+                            @foreach ($airlines as $airline)
                                 <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
                             @endforeach
                         </x-select>
@@ -183,11 +192,11 @@ new class extends Component
                             style="text-transform: uppercase"
                         />
                     @else
-                        <p class="text-sm text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
-                        <p class="text-sm text-neutral-500">Registration: {{ $aircraftLog?->registration }}</p>
-                        <p class="text-sm text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</p>
-                        <p class="text-sm text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</p>
-                        <p class="text-sm text-neutral-500">{{ $aircraftLog?->description }}</p>
+                        <p class="text-md text-neutral-500">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
+                        <p class="text-md text-neutral-500">Registration: {{ $aircraftLog?->registration }}</p>
+                        <p class="text-md text-neutral-500">Airline: {{ $aircraftLog?->airline?->name }}</p>
+                        <p class="text-md text-neutral-500">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</p>
+                        <p class="text-md text-neutral-500">{{ $aircraftLog?->description }}</p>
                     @endif
 
 

@@ -6,13 +6,11 @@
 [x] Finish log list grid and display
 [x] Make airports list dynamic
 [x] Create individual log modal/page
-[ ] Edit log
-[ ] Finish log view
-[ ] Delete log
+[x] Edit log
+[x] Finish log view
+[x] Delete log
 [ ] Images on s3
-[ ] Allow logs to be made public
-[ ] Show all public logs
-[ ] Comment on public logs
+[ ] Lazy load images as not to spam s3
 [ ] Image safety checks
 [ ] Error reporting (Look at sentry)
 [ ] Analytics (Look at posthog)
@@ -28,3 +26,6 @@
 [ ] Comment on other peoples logs
 [ ] Host videos and safety
 [ ] share to social media with a watermark
+[ ] Allow logs to be made public
+[ ] Show all public logs
+[ ] Comment on public logs
