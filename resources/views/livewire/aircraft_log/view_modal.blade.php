@@ -23,6 +23,12 @@ new class extends Component
         $this->id = null;
     }
 
+    #[On('aircraft_log-deleted')]
+    public function closeModal()
+    {
+        $this->dispatch('close_aircraft_log_modal');
+    }
+
 }
 ?>
 <div wire:model.change="aircraftLog">
@@ -41,16 +47,16 @@ new class extends Component
 @close-modal.window="modalClose"
 class="w-full h-full select-none">
 @script
-            <script>
-                $wire.on('open_aircraft_log_modal', ({ id }) => {
-                    $dispatch('open-modal');
-                });
+    <script>
+        $wire.on('open_aircraft_log_modal', ({ id }) => {
+            $dispatch('open-modal');
+        });
 
-                $wire.on('close_aircraft_log_modal', () => {
-                    $dispatch('close-modal');
-                });
-            </script>
-        @endscript
+        $wire.on('close_aircraft_log_modal', () => {
+            $dispatch('close-modal');
+        });
+    </script>
+@endscript
 <template x-teleport="body">
 
     <div
