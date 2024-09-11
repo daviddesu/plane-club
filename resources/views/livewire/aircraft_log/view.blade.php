@@ -111,6 +111,7 @@ new class extends Component
 
 <div class="grid grid-cols-1 md:grid-cols-3">
 
+    @if($id)
     <div class="relative top-0 bottom-0 right-0 flex-shrink-0 bg-cover md:col-span-2 md:border-r-2 overlow-scroll lg:block">
         <img
             class="object-contain object-center w-full h-full bg-opacity-100 cursor-pointer select-none"
@@ -208,5 +209,6 @@ new class extends Component
             </div>
         </div>
     </div>
+    @endif
 </div>
 

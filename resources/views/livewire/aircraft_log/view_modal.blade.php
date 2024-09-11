@@ -31,7 +31,6 @@ new class extends Component
 
 }
 ?>
-<div wire:model.change="aircraftLog">
 
 <div x-data="{
     modalOpened: false,
@@ -77,8 +76,4 @@ class="w-full h-full select-none">
             <livewire:aircraft_log.view />
         </div>
 </template>
-
 </div>
-
-</div>
-
