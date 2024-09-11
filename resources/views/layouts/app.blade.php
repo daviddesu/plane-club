@@ -36,6 +36,7 @@
                 <livewire:aircraft_log.create />
             </main>
         </div>
+        <x-toaster-hub />
         @livewireScripts
     </body>
 </html>
