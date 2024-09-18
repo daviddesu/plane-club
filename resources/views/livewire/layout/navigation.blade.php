@@ -18,21 +18,9 @@ $logout = function (Logout $logout) {
                 <!-- Logo -->
                 <div class="flex items-center shrink-0">
                     <a href="{{ route('aircraft_logs') }}" wire:navigate>
-                        <x-application-logo class="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
+                        <img src="/logo.png" class="block w-auto h-16 text-gray-800 fill-current dark:text-gray-200" />
                     </a>
                 </div>
-
-                <!-- Navigation Links -->
-                {{-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate>
-                        {{ __('Aircraft Logs') }}
-                    </x-nav-link>
-                </div> --}}
             </div>
 
             <!-- Settings Dropdown -->
@@ -55,8 +43,13 @@ $logout = function (Logout $logout) {
                             </div>
                         </button>
                     </x-slot>
+                        <x-dropdown.item icon="user" label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
+                    <x-dropdown.item separator label="Logout" wire:click="logout" class="w-full text-start" />
 
-                    <x-slot name="content">
+
+
+                    {{-- <x-slot name="content">
+
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -67,7 +60,7 @@ $logout = function (Logout $logout) {
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </button>
-                    </x-slot>
+                    </x-slot> --}}
                 </x-dropdown>
             </div>
 

@@ -15,12 +15,16 @@
 [ ] Error reporting (Look at sentry)
 [ ] Analytics (Look at posthog)
 [ ] Home page and signup page
-[ ] User area upgrades
+[ ] User area upgrades for subscription view and cancel
+[ ] Add avatar to nav bar
 [ ] Auth themeing
+[ ] S3 public access restirctions and look at cors to specifiyt he correct domain
+[ ] Perfection pass
 
 
 ## Later
 
+[ ] Show avatar on log
 [ ] Like other people logs
 [ ] Google and facebook auth (clerk maybe?)
 [ ] Comment on other peoples logs

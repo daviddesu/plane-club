@@ -43,11 +43,16 @@ new class extends Component
                         alt=""
                         class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-pointer aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"
                     >
-                    <div>
-                        <span class="text-gray-800">{{ $aircraftLog->airport->name }}</span>
-                        <small class="ml-2 text-xs text-gray-600">{{ $aircraftLog->user->name }}</small>
-                        <small
-                            class="ml-2 text-xs text-gray-600">{{ $aircraftLog->logged_at }}</small>
+                    <div class="grid grid-cols-2">
+                        <div>
+                            <div><span class="text-gray-800">{{ $aircraftLog->airport->name }}</span></div>
+                            <div><small class="text-xs text-gray-600">{{ (new DateTime($aircraftLog->logged_at))->format('d/m/Y') }}</small></div>
+                        </div>
+                        <div>
+                            <div><small class="text-xs text-gray-600">{{ $aircraftLog->aircraft?->getFormattedName() }}</small></div>
+                            <div><small class="text-xs text-gray-600">{{ $aircraftLog->airline?->name }}</small></div>
+
+                        </div>
                     </div>
                 </li>
             @endforeach

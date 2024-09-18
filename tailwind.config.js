@@ -1,7 +1,7 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
-const colors = require('tailwindcss/colors')
+const colors = require('tailwindcss/colors');
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -23,11 +23,11 @@ export default {
             },
             colors: {
                 primary: colors.gray,
-                secondary: colors.blue,
+                secondary: colors.warmGray,
                 positive: colors.emerald,
                 negative: colors.red,
                 warning: colors.amber,
-                info: colors.indigo
+                info: colors.blue
             },
         },
     },

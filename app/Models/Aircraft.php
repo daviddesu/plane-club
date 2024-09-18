@@ -14,4 +14,13 @@ class Aircraft extends Model
     {
         return $this->hasMany(AircraftLog::class);
     }
+
+    public function getFormattedName()
+    {
+        $output = "";
+        $output .= $this->manufacturer ?? "";
+        $output .= $this->model ? " ".$this->model : "";
+        $output .= $this->varient ? "-".$this->varient : "";
+        return $output;
+    }
 }

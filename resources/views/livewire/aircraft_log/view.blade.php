@@ -122,11 +122,11 @@ new class extends Component
     <div class="relative flex flex-wrap w-full h-full px-8 pt-2 md:col-span-1">
         <div class="relative float-left w-full max-w-sm mx-auto space-x-1 lg:mb-0">
             @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
-                <x-mini-button rounded flat wire:click='startEdit' icon="pencil" />
+                <x-mini-button rounded outline wire:click='startEdit' icon="pencil" />
                 {{-- <x-mini-button rounded wire:click='copyLink' icon="link" />
                 <x-mini-button rounded wire:click='publishToFacebook' icon="facebook" />
                 <x-mini-button rounded wire:click='publishToTwitter' icon="twitter" /> --}}
-                <x-mini-button rounded flat negative wire:click='delete' icon="trash" />
+                <x-mini-button rounded outline negative wire:click='delete' icon="trash" />
             @endif
         </div>
 
@@ -181,7 +181,7 @@ new class extends Component
                             min-items-for-search="2"
                         >
                             @foreach ($aircraft as $aircraftType)
-                                <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer }} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
+                                <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->getFormattedName() }}" />
                             @endforeach
                         </x-select>
 
