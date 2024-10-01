@@ -9,21 +9,21 @@ use Livewire\Attributes\On;
 
 new class extends Component
 {
-    public Collection $aircraftLogs;
+    public array $aircraftLogIds;
 
 
     public function mount(): void
     {
-        $this->getAircraftLogs();
+        $this->getAircraftLogIds();
     }
 
 
     #[On('aircraft_log-created')]
     #[On('aircraft_log-updated')]
     #[On('aircraft_log-deleted')]
-    public function getAircraftLogs(): void
+    public function getAircraftLogIds(): void
     {
-        $this->aircraftLogs = AircraftLog::with('user', 'image', 'airline', 'airport', 'aircraft')->latest()->get();
+        $this->aircraftLogIds = AircraftLog::with('user', 'image', 'airline', 'airport', 'aircraft')->latest()->pluck("id")->toArray();
     }
 
 }
@@ -35,25 +35,9 @@ new class extends Component
 <div class="w-full h-full select-none">
     <div class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
         <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
-            @foreach($aircraftLogs as $aircraftLog)
-                <li wire:key='{{ $aircraftLog->id }}'>
-                    <img
-                        x-on:click="$wire.dispatch('open_aircraft_log', { id: {{ $aircraftLog->id }},});"
-                        src="{{ Storage::disk('s3')->temporaryUrl($aircraftLog->image->path, now()->addMinutes(60)) }}"
-                        alt=""
-                        class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-pointer aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"
-                    >
-                    <div class="grid grid-cols-2">
-                        <div>
-                            <div><span class="text-gray-800">{{ $aircraftLog->airport->name }}</span></div>
-                            <div><small class="text-xs text-gray-600">{{ (new DateTime($aircraftLog->logged_at))->format('d/m/Y') }}</small></div>
-                        </div>
-                        <div>
-                            <div><small class="text-xs text-gray-600">{{ $aircraftLog->aircraft?->getFormattedName() }}</small></div>
-                            <div><small class="text-xs text-gray-600">{{ $aircraftLog->airline?->name }}</small></div>
-
-                        </div>
-                    </div>
+            @foreach($aircraftLogIds as $aircraftLogId)
+                <li wire:key='{{ $aircraftLogId }}'>
+                    <livewire:aircraft_log.log lazy :$aircraftLogId />
                 </li>
             @endforeach
         </ul>
