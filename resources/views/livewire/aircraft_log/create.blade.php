@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
+use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature\Type;
 
 new class extends Component
 {
@@ -46,27 +48,79 @@ new class extends Component
         $this->airlines = Airline::all();
     }
 
+    public function analyzeImage($imagePath)
+    {
+        $imageAnnotator = new ImageAnnotatorClient();
+
+        try {
+            $imageData = file_get_contents($imagePath);
+            $response = $imageAnnotator->safeSearchDetection($imageData);
+            $safeSearch = $response->getSafeSearchAnnotation();
+
+            if ($safeSearch) {
+                // Retrieve the likelihoods
+                $adult = $safeSearch->getAdult();
+                $violence = $safeSearch->getViolence();
+                $medical = $safeSearch->getMedical();
+
+                // Define thresholds (e.g., reject if likelihood is likely or higher)
+                $unacceptableLikelihoods = [
+                    \Google\Cloud\Vision\V1\Likelihood::LIKELY,
+                    \Google\Cloud\Vision\V1\Likelihood::VERY_LIKELY,
+                ];
+
+                // Check if any content is unacceptable
+                if (
+                    in_array($adult, $unacceptableLikelihoods) ||
+                    in_array($violence, $unacceptableLikelihoods) ||
+                    in_array($medical, $unacceptableLikelihoods)
+                ) {
+                    // Close the client
+                    $imageAnnotator->close();
+                    return false;
+                } else {
+                    // Content is acceptable
+                    $imageAnnotator->close();
+                    return true;
+                }
+            }
+
+            // If no SafeSearch data is available, reject the image
+            $imageAnnotator->close();
+            return false;
+        } catch (\Exception $e) {
+            // Handle exception
+            session()->flash('error', 'Error analyzing image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function store()
     {
         $validated = $this->validate();
 
         foreach ($this->images as $image) {
-            $storedFilePath = $image->store('aircraft', 's3');
-            $image = auth()->user()->images()->create(
-                [
-                    "path" => $storedFilePath,
-                ]
-            );
-            $newAircraftLog = auth()->user()->aircraftLogs()->create([
-                "image_id" => $image->id,
-                "airport_id" => $this->airport,
-                "logged_at" => $this->loggedAt,
-                "description" => $this->description,
-                "airline_id" => $this->airline,
-                "registration" => strtoupper($this->registration),
-                "aircraft_id" => $this->aircraft,
-            ]);
-
+            // Analyze the image for unwanted content
+            $isSafe = $this->analyzeImage($image->getRealPath());
+            if($isSafe){
+                $storedFilePath = $image->store('aircraft', 's3');
+                $image = auth()->user()->images()->create(
+                    [
+                        "path" => $storedFilePath,
+                    ]
+                );
+                $newAircraftLog = auth()->user()->aircraftLogs()->create([
+                    "image_id" => $image->id,
+                    "airport_id" => $this->airport,
+                    "logged_at" => $this->loggedAt,
+                    "description" => $this->description,
+                    "airline_id" => $this->airline,
+                    "registration" => strtoupper($this->registration),
+                    "aircraft_id" => $this->aircraft,
+                ]);
+            }else{
+                throw new \RuntimeException("The uploaded image contains inappropriate content and cannot be uploaded.");
+            }
         }
 
         $this->reset();

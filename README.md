@@ -10,15 +10,16 @@
 [x] Finish log view
 [x] Delete log
 [x] Images on s3
-[ ] Lazy load images as not to spam s3
-[ ] Image safety checks
-[ ] Error reporting (Look at sentry)
-[ ] Analytics (Look at posthog)
+[x] Lazy load images as not to spam s3
+[x] Image safety checks
+[x] Error reporting (Look at sentry)
+[x] Analytics (Look at posthog)
+[ ] Implement the toast lib for all action confirmations
 [ ] Home page and signup page
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar
 [ ] Auth themeing
-[ ] S3 public access restirctions and look at cors to specifiyt he correct domain
+[ ] S3 look at cors to specifiyt he correct domain
 [ ] Perfection pass
 
 
@@ -33,3 +34,4 @@
 [ ] Allow logs to be made public
 [ ] Show all public logs
 [ ] Comment on public logs
+[ ] Scale down image safety checks as the user proves trustworthy. e,g, 100% for first month, reduced to a % probbaility that   decreases over time, probably to a minumum of 10% of uploads checked?
