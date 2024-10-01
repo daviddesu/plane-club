@@ -115,7 +115,7 @@ new class extends Component
     <div class="relative top-0 bottom-0 right-0 flex-shrink-0 bg-cover md:col-span-2 md:border-r-2 overlow-scroll lg:block">
         <img
             class="object-contain object-center w-full h-full bg-opacity-100 cursor-pointer select-none"
-            src="{{ Storage::disk('s3')->url($aircraftLog?->image->path) }}"
+            src="{{ Storage::disk('s3')->temporaryUrl($aircraftLog?->image->path, now()->addMinutes(60)) }}"
             alt=""
         />
     </div>
