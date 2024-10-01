@@ -9,7 +9,7 @@
 [x] Edit log
 [x] Finish log view
 [x] Delete log
-[ ] Images on s3
+[x] Images on s3
 [ ] Lazy load images as not to spam s3
 [ ] Image safety checks
 [ ] Error reporting (Look at sentry)

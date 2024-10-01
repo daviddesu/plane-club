@@ -10,7 +10,7 @@
         "laravel/tinker": "^2.9",
         "laravel/vapor-cli": "^1.65",
         "laravel/vapor-core": "^2.37",
-        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.0",
         "masmerise/livewire-toaster": "^2.3",

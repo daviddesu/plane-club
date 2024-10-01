@@ -20,7 +20,7 @@ new class extends Component
     public ?string $loggedAt;
 
     #[Validate('required')]
-    public ?string $airport;
+    public ?string $airport = null;
 
     #[Validate]
     public ?string $airline = null;
@@ -34,6 +34,7 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
+    #[Validate(['images.*' => 'image|max:8192'])]
     public array $images = [];
 
     public bool $moreDetails = false;
@@ -50,10 +51,10 @@ new class extends Component
         $validated = $this->validate();
 
         foreach ($this->images as $image) {
-            $storedFilePath = $image->storePublicly('public/aircraft');
+            $storedFilePath = $image->store('aircraft', 's3');
             $image = auth()->user()->images()->create(
                 [
-                    "path" => str_replace("public/", "", $storedFilePath),
+                    "path" => $storedFilePath,
                 ]
             );
             $newAircraftLog = auth()->user()->aircraftLogs()->create([
@@ -71,6 +72,7 @@ new class extends Component
         $this->reset();
 
         $this->dispatch('aircraft_log-created');
+        $this->mount();
     }
 
     public function removeUploadedImages()
@@ -144,7 +146,7 @@ new class extends Component
                     searchable="true"
                     min-items-for-search="2"
                 >
-                    @foreach ($airline as $airline)
+                    @foreach ($airlines as $airline)
                         <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
                     @endforeach
                 </x-select>
@@ -237,3 +239,10 @@ new class extends Component
     </div>
     </form>
 </x-model-card>
+@script
+    <script>
+        $wire.on('aircraft_log-created', ({ id }) => {
+            $closeModal('logModal')
+        });
+    </script>
+@endscript

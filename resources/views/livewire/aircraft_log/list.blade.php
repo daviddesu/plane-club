@@ -39,7 +39,7 @@ new class extends Component
                 <li wire:key='{{ $aircraftLog->id }}'>
                     <img
                         x-on:click="$wire.dispatch('open_aircraft_log', { id: {{ $aircraftLog->id }},});"
-                        src="{{ asset('storage/' .  $aircraftLog->image->path) }}"
+                        src="{{ Storage::disk('s3')->url($aircraftLog->image->path) }}"
                         alt=""
                         class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-pointer aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"
                     >
