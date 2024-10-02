@@ -17,7 +17,7 @@ new class extends Component
       <div class="text-center">
         <h1 class="mb-4 text-3xl font-bold text-white md:text-5xl">Capture Every Flight and Aircraft Spotted</h1>
         <p class="mb-8 text-xl text-gray-200">Log your aviation journey.</p>
-        <a href="/register" class="px-8 py-3 text-lg text-white bg-blue-600 rounded-full">Hop on Board for £20/month</a>
+        <a href="/register" class="px-8 py-3 text-lg text-white bg-blue-600 rounded-full">Start Your 14-Day Free Trial</a>
     </div>
     </div>
   </section>
@@ -46,6 +46,8 @@ new class extends Component
           <p>Maintain a detailed database of all your flights and spotted planes, all in one place.</p>
         </div>
       </div>
+      <p class="mt-8 text-xl text-center">Experience all these features £19.99/month</p>
+
     </div>
   </section>
 
@@ -53,8 +55,8 @@ new class extends Component
   <section class="py-20 bg-blue-600">
     <div class="container px-6 mx-auto text-center">
         <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
-        <p class="mb-8 text-xl text-white">Continue your aviation journey with Plane Club for just £20 per month.</p>
-      <a href="/signup" class="px-8 py-3 text-lg text-blue-600 bg-white rounded-full">Join Plane Club Now</a>
+        <p class="mb-8 text-xl text-white">Continue your aviation journey with Plane Club for just £19.99 per month.</p>
+      <a href="/signup" class="px-8 py-3 text-lg text-blue-600 bg-white rounded-full">Start Your 14-Day Free Trial</a>
     </div>
   </section>
 

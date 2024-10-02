@@ -23,6 +23,9 @@
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Perfection pass
 [ ] Beuutify sales page
+[ ] register business
+[ ] Business bank account
+[ ] Update stripe account
 
 
 ## Later
