@@ -41,8 +41,6 @@ new class extends Component
     #[Validate(['images.*' => 'image|max:8192'])]
     public array $images = [];
 
-    public bool $moreDetails = false;
-
     public function mount()
     {
         $this->airports = Airport::all();
@@ -190,11 +188,7 @@ new class extends Component
                     @endforeach
                 </x-select>
 
-                @if(count($images) != 1)
-                    <x-toggle id="label" label="More details..." name="toggle" wire:click='toggleMoreDetails' wire:model='moreDetails' />
-                @endif
 
-                @if(count($images) == 1 || $moreDetails)
                 <x-select
                     class="pd-2"
                     label="Airline"
@@ -227,7 +221,6 @@ new class extends Component
                     wire:model='registration'
                     style="text-transform: uppercase"
                 />
-                @endif
             </div>
 
             @if(!$images)
@@ -287,7 +280,9 @@ new class extends Component
         </div>
         <div class="pt-2 border-b-2"></div>
         <div name="footer" class="flex justify-between gap-x-4">
-            <x-button class="mt-4" flat negative label="Clear images" wire:click='removeUploadedImages' />
+            @if($images)
+                <x-button class="mt-4" flat negative label="Clear images" wire:click='removeUploadedImages' />
+            @endif
             <div class="flex gap-x-4">
                 <x-button flat class="justify-center mt-4" label="Cancel" x-on:click="close" wire:click='close' />
                 <x-primary-button  flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
