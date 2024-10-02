@@ -9,6 +9,8 @@ use App\Models\Airline;
 use App\Models\Airport;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\Feature\Type;
+use Masmerise\Toaster\Toaster;
+
 
 new class extends Component
 {
@@ -90,7 +92,6 @@ new class extends Component
             return false;
         } catch (\Exception $e) {
             // Handle exception
-            session()->flash('error', 'Error analyzing image: ' . $e->getMessage());
             return false;
         }
     }
@@ -119,14 +120,16 @@ new class extends Component
                     "aircraft_id" => $this->aircraft,
                 ]);
             }else{
-                throw new \RuntimeException("The uploaded image contains inappropriate content and cannot be uploaded.");
+                Toaster::warning('The uploaded image contains inappropriate content and cannot be uploaded.');
+                return;
             }
         }
+        Toaster::info('Log created successfully.');
 
         $this->reset();
-
         $this->dispatch('aircraft_log-created');
         $this->mount();
+
     }
 
     public function removeUploadedImages()

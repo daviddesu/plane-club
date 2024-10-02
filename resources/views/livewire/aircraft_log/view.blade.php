@@ -7,7 +7,7 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Illuminate\Database\Eloquent\Collection;
-
+use Masmerise\Toaster\Toaster;
 
 
 new class extends Component
@@ -96,6 +96,7 @@ new class extends Component
             "registration" => strtoupper($this->registration),
             "aircraft_id" => $this->aircraft_id,
         ]);
+        Toaster::info("Log updated");
         $this->dispatch('aircraft_log-updated');
         $this->dispatch('close_aircraft_log_modal');
     }
@@ -103,6 +104,7 @@ new class extends Component
     public function delete()
     {
         $this->aircraftLog->delete();
+        Toaster::info("Log deleted");
         $this->dispatch('aircraft_log-deleted');
     }
 

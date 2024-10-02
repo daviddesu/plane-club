@@ -14,8 +14,8 @@
 [x] Image safety checks
 [x] Error reporting (Look at sentry)
 [x] Analytics (Look at posthog)
-[ ] Implement the toast lib for all action confirmations
-[ ] Home page and signup page
+[x] Implement the toast lib for all action confirmations
+[ ] Home page and pricing and signup page
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar
 [ ] Auth themeing
