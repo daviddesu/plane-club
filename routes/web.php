@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\AircraftLogController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', [SalesController::class, 'index'])
+    ->name('signup');
 
-Route::get('/', [AircraftLogController::class, 'index'])
+Route::get('/logs', [AircraftLogController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('aircraft_logs');
 

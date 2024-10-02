@@ -38,7 +38,9 @@
                 {{ $slot }}
 
                 {{-- Modals --}}
-                <livewire:aircraft_log.create />
+                @if(Auth::check())
+                    <livewire:aircraft_log.create />
+                @endif
             </main>
         </div>
         <x-toaster-hub />

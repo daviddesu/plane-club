@@ -15,12 +15,14 @@
 [x] Error reporting (Look at sentry)
 [x] Analytics (Look at posthog)
 [x] Implement the toast lib for all action confirmations
-[ ] Home page and pricing and signup page
+[x] Home page and pricing page
+[ ] Registration page and implement stripe or other payment provider
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar
 [ ] Auth themeing
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Perfection pass
+[ ] Beuutify sales page
 
 
 ## Later
