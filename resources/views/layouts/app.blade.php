@@ -24,6 +24,24 @@
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             <livewire:layout.navigation />
 
+            @if (session()->has('success-message'))
+                <div class="alert alert-success">
+                    <x-alert title="{{ session('success-message') }}" positive />
+                </div>
+            @endif
+
+            @if (session()->has('alert-message'))
+                <div class="alert alert-success">
+                    <x-alert title="{{ session('alert-message') }}" warning />
+                </div>
+            @endif
+
+            @if (session()->has('error-message'))
+                <div class="alert alert-success">
+                    <x-alert title="{{ session('error-message') }}" negative />
+                </div>
+            @endif
+
             <!-- Page Heading -->
             @if (isset($header))
                 <header class="bg-white shadow dark:bg-gray-800">

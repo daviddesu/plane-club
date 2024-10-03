@@ -13,9 +13,10 @@ class Subscribed
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->subscribed()) {
+        $user = $request->user();
+        if (! $user->subscribed(env('STRIPE_PRODUCT_ID'))) {
             // Redirect user to billing page and ask them to subscribe...
-            return redirect('/billing');
+            return redirect('/profile');
         }
 
         return $next($request);

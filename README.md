@@ -23,6 +23,8 @@
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Perfection pass
 [ ] Beuutify sales page
+[ ] Subscription emails and verficiation and trial end prompts and actual
+[ ] trial days left banner (colapsable)
 [ ] register business
 [ ] Business bank account
 [ ] Update stripe account
@@ -40,3 +42,12 @@
 [ ] Show all public logs
 [ ] Comment on public logs
 [ ] Scale down image safety checks as the user proves trustworthy. e,g, 100% for first month, reduced to a % probbaility that   decreases over time, probably to a minumum of 10% of uploads checked?
+
+
+## Local env
+- PHP
+- postgres
+- node
+- npm
+- nginx
+- stripe cli (https://www.youtube.com/watch?v=2_BsWO5WRmU)
