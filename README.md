@@ -16,7 +16,12 @@
 [x] Analytics (Look at posthog)
 [x] Implement the toast lib for all action confirmations
 [x] Home page and pricing page
-[ ] Registration page and implement stripe or other payment provider
+[x] Registration page and implement stripe or other payment provider
+[x] Can see other users logs
+[x] Change log addition to not add multiple logs per image
+[x] Chnage log view to show images view
+[ ] WHen clikcing on an image, show the log image carrousel starting with the selected image
+[ ] Email verification on signup
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar
 [ ] Auth themeing

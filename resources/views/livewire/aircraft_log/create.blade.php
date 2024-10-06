@@ -101,33 +101,36 @@ new class extends Component
         foreach ($this->images as $image) {
             // Analyze the image for unwanted content
             $isSafe = $this->analyzeImage($image->getRealPath());
-            if($isSafe){
-                $storedFilePath = $image->store('aircraft', 's3');
-                $image = auth()->user()->images()->create(
-                    [
-                        "path" => $storedFilePath,
-                    ]
-                );
-                $newAircraftLog = auth()->user()->aircraftLogs()->create([
-                    "image_id" => $image->id,
-                    "airport_id" => $this->airport,
-                    "logged_at" => $this->loggedAt,
-                    "description" => $this->description,
-                    "airline_id" => $this->airline,
-                    "registration" => strtoupper($this->registration),
-                    "aircraft_id" => $this->aircraft,
-                ]);
-            }else{
+            if(!$isSafe){
                 Toaster::warning('The uploaded image contains inappropriate content and cannot be uploaded.');
-                return;
+                throw new \RuntimeException("The uploaded image contains inappropriate content and cannot be uploaded.");
             }
+        }
+
+        $newAircraftLog = auth()->user()->aircraftLogs()->create([
+            "airport_id" => $this->airport,
+            "logged_at" => $this->loggedAt,
+            "description" => $this->description,
+            "airline_id" => $this->airline,
+            "registration" => strtoupper($this->registration),
+            "aircraft_id" => $this->aircraft,
+        ]);
+
+        // dd($newAircraftLog);
+        foreach ($this->images as $image) {
+            $storedFilePath = $image->store('aircraft', 's3');
+            $image = auth()->user()->images()->create(
+                [
+                    "path" => $storedFilePath,
+                    "aircraft_log_id" => $newAircraftLog->id,
+                ]
+            );
         }
         Toaster::info('Log created successfully.');
 
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
-
     }
 
     public function removeUploadedImages()

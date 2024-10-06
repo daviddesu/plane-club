@@ -12,10 +12,19 @@ class Image extends Model
 
     protected $fillable = [
         'path',
+        'aircraft_log_id',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the post that owns the comment.
+     */
+    public function aircraftLog(): BelongsTo
+    {
+        return $this->belongsTo(AircraftLog::class);
     }
 }
