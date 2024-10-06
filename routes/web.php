@@ -12,9 +12,9 @@ use Masmerise\Toaster\Toaster;
 Route::get('/', [SalesController::class, 'index'])
     ->name('signup');
 
-Route::get('/logs', [AircraftLogController::class, 'index'])
+Route::get('/logs/images', [AircraftLogController::class, 'index'])
     ->middleware(['auth', Subscribed::class])
-    ->name('aircraft_logs');
+    ->name('aircraft_logs_images');
 
 Route::get('/log/{id}', [AircraftLogController::class, 'viewAircraftLog'])
     ->middleware(['auth', 'verified', Subscribed::class])
