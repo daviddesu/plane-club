@@ -21,6 +21,8 @@
 [x] Change log addition to not add multiple logs per image
 [x] Chnage log view to show images view
 [ ] WHen clikcing on an image, show the log image carrousel starting with the selected image
+[ ] A page to view logs and a page to view all images - image page will show fullscreen image when clicked
+[ ] Add departure/destination airport, and also flight number
 [ ] Email verification on signup
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar

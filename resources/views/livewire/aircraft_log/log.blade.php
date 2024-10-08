@@ -28,7 +28,7 @@ new class extends Component
 
 <div>
     <img
-        x-on:click="$wire.dispatch('open_aircraft_log', { id: {{ $aircraftLog->id }}, image_id: {{ $aircraftLog->images?->first()->id }}});"
+        x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLog->id }}});"
         src="{{ Storage::disk('s3')->temporaryUrl($aircraftLog->images?->first()->path, now()->addMinutes(60)) }}"
         alt=""
         class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-pointer aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"
