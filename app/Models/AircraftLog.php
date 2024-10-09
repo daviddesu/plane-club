@@ -12,6 +12,10 @@ class AircraftLog extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'logged_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'description',
         'image_id',

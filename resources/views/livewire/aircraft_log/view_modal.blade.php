@@ -152,7 +152,10 @@ new class extends Component
         class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-75"
         @keydown.window.escape="modalClose"
     >
-        <div class="relative w-full max-w-5xl mx-auto bg-white rounded-lg">
+        <div
+            class="relative w-full max-w-5xl mx-auto bg-white rounded-lg"
+            style="max-height: 100vh; overflow-y: auto;"
+        >
             <!-- Close Button -->
             <button @click="modalClose" class="absolute text-gray-600 top-2 right-2 hover:text-gray-800">
                 <!-- Close Icon SVG -->
@@ -162,7 +165,7 @@ new class extends Component
             </button>
 
             <!-- Modal Content -->
-            <div class="grid grid-cols-1 md:grid-cols-3">
+            <div class="grid grid-cols-1 pt-4 md:grid-cols-3">
                 <!-- Image Gallery -->
                 <div class="p-4 md:col-span-2">
                     @php
@@ -322,8 +325,6 @@ new class extends Component
     @endif
 </div>
 
-<!-- Alpine.js Scripts -->
-<!-- Alpine.js Scripts -->
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('modalComponent', () => ({

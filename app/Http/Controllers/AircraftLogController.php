@@ -14,7 +14,7 @@ class AircraftLogController extends Controller
 
     public function viewImages(): View
     {
-        return view('aircraft_logs_gallery', []);
+        return view('aircraft_images_gallery', []);
     }
 
     public function viewAircraftLog(string $id): View
