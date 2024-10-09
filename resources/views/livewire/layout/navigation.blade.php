@@ -17,7 +17,7 @@ $logout = function (Logout $logout) {
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex items-center shrink-0">
-                    <a href="{{ route('aircraft_logs_images') }}" wire:navigate>
+                    <a href="{{ route('aircraft_logs') }}" wire:navigate>
                         <img src="/logo.png" class="block w-auto h-16 text-gray-800 fill-current dark:text-gray-200" />
                     </a>
                 </div>
@@ -100,7 +100,7 @@ $logout = function (Logout $logout) {
             {{-- <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('aircraft_logs_images')" :active="request()->routeIs('aircraft_logs_images')" wire:navigate>
+            <x-responsive-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate>
                 {{ __('Aircraft Logs') }}
             </x-responsive-nav-link> --}}
         </div>

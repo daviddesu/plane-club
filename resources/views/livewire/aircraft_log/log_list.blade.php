@@ -9,20 +9,20 @@ use Livewire\Attributes\On;
 
 new class extends Component
 {
-    public Collection $images;
+    public Collection $aircraftLogs;
 
 
     public function mount(): void
     {
-        $this->getImageIds();
+        $this->getAircraftLogs();
     }
 
     #[On('aircraft_log-created')]
     #[On('aircraft_log-updated')]
     #[On('aircraft_log-deleted')]
-    public function getImageIds(): void
+    public function getAircraftLogs(): void
     {
-        $this->images = auth()->user()->images()->with('aircraftLog:id')->latest()->get();
+        $this->aircraftLogs = auth()->user()->aircraftLogs()->latest()->get();
     }
 
 }
@@ -34,9 +34,9 @@ new class extends Component
 <div class="w-full h-full select-none">
     <div class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
         <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
-            @foreach($images as $image)
-                <li wire:key='{{ $image->id }}'>
-                    <livewire:aircraft_log.log lazy :aircraftLogId="$image->aircraftLog->id" :imageId="$image->id" />
+            @foreach($aircraftLogs as $aircraftLog)
+                <li wire:key='{{ $aircraftLog->id }}'>
+                    <livewire:aircraft_log.log_card lazy :aircraftLogId="$aircraftLog->id" />
                 </li>
             @endforeach
         </ul>
