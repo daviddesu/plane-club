@@ -18,11 +18,52 @@ new class extends Component
             ])
             ->find($aircraftLogId);
     }
+
+    // Get the S3 temporary URL with caching
+    public function getCachedImageUrl($imagePath)
+    {
+        return Cache::remember("s3_image_{$imagePath}", now()->addMinutes(60), function() use ($imagePath) {
+            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addMinutes(60));
+        });
+    }
 }
 
 
 ?>
 
+
+<?php
+
+use App\Models\AircraftLog;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Volt\Component;
+
+new class extends Component
+{
+    public AircraftLog $aircraftLog;
+
+    public function mount(int $aircraftLogId): void
+    {
+        $this->aircraftLog = AircraftLog::with([
+            'user',
+            'images',
+            'airline',
+            'airport',
+            'aircraft'
+        ])->find($aircraftLogId);
+    }
+
+    // Get the S3 temporary URL with caching
+    public function getCachedImageUrl($imagePath)
+    {
+        return Cache::remember("s3_image_{$imagePath}", now()->addMinutes(60), function() use ($imagePath) {
+            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addMinutes(60));
+        });
+    }
+};
+
+?>
 
 <div>
     @php
@@ -38,7 +79,7 @@ new class extends Component
         @if($imageCount == 1)
             {{-- Case 1: One image --}}
             <img
-                src="{{ Storage::disk('s3')->temporaryUrl($images->first()->path, now()->addMinutes(60)) }}"
+                src="{{ $getCachedImageUrl($images->first()->path) }}"
                 alt=""
                 class="object-cover w-full h-full select-none"
             >
@@ -48,7 +89,7 @@ new class extends Component
                 @foreach($images->take(2) as $image)
                     <div class="w-1/2 h-full">
                         <img
-                            src="{{ Storage::disk('s3')->temporaryUrl($image->path, now()->addMinutes(60)) }}"
+                            src="{{ $getCachedImageUrl($image->path) }}"
                             alt=""
                             class="object-cover w-full h-full select-none"
                         >
@@ -61,7 +102,7 @@ new class extends Component
                 {{-- Left large image --}}
                 <div class="w-2/3 h-full">
                     <img
-                        src="{{ Storage::disk('s3')->temporaryUrl($images[0]->path, now()->addMinutes(60)) }}"
+                        src="{{ $getCachedImageUrl($images[0]->path) }}"
                         alt=""
                         class="object-cover w-full h-full select-none"
                     >
@@ -71,7 +112,7 @@ new class extends Component
                     @foreach($images->slice(1, 2) as $image)
                         <div class="h-1/2">
                             <img
-                                src="{{ Storage::disk('s3')->temporaryUrl($image->path, now()->addMinutes(60)) }}"
+                                src="{{ $getCachedImageUrl($image->path) }}"
                                 alt=""
                                 class="object-cover w-full h-full select-none"
                             >
@@ -85,7 +126,7 @@ new class extends Component
                 {{-- Left large image --}}
                 <div class="w-2/3 h-full">
                     <img
-                        src="{{ Storage::disk('s3')->temporaryUrl($images[0]->path, now()->addMinutes(60)) }}"
+                        src="{{ $getCachedImageUrl($images[0]->path) }}"
                         alt=""
                         class="object-cover w-full h-full select-none"
                     >
@@ -94,14 +135,14 @@ new class extends Component
                 <div class="flex flex-col w-1/3 h-full">
                     <div class="h-1/2">
                         <img
-                            src="{{ Storage::disk('s3')->temporaryUrl($images[1]->path, now()->addMinutes(60)) }}"
+                            src="{{ $getCachedImageUrl($images[1]->path) }}"
                             alt=""
                             class="object-cover w-full h-full select-none"
                         >
                     </div>
                     <div class="relative h-1/2">
                         <img
-                            src="{{ Storage::disk('s3')->temporaryUrl($images[2]->path, now()->addMinutes(60)) }}"
+                            src="{{ $getCachedImageUrl($images[2]->path) }}"
                             alt=""
                             class="object-cover w-full h-full select-none"
                         >
@@ -116,7 +157,6 @@ new class extends Component
         @endif
     </div>
 
-    {{-- Existing Details Section --}}
     <div class="grid grid-cols-2 mt-2">
         <div>
             <div><span class="text-gray-800">{{ $aircraftLog->airport->name }}</span></div>
@@ -128,5 +168,6 @@ new class extends Component
         </div>
     </div>
 </div>
+
 
 

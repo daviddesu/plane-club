@@ -10,6 +10,8 @@ use App\Models\Airport;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Masmerise\Toaster\Toaster;
+use Illuminate\Support\Facades\Cache;
+
 
 
 new class extends Component
@@ -116,21 +118,39 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        // dd($newAircraftLog);
         foreach ($this->images as $image) {
-            $storedFilePath = $image->store('aircraft', 's3');
-            $image = auth()->user()->images()->create(
-                [
-                    "path" => $storedFilePath,
-                    "aircraft_log_id" => $newAircraftLog->id,
-                ]
-            );
+            // Store the image in S3
+            $storedFilePath = $image->store('aircraft', 's3', [
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ]);
+
+
+            // Save the image record
+            $imageRecord = auth()->user()->images()->create([
+                "path" => $storedFilePath,
+                "aircraft_log_id" => $newAircraftLog->id,
+            ]);
+
+            // Cache the URL for the newly uploaded image
+            $this->cacheImageUrl($storedFilePath);
         }
+
         Toaster::info('Log created successfully.');
 
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
+    }
+
+    /**
+     * Cache the S3 image URL immediately after uploading.
+     */
+    public function cacheImageUrl(string $path): void
+    {
+        $cacheKey = "s3_image_url_" . md5($path);
+
+        // Cache the new URL
+        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60)), now()->addMinutes(60));
     }
 
     public function removeUploadedImages()

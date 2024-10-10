@@ -7,6 +7,8 @@ use Livewire\Volt\Component;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
+
 
 new class extends Component
 {
@@ -34,12 +36,27 @@ new class extends Component
             ->latest()
             ->get();
 
+        // Cache the image URLs
         $this->imageUrls = $this->images->map(function ($image) {
             return [
                 'id' => $image->id,
-                'url' => Storage::disk('s3')->temporaryUrl($image->path, now()->addMinutes(60)),
+                'url' => $this->getCachedImageUrl($image->path),
             ];
         })->values()->toArray();
+    }
+
+    /**
+     * Get the cached image URL for an S3 image.
+     */
+    public function getCachedImageUrl(string $path): string
+    {
+        // Cache key for this image's temporary URL
+        $cacheKey = "s3_image_url_" . md5($path);
+
+        // Check if a cached URL exists, otherwise generate a new one
+        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($path) {
+            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60));
+        });
     }
 };
 
@@ -52,7 +69,7 @@ new class extends Component
         <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
             @foreach($images as $index => $image)
                 <li wire:key='{{ $image->id }}'>
-                    <livewire:aircraft_log.image_card :image="$image" :index="$index" />
+                    <livewire:aircraft_log.image_card lazy :image="$image" :index="$index" />
                 </li>
             @endforeach
         </ul>
