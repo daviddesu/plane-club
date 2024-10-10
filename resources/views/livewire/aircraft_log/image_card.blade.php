@@ -43,8 +43,9 @@ use Illuminate\Support\Facades\Storage;
     }
 }">
     <img
-        src="{{ Storage::disk('s3')->temporaryUrl($image->path, now()->addMinutes(60)) }}"
+        src="{{ Storage::disk('s3')->temporaryUrl($image->path, now()->addDays(7)) }}"
         alt=""
+        loading="lazy"
         class="object-cover select-none w-full h-auto bg-gray-200 rounded cursor-pointer aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"
         x-on:click="openModal"
     >

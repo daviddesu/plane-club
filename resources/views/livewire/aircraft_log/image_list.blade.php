@@ -54,8 +54,8 @@ new class extends Component
         $cacheKey = "s3_image_url_" . md5($path);
 
         // Check if a cached URL exists, otherwise generate a new one
-        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($path) {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60));
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($path) {
+            return Storage::disk('s3')->temporaryUrl($path, now()->addDays(7));
         });
     }
 };
@@ -87,6 +87,7 @@ new class extends Component
             <img
                 x-bind:src="images[currentIndex].url"
                 alt="Image"
+                loading="lazy"
                 class="object-contain max-w-full max-h-screen"
             >
             <button @click="nextImage()" class="absolute right-0 p-4 text-3xl text-white transform -translate-y-1/2 top-1/2 focus:outline-none">&rarr;</button>

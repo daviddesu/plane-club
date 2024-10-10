@@ -150,7 +150,7 @@ new class extends Component
         $cacheKey = "s3_image_url_" . md5($path);
 
         // Cache the new URL
-        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(60)), now()->addMinutes(60));
+        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
     }
 
     public function removeUploadedImages()

@@ -22,8 +22,8 @@ new class extends Component
     // Get the S3 temporary URL with caching
     public function getCachedImageUrl($imagePath)
     {
-        return Cache::remember("s3_image_{$imagePath}", now()->addMinutes(60), function() use ($imagePath) {
-            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addMinutes(60));
+        return Cache::remember("s3_image_{$imagePath}", now()->addDays(7), function() use ($imagePath) {
+            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addDays(7));
         });
     }
 }
@@ -31,39 +31,6 @@ new class extends Component
 
 ?>
 
-
-<?php
-
-use App\Models\AircraftLog;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Volt\Component;
-
-new class extends Component
-{
-    public AircraftLog $aircraftLog;
-
-    public function mount(int $aircraftLogId): void
-    {
-        $this->aircraftLog = AircraftLog::with([
-            'user',
-            'images',
-            'airline',
-            'airport',
-            'aircraft'
-        ])->find($aircraftLogId);
-    }
-
-    // Get the S3 temporary URL with caching
-    public function getCachedImageUrl($imagePath)
-    {
-        return Cache::remember("s3_image_{$imagePath}", now()->addMinutes(60), function() use ($imagePath) {
-            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addMinutes(60));
-        });
-    }
-};
-
-?>
 
 <div>
     @php
@@ -79,8 +46,9 @@ new class extends Component
         @if($imageCount == 1)
             {{-- Case 1: One image --}}
             <img
-                src="{{ $getCachedImageUrl($images->first()->path) }}"
+                src="{{ $this->getCachedImageUrl($images->first()->path) }}"
                 alt=""
+                loading="lazy"
                 class="object-cover w-full h-full select-none"
             >
         @elseif($imageCount == 2)
@@ -89,8 +57,9 @@ new class extends Component
                 @foreach($images->take(2) as $image)
                     <div class="w-1/2 h-full">
                         <img
-                            src="{{ $getCachedImageUrl($image->path) }}"
+                            src="{{ $this->getCachedImageUrl($image->path) }}"
                             alt=""
+                            loading="lazy"
                             class="object-cover w-full h-full select-none"
                         >
                     </div>
@@ -102,8 +71,9 @@ new class extends Component
                 {{-- Left large image --}}
                 <div class="w-2/3 h-full">
                     <img
-                        src="{{ $getCachedImageUrl($images[0]->path) }}"
+                        src="{{ $this->getCachedImageUrl($images[0]->path) }}"
                         alt=""
+                        loading="lazy"
                         class="object-cover w-full h-full select-none"
                     >
                 </div>
@@ -112,8 +82,9 @@ new class extends Component
                     @foreach($images->slice(1, 2) as $image)
                         <div class="h-1/2">
                             <img
-                                src="{{ $getCachedImageUrl($image->path) }}"
+                                src="{{ $this->getCachedImageUrl($image->path) }}"
                                 alt=""
+                                loading="lazy"
                                 class="object-cover w-full h-full select-none"
                             >
                         </div>
@@ -126,8 +97,9 @@ new class extends Component
                 {{-- Left large image --}}
                 <div class="w-2/3 h-full">
                     <img
-                        src="{{ $getCachedImageUrl($images[0]->path) }}"
+                        src="{{ $this->getCachedImageUrl($images[0]->path) }}"
                         alt=""
+                        loading="lazy"
                         class="object-cover w-full h-full select-none"
                     >
                 </div>
@@ -135,15 +107,17 @@ new class extends Component
                 <div class="flex flex-col w-1/3 h-full">
                     <div class="h-1/2">
                         <img
-                            src="{{ $getCachedImageUrl($images[1]->path) }}"
+                            src="{{ $this->getCachedImageUrl($images[1]->path) }}"
                             alt=""
+                            loading="lazy"
                             class="object-cover w-full h-full select-none"
                         >
                     </div>
                     <div class="relative h-1/2">
                         <img
-                            src="{{ $getCachedImageUrl($images[2]->path) }}"
+                            src="{{ $this->getCachedImageUrl($images[2]->path) }}"
                             alt=""
+                            loading="lazy"
                             class="object-cover w-full h-full select-none"
                         >
                         <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">

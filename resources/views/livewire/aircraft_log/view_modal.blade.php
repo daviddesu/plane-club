@@ -69,7 +69,7 @@ new class extends Component
             $this->images = $this->aircraftLog->images->map(function ($image) {
                 return [
                     'id' => $image->id,
-                    'tempUrl' => Storage::disk('s3')->temporaryUrl($image->path, now()->addMinutes(60)),
+                    'tempUrl' => Storage::disk('s3')->temporaryUrl($image->path, now()->addDays(7)),
                 ];
             })->values()->toArray();
 
@@ -187,6 +187,7 @@ new class extends Component
                             <div class="w-full h-80">
                                 <img src="{{ $firstImage['tempUrl'] }}"
                                      alt="Image"
+                                     loading="lazy"
                                      class="object-cover w-full h-full cursor-pointer"
                                      @click="openModal(0)">
                             </div>
@@ -197,6 +198,7 @@ new class extends Component
                                     <div class="w-full h-40">
                                         <img src="{{ $image['tempUrl'] }}"
                                              alt="Image"
+                                             loading="lazy"
                                              class="object-cover w-full h-full cursor-pointer"
                                              @click="openModal({{ $index }})">
                                     </div>
@@ -215,6 +217,7 @@ new class extends Component
                             <!-- Image Display -->
                             <img x-bind:src="images[imageIndex]"
                                 alt="Image"
+                                loading="lazy"
                                 class="object-contain max-w-full max-h-screen">
 
                             <!-- Left Arrow -->
