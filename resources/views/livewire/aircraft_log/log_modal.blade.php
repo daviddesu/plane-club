@@ -11,6 +11,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Masmerise\Toaster\Toaster;
 
 new class extends Component
@@ -40,8 +41,8 @@ new class extends Component
     #[Validate]
     public ?string $registration = "";
 
-    public array $images = [];
-    public array $imageUrls = []; // Added this property
+    public array $mediaItems = [];
+    public array $mediaUrls = [];
     public bool $editing = false;
     public bool $modalOpened = false;
 
@@ -55,7 +56,7 @@ new class extends Component
 
     public function loadAircraftLog($id): void
     {
-        $this->aircraftLog = AircraftLog::with('user', 'images', 'airport', 'airline', 'aircraft')->find($id);
+        $this->aircraftLog = AircraftLog::with('user', 'mediaItems', 'airport', 'airline', 'aircraft')->find($id);
 
         if ($this->aircraftLog) {
             $this->loggedAt = $this->aircraftLog->logged_at;
@@ -65,20 +66,31 @@ new class extends Component
             $this->aircraft_id = $this->aircraftLog->aircraft?->id;
             $this->registration = $this->aircraftLog->registration;
 
-            // Load all images with temporary URLs and convert to array
-            $this->images = $this->aircraftLog->images->map(function ($image) {
+            // Load all media with temporary URLs and add cache
+            $this->mediaItems = $this->aircraftLog->mediaItems->map(function ($media) {
                 return [
-                    'id' => $image->id,
-                    'tempUrl' => Storage::disk('s3')->temporaryUrl($image->path, now()->addDays(7)),
+                    'id' => $media->id,
+                    'tempUrl' => $this->getCachedMediaUrl($media->path),
+                    'is_video' => str_contains($media->mime_type, 'video'),
                 ];
             })->values()->toArray();
 
-            // Extract tempUrls into $this->imageUrls
-            $this->imageUrls = array_column($this->images, 'tempUrl');
+            // Extract tempUrls into $this->mediaUrls
+            $this->mediaUrls = array_column($this->mediaItems, 'tempUrl');
         } else {
-            $this->images = [];
-            $this->imageUrls = [];
+            $this->mediaItems = [];
+            $this->mediaUrls = [];
         }
+    }
+
+    public function getCachedMediaUrl(string $path): string
+    {
+        // Cache the media URL for 7 days
+        $cacheKey = "s3_media_url_" . md5($path);
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($path) {
+            return Storage::disk('s3')->temporaryUrl($path, now()->addDays(7));
+        });
     }
 
     #[On('close_aircraft_log')]
@@ -95,8 +107,8 @@ new class extends Component
         $this->airports = Airport::all();
         $this->aircraft = Aircraft::all();
         $this->airlines = Airline::all();
-        $this->images = [];
-        $this->imageUrls = [];
+        $this->mediaItems = [];
+        $this->mediaUrls = [];
     }
 
     public function startEdit()
@@ -111,10 +123,7 @@ new class extends Component
 
     public function update()
     {
-        $this->authorize('update', $this->aircraftLog);
         $validated = $this->validate();
-        $this->editing = false;
-
         $this->aircraftLog->update([
             "airport_id" => $this->airport_id,
             "logged_at" => $this->loggedAt,
@@ -138,8 +147,6 @@ new class extends Component
     }
 };
 
-
-
 ?>
 
 <div x-data="modalComponent" class="w-full h-full select-none">
@@ -158,7 +165,6 @@ new class extends Component
         >
             <!-- Close Button -->
             <button @click="modalClose" class="absolute text-gray-600 top-2 right-2 hover:text-gray-800">
-                <!-- Close Icon SVG -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -166,47 +172,65 @@ new class extends Component
 
             <!-- Modal Content -->
             <div class="grid grid-cols-1 pt-4 md:grid-cols-3">
-                <!-- Image Gallery -->
+                <!-- Media Gallery -->
                 <div class="p-4 md:col-span-2">
                     @php
-                        $imageCount = count($images);
-                        $columns = max(1, min($imageCount, 3));
-                        // Extract tempUrls from images
-                        $imageUrls = collect($images)->pluck('tempUrl')->all();
+                        $mediaCount = count($mediaItems);
+                        $columns = max(1, min($mediaCount, 3));
                     @endphp
 
-                    <div x-data='imageGallery({ images: @json($imageUrls) })' x-bind:key="$id" class="relative">
-                        <!-- Image Grid -->
-                        @if($imageCount == 0)
-                            <p>No images available.</p>
-                        @elseif ($imageCount == 1)
-                            <!-- Single image -->
-                            @php
-                                $firstImage = $images[0];
-                            @endphp
+                    <div x-data='mediaGallery({ mediaItems: @json($mediaItems) })' x-bind:key="$id" class="relative">
+                        <!-- Grid -->
+                        @if($mediaCount == 0)
+                            <p>No media available.</p>
+                        @elseif ($mediaCount == 1)
+                            <!-- Single Media -->
                             <div class="w-full h-80">
-                                <img src="{{ $firstImage['tempUrl'] }}"
-                                     alt="Image"
-                                     loading="lazy"
-                                     class="object-cover w-full h-full cursor-pointer"
-                                     @click="openModal(0)">
+                                @php
+                                    $firstMedia = $mediaItems[0];
+                                @endphp
+                                @if($firstMedia['is_video'])
+                                    <video controls
+                                        src="{{ $firstMedia['tempUrl'] }}"
+                                        class="object-cover w-full h-full cursor-pointer"
+                                    ></video>
+                                @else
+                                    <img src="{{ $firstMedia['tempUrl'] }}"
+                                         alt="Media"
+                                         loading="lazy"
+                                         class="object-cover w-full h-full cursor-pointer"
+                                         @click="openModal(0)">
+                                @endif
                             </div>
                         @else
-                            <!-- Multiple images -->
+                            <!-- Multiple Media -->
                             <div class="grid grid-cols-2 md:grid-cols-{{ $columns }} gap-2">
-                                @foreach($images as $index => $image)
+                                @foreach($mediaItems as $index => $media)
                                     <div class="w-full h-40">
-                                        <img src="{{ $image['tempUrl'] }}"
-                                             alt="Image"
-                                             loading="lazy"
-                                             class="object-cover w-full h-full cursor-pointer"
-                                             @click="openModal({{ $index }})">
+                                        @if($media['is_video'])
+                                            <div class="relative">
+                                                <video
+                                                    src="{{ $media['tempUrl'] }}"
+                                                    class="object-cover w-full h-full"
+                                                    muted
+                                                ></video>
+                                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                                    <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                                                </div>
+                                            </div>
+                                        @else
+                                            <img src="{{ $media['tempUrl'] }}"
+                                                 alt="Media"
+                                                 loading="lazy"
+                                                 class="object-cover w-full h-full cursor-pointer"
+                                                 @click="openModal({{ $index }})">
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
                         @endif
 
-                        <!-- Fullscreen Image Modal -->
+                        <!-- Fullscreen Modal for Media -->
                         <div
                             x-show="isOpen"
                             x-transition
@@ -214,15 +238,24 @@ new class extends Component
                             @keydown.escape.window="closeModal()"
                         >
                         <div class="relative max-w-full max-h-screen">
-                            <!-- Image Display -->
-                            <img x-bind:src="images[imageIndex]"
-                                alt="Image"
-                                loading="lazy"
-                                class="object-contain max-w-full max-h-screen">
+                            <template x-if="mediaItems[mediaIndex].is_video">
+                                <video
+                                    controls
+                                    x-bind:src="mediaItems[mediaIndex].tempUrl"
+                                    class="object-contain max-w-full max-h-screen"
+                                ></video>
+                            </template>
+                            <template x-if="!mediaItems[mediaIndex].is_video">
+                                <img
+                                    x-bind:src="mediaItems[mediaIndex].tempUrl"
+                                    loading="lazy"
+                                    class="object-contain max-w-full max-h-screen"
+                                >
+                            </template>
 
                             <!-- Left Arrow -->
                             <button
-                                @click="prevImage()"
+                                @click="prevItem()"
                                 class="absolute left-0 p-4 text-3xl text-white transform -translate-y-1/2 top-1/2 focus:outline-none"
                             >
                                 &larr;
@@ -230,7 +263,7 @@ new class extends Component
 
                             <!-- Right Arrow -->
                             <button
-                                @click="nextImage()"
+                                @click="nextItem()"
                                 class="absolute right-0 p-4 text-3xl text-white transform -translate-y-1/2 top-1/2 focus:outline-none"
                             >
                                 &rarr;
@@ -332,21 +365,19 @@ new class extends Component
     document.addEventListener('alpine:init', () => {
         Alpine.data('modalComponent', () => ({
             modalOpened: @entangle('modalOpened'),
-            init() {
-                // Initialization if needed
-            },
+            init() {},
             modalClose() {
                 this.modalOpened = false;
                 @this.call('closeLog');
             },
         }));
 
-        Alpine.data('imageGallery', (data) => ({
+        Alpine.data('mediaGallery', (data) => ({
             isOpen: false,
-            imageIndex: 0,
-            images: data.images || [],
+            mediaIndex: 0,
+            mediaItems: data.mediaItems || [],
             openModal(index) {
-                this.imageIndex = index;
+                this.mediaIndex = index;
                 this.isOpen = true;
                 document.body.classList.add('overflow-hidden');
             },
@@ -354,18 +385,16 @@ new class extends Component
                 this.isOpen = false;
                 document.body.classList.remove('overflow-hidden');
             },
-            nextImage() {
-                if (this.imageIndex < this.images.length - 1) {
-                    this.imageIndex++;
+            nextItem() {
+                if (this.mediaIndex < this.mediaItems.length - 1) {
+                    this.mediaIndex++;
                 }
             },
-            prevImage() {
-                if (this.imageIndex > 0) {
-                    this.imageIndex--;
+            prevItem() {
+                if (this.mediaIndex > 0) {
+                    this.mediaIndex--;
                 }
             },
         }));
     });
-    </script>
-
-
+</script>

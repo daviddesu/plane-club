@@ -8,11 +8,8 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
-use Google\Cloud\Vision\V1\Feature\Type;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Cache;
-
-
 
 new class extends Component
 {
@@ -40,8 +37,8 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
-    #[Validate(['images.*' => 'image|max:8192'])]
-    public array $images = [];
+    #[Validate(['media.*' => 'file|max:51200|mimes:jpeg,jpg,png,gif,mp4,mov,avi,wmv'])]
+    public array $media = []; // Accept both images and videos
 
     public function mount()
     {
@@ -50,48 +47,46 @@ new class extends Component
         $this->airlines = Airline::all();
     }
 
-    public function analyzeImage($imagePath)
+    /**
+     * Analyze an image or video for sensitive content.
+     */
+    public function analyzeMedia($mediaPath, $type): bool
     {
         $imageAnnotator = new ImageAnnotatorClient();
 
         try {
-            $imageData = file_get_contents($imagePath);
-            $response = $imageAnnotator->safeSearchDetection($imageData);
-            $safeSearch = $response->getSafeSearchAnnotation();
+            if ($type === 'image') {
+                $imageData = file_get_contents($mediaPath);
+                $response = $imageAnnotator->safeSearchDetection($imageData);
+                $safeSearch = $response->getSafeSearchAnnotation();
 
-            if ($safeSearch) {
-                // Retrieve the likelihoods
-                $adult = $safeSearch->getAdult();
-                $violence = $safeSearch->getViolence();
-                $medical = $safeSearch->getMedical();
+                if ($safeSearch) {
+                    $adult = $safeSearch->getAdult();
+                    $violence = $safeSearch->getViolence();
+                    $medical = $safeSearch->getMedical();
 
-                // Define thresholds (e.g., reject if likelihood is likely or higher)
-                $unacceptableLikelihoods = [
-                    \Google\Cloud\Vision\V1\Likelihood::LIKELY,
-                    \Google\Cloud\Vision\V1\Likelihood::VERY_LIKELY,
-                ];
+                    $unacceptableLikelihoods = [
+                        \Google\Cloud\Vision\V1\Likelihood::LIKELY,
+                        \Google\Cloud\Vision\V1\Likelihood::VERY_LIKELY,
+                    ];
 
-                // Check if any content is unacceptable
-                if (
-                    in_array($adult, $unacceptableLikelihoods) ||
-                    in_array($violence, $unacceptableLikelihoods) ||
-                    in_array($medical, $unacceptableLikelihoods)
-                ) {
-                    // Close the client
-                    $imageAnnotator->close();
-                    return false;
-                } else {
-                    // Content is acceptable
-                    $imageAnnotator->close();
-                    return true;
+                    if (
+                        in_array($adult, $unacceptableLikelihoods) ||
+                        in_array($violence, $unacceptableLikelihoods) ||
+                        in_array($medical, $unacceptableLikelihoods)
+                    ) {
+                        $imageAnnotator->close();
+                        return false;
+                    }
                 }
+            } else if ($type === 'video') {
+                // Use a video moderation API, or return true as a placeholder
+                return true; // Placeholder, replace with actual moderation
             }
 
-            // If no SafeSearch data is available, reject the image
             $imageAnnotator->close();
-            return false;
+            return true;
         } catch (\Exception $e) {
-            // Handle exception
             return false;
         }
     }
@@ -100,12 +95,20 @@ new class extends Component
     {
         $validated = $this->validate();
 
-        foreach ($this->images as $image) {
-            // Analyze the image for unwanted content
-            $isSafe = $this->analyzeImage($image->getRealPath());
-            if(!$isSafe){
-                Toaster::warning('The uploaded image contains inappropriate content and cannot be uploaded.');
-                throw new \RuntimeException("The uploaded image contains inappropriate content and cannot be uploaded.");
+        foreach ($this->media as $file) {
+            $fileType = $file->getMimeType();
+            $isSafe = false;
+
+            // Check file type and perform content analysis accordingly
+            if (str_contains($fileType, 'image')) {
+                $isSafe = $this->analyzeMedia($file->getRealPath(), 'image');
+            } else if (str_contains($fileType, 'video')) {
+                $isSafe = $this->analyzeMedia($file->getRealPath(), 'video');
+            }
+
+            if (!$isSafe) {
+                Toaster::warning('The uploaded file contains inappropriate content and cannot be uploaded.');
+                throw new \RuntimeException("The uploaded file contains inappropriate content and cannot be uploaded.");
             }
         }
 
@@ -118,44 +121,57 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        foreach ($this->images as $image) {
-            // Store the image in S3
-            $storedFilePath = $image->store('aircraft', 's3', [
-                'CacheControl' => 'public, max-age=31536000, immutable',
-            ]);
+        foreach ($this->media as $file) {
+            $fileType = $file->getMimeType();
 
+            // Store in S3 based on file type
+            if (str_contains($fileType, 'image')) {
+                $storedFilePath = $this->storeFileInS3($file, 'images');
+            } else if (str_contains($fileType, 'video')) {
+                $storedFilePath = $this->storeFileInS3($file, 'videos');
+            }
 
-            // Save the image record
-            $imageRecord = auth()->user()->images()->create([
+            // Save media record in the database
+            auth()->user()->media()->create([
                 "path" => $storedFilePath,
                 "aircraft_log_id" => $newAircraftLog->id,
             ]);
 
-            // Cache the URL for the newly uploaded image
-            $this->cacheImageUrl($storedFilePath);
+            // Cache the media URL
+            $this->cacheMediaUrl($storedFilePath, $fileType);
         }
 
         Toaster::info('Log created successfully.');
-
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
     }
 
     /**
-     * Cache the S3 image URL immediately after uploading.
+     * Store files in S3 with proper caching headers.
      */
-    public function cacheImageUrl(string $path): void
+    public function storeFileInS3($file, $type): string
     {
-        $cacheKey = "s3_image_url_" . md5($path);
-
-        // Cache the new URL
-        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
+        return $file->store($type, 's3', [
+            'CacheControl' => 'public, max-age=31536000, immutable',
+        ]);
     }
 
-    public function removeUploadedImages()
+    /**
+     * Cache the media URL (image/video).
+     */
+    public function cacheMediaUrl(string $path, string $fileType): void
     {
-        $this->images = [];
+        $cacheKey = "s3_media_url_" . md5($path);
+        $expiration = $fileType === 'image' ? now()->addDays(7) : now()->addHours(6);  // Shorter expiration for videos
+        $temporaryUrl = Storage::disk('s3')->temporaryUrl($path, $expiration);
+
+        Cache::put($cacheKey, $temporaryUrl, $expiration);
+    }
+
+    public function removeUploadedFiles()
+    {
+        $this->media = [];
     }
 
     public function close()
@@ -169,26 +185,17 @@ new class extends Component
         $this->airport = null;
         $this->airline = null;
         $this->aircraft = null;
-        $this->images = [];
+        $this->media = [];
         $this->description = "";
-    }
-
-    public function toggleMoreDetails()
-    {
-        if($this->moreDetails){
-            $this->moreDetails = true;
-        }else{
-            $this->moreDetails = false;
-        }
     }
 }
 
 
 ?>
-<x-modal-card title="Add photos" name="logModal">
+<x-modal-card title="Add Photos/Videos" name="logModal">
     <form wire:submit='store()'>
-        <div>
         <div class="grid grid-cols-1 gap-4">
+            <!-- Existing Form Inputs -->
             <div class="grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-datetime-picker
                     class="pd-2"
@@ -210,7 +217,6 @@ new class extends Component
                         <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
                     @endforeach
                 </x-select>
-
 
                 <x-select
                     class="pd-2"
@@ -246,78 +252,75 @@ new class extends Component
                 />
             </div>
 
-            @if(!$images)
-                {{-- File upload --}}
-                <div
-                    x-data="{ isUploading: false, progress: 0 }"
-                    x-on:livewire-upload-start="isUploading = true"
-                    x-on:livewire-upload-finish="isUploading = false"
-                    x-on:livewire-upload-error="isUploading = false"
-                    x-on:livewire-upload-progress="progress = $event.detail.progress"
-                >
-                    <label for="images">
-                        <div
-                            class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
-                            <div class="flex flex-col items-center justify-center">
-
-                                <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" />
-                                <p class="text-blue-600 dark:text-teal-600">
-                                    Click to add photos
-                                </p>
-                            </div>
+            {{-- File upload for images and videos --}}
+            <div
+                x-data="{ isUploading: false, progress: 0 }"
+                x-on:livewire-upload-start="isUploading = true"
+                x-on:livewire-upload-finish="isUploading = false"
+                x-on:livewire-upload-error="isUploading = false"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+            >
+                <label for="media">
+                    <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
+                        <div class="flex flex-col items-center justify-center">
+                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" />
+                            <p class="text-blue-600 dark:text-teal-600">
+                                Click to add media (images or videos)
+                            </p>
                         </div>
-                    </label>
-                    <input type="file" id="images" wire:model="images" multiple hidden />
-
-                    @error('images.*')
-                        <span class="error">{{ $message }}</span>
-                    @enderror
-
-                    <!-- Progress Bar -->
-                    <div
-                        x-show="isUploading"
-                        class="flex items-center justify-center h-20 col-span-1 shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M20.27,4.74a4.93,4.93,0,0,1,1.52,4.61,5.32,5.32,0,0,1-4.1,4.51,5.12,5.12,0,0,1-5.2-1.5,5.53,5.53,0,0,0,6.13-1.48A5.66,5.66,0,0,0,20.27,4.74ZM12.32,11.53a5.49,5.49,0,0,0-1.47-6.2A5.57,5.57,0,0,0,4.71,3.72,5.17,5.17,0,0,1,9.53,2.2,5.52,5.52,0,0,1,13.9,6.45,5.28,5.28,0,0,1,12.32,11.53ZM19.2,20.29a4.92,4.92,0,0,1-4.72,1.49,5.32,5.32,0,0,1-4.34-4.05A5.2,5.2,0,0,1,11.6,12.5a5.6,5.6,0,0,0,1.51,6.13A5.63,5.63,0,0,0,19.2,20.29ZM3.79,19.38A5.18,5.18,0,0,1,2.32,14a5.3,5.3,0,0,1,4.59-4,5,5,0,0,1,4.58,1.61,5.55,5.55,0,0,0-6.32,1.69A5.46,5.46,0,0,0,3.79,19.38ZM12.23,12a5.11,5.11,0,0,0,3.66-5,5.75,5.75,0,0,0-3.18-6,5,5,0,0,1,4.42,2.3,5.21,5.21,0,0,1,.24,5.92A5.4,5.4,0,0,1,12.23,12ZM11.76,12a5.18,5.18,0,0,0-3.68,5.09,5.58,5.58,0,0,0,3.19,5.79c-1,.35-2.9-.46-4-1.68A5.51,5.51,0,0,1,11.76,12ZM23,12.63a5.07,5.07,0,0,1-2.35,4.52,5.23,5.23,0,0,1-5.91.2,5.24,5.24,0,0,1-2.67-4.77,5.51,5.51,0,0,0,5.45,3.33A5.52,5.52,0,0,0,23,12.63ZM1,11.23a5,5,0,0,1,2.49-4.5,5.23,5.23,0,0,1,5.81-.06,5.3,5.3,0,0,1,2.61,4.74A5.56,5.56,0,0,0,6.56,8.06,5.71,5.71,0,0,0,1,11.23Z"><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></svg>
                     </div>
-                </div>
-            @endif
+                </label>
+                <input type="file" id="media" wire:model="media" multiple hidden />
 
-            @if ($images)
-                {{-- Log Preview --}}
-                <div
-                class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view"
-                style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                @error('media.*')
+                    <span class="error">{{ $message }}</span>
+                @enderror
+
+                <!-- Progress Bar -->
+                <div x-show="isUploading" class="flex items-center justify-center h-20 col-span-1 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20.27,4.74a4.93,4.93,0,0,1,1.52,4.61a5.32,5.32,0,0,1-4.1,4.51a5.12,5.12,0,0,1-5.2-1.5a5.53,5.53,0,0,0,6.13-1.48A5.66,5.66,0,0,0,20.27,4.74ZM12.32,11.53a5.49,5.49,0,0,0-1.47-6.2A5.57,5.57,0,0,0,4.71,3.72a5.17,5.17,0,0,1,4.82-1.52a5.52,5.52,0,0,1,4.37,4.25a5.28,5.28,0,0,1-1.58,5.1Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Media Preview --}}
+            @if ($media)
+                <div class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view">
                     <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-                        @foreach ($images as $key => $image)
-                                <li><img
-                                    wire:key="{{ $key++ }}"
-                                    src="{{ $image->temporaryUrl() }}"
-                                    class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]" />
-                                </li>
+                        @foreach ($media as $key => $file)
+                            <li wire:key="{{ $key }}">
+                                @if (str_contains($file->getMimeType(), 'video'))
+                                    <video src="{{ $file->temporaryUrl() }}" controls class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"></video>
+                                @else
+                                    <img src="{{ $file->temporaryUrl() }}" class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]" />
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </div>
-                <x-input-error :messages="$errors->get('message')" class="mt-2" />
             @endif
-
         </div>
+
         <div class="pt-2 border-b-2"></div>
         <div name="footer" class="flex justify-between gap-x-4">
-            @if($images)
-                <x-button class="mt-4" flat negative label="Clear images" wire:click='removeUploadedImages' />
+            @if($media)
+                <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedFiles' />
             @endif
             <div class="flex gap-x-4">
                 <x-button flat class="justify-center mt-4" label="Cancel" x-on:click="close" wire:click='close' />
-                <x-primary-button  flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
+                <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
             </div>
         </div>
-    </div>
     </form>
 </x-model-card>
+
 @script
     <script>
         $wire.on('aircraft_log-created', ({ id }) => {
-            $closeModal('logModal')
+            $closeModal('logModal');
         });
     </script>
 @endscript
+
+

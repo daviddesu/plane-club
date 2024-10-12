@@ -52,8 +52,8 @@ class User extends Authenticatable
         return $this->hasMany(AircraftLog::class);
     }
 
-    public function images(): HasMany
+    public function mediaItems(): HasMany
     {
-        return $this->hasMany(Image::class);
+        return $this->hasMany(Media::class);
     }
 }

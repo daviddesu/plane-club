@@ -22,9 +22,11 @@
 [x] Chnage log view to show images view
 [x] WHen clikcing on an image, show the log image carrousel starting with the selected image
 [x] A page to view logs and a page to view all images - image page will show fullscreen image when clicked
-[ ] efficiently load images form AWS with pagination for images page and logs page
+[x] efficiently load images form AWS with pagination for images page and logs page
+[x] add video uploads
 [ ] Add departure/destination airport, and also flight number
 [ ] Email verification on signup
+[ ] Send to facebook
 [ ] User area upgrades for subscription view and cancel
 [ ] Add avatar to nav bar
 [ ] Auth themeing

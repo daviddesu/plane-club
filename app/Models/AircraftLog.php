@@ -18,7 +18,6 @@ class AircraftLog extends Model
 
     protected $fillable = [
         'description',
-        'image_id',
         'airport_id',
         'logged_at',
         'airline_id',
@@ -31,9 +30,9 @@ class AircraftLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function images(): HasMany
+    public function mediaItems(): HasMany
     {
-        return $this->hasMany(Image::class);
+        return $this->hasMany(Media::class);
     }
 
     public function airport(): BelongsTo

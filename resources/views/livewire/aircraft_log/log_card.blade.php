@@ -2,6 +2,8 @@
 
 use App\Models\AircraftLog;
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
@@ -11,7 +13,7 @@ new class extends Component
     {
         $this->aircraftLog = AircraftLog::with([
                 'user',
-                'images',
+                'mediaItems', // Assuming mediaItems includes both images and videos
                 'airline',
                 'airport',
                 'aircraft'
@@ -20,109 +22,179 @@ new class extends Component
     }
 
     // Get the S3 temporary URL with caching
-    public function getCachedImageUrl($imagePath)
+    public function getCachedMediaUrl($mediaPath)
     {
-        return Cache::remember("s3_image_{$imagePath}", now()->addDays(7), function() use ($imagePath) {
-            return Storage::disk('s3')->temporaryUrl($imagePath, now()->addDays(7));
+        return Cache::remember("s3_media_{$mediaPath}", now()->addDays(7), function() use ($mediaPath) {
+            return Storage::disk('s3')->temporaryUrl($mediaPath, now()->addDays(7));
         });
+    }
+
+    // Determine if the media is a video based on its MIME type
+    public function isVideo($media)
+    {
+        return str_contains($media->mime_type, 'video');
     }
 }
 
-
 ?>
-
 
 <div>
     @php
-        $images = $aircraftLog->images;
-        $imageCount = $images->count();
+        $mediaItems = $aircraftLog->mediaItems;
+        $mediaCount = $mediaItems->count();
     @endphp
 
-    {{-- Image Container with rectangular aspect ratio --}}
+    {{-- Media Container with rectangular aspect ratio --}}
     <div
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLog->id }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
-        @if($imageCount == 1)
-            {{-- Case 1: One image --}}
-            <img
-                src="{{ $this->getCachedImageUrl($images->first()->path) }}"
-                alt=""
-                loading="lazy"
-                class="object-cover w-full h-full select-none"
-            >
-        @elseif($imageCount == 2)
-            {{-- Case 2: Two images side by side --}}
-            <div class="absolute inset-0 flex">
-                @foreach($images->take(2) as $image)
-                    <div class="w-1/2 h-full">
-                        <img
-                            src="{{ $this->getCachedImageUrl($image->path) }}"
-                            alt=""
-                            loading="lazy"
-                            class="object-cover w-full h-full select-none"
-                        >
+        @if($mediaCount == 1)
+            {{-- Case 1: One media item (image or video) --}}
+            @php
+                $firstMedia = $mediaItems->first();
+            @endphp
+
+            @if($this->isVideo($firstMedia))
+                <div class="relative w-full h-full">
+                    <video class="object-cover w-full h-full select-none"></video>
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <x-icon name="play-circle" class="w-12 h-12 text-white" />
                     </div>
-                @endforeach
-            </div>
-        @elseif($imageCount == 3)
-            {{-- Case 3: One large image on the left, two smaller images stacked on the right --}}
-            <div class="absolute inset-0 flex">
-                {{-- Left large image --}}
-                <div class="w-2/3 h-full">
-                    <img
-                        src="{{ $this->getCachedImageUrl($images[0]->path) }}"
-                        alt=""
-                        loading="lazy"
-                        class="object-cover w-full h-full select-none"
-                    >
                 </div>
-                {{-- Right two images --}}
-                <div class="flex flex-col w-1/3 h-full">
-                    @foreach($images->slice(1, 2) as $image)
-                        <div class="h-1/2">
+            @else
+                <img
+                    src="{{ $this->getCachedMediaUrl($firstMedia->path) }}"
+                    alt=""
+                    loading="lazy"
+                    class="object-cover w-full h-full select-none"
+                >
+            @endif
+        @elseif($mediaCount == 2)
+            {{-- Case 2: Two media items side by side --}}
+            <div class="absolute inset-0 flex">
+                @foreach($mediaItems->take(2) as $media)
+                    <div class="relative w-1/2 h-full">
+                        @if($this->isVideo($media))
+                            <video class="object-cover w-full h-full select-none"></video>
+                            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                            </div>
+                        @else
                             <img
-                                src="{{ $this->getCachedImageUrl($image->path) }}"
+                                src="{{ $this->getCachedMediaUrl($media->path) }}"
                                 alt=""
                                 loading="lazy"
                                 class="object-cover w-full h-full select-none"
                             >
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @elseif($mediaCount == 3)
+            {{-- Case 3: One large media item on the left, two smaller items stacked on the right --}}
+            <div class="absolute inset-0 flex">
+                {{-- Left large media --}}
+                <div class="relative w-2/3 h-full">
+                    @php
+                        $firstMedia = $mediaItems[0];
+                    @endphp
+                    @if($this->isVideo($firstMedia))
+                        <video class="object-cover w-full h-full select-none"></video>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                        </div>
+                    @else
+                        <img
+                            src="{{ $this->getCachedMediaUrl($firstMedia->path) }}"
+                            alt=""
+                            loading="lazy"
+                            class="object-cover w-full h-full select-none"
+                        >
+                    @endif
+                </div>
+                {{-- Right two smaller media items --}}
+                <div class="flex flex-col w-1/3 h-full">
+                    @foreach($mediaItems->slice(1, 2) as $media)
+                        <div class="relative h-1/2">
+                            @if($this->isVideo($media))
+                                <video class="object-cover w-full h-full select-none"></video>
+                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                    <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                                </div>
+                            @else
+                                <img
+                                    src="{{ $this->getCachedMediaUrl($media->path) }}"
+                                    alt=""
+                                    loading="lazy"
+                                    class="object-cover w-full h-full select-none"
+                                >
+                            @endif
                         </div>
                     @endforeach
                 </div>
             </div>
-        @elseif($imageCount > 3)
-            {{-- Case 4: Same layout as Case 3, but overlay "+ X" on the last image --}}
+        @elseif($mediaCount > 3)
+            {{-- Case 4: Same layout as Case 3, but overlay "+ X" on the last media item --}}
             <div class="absolute inset-0 flex">
-                {{-- Left large image --}}
-                <div class="w-2/3 h-full">
-                    <img
-                        src="{{ $this->getCachedImageUrl($images[0]->path) }}"
-                        alt=""
-                        loading="lazy"
-                        class="object-cover w-full h-full select-none"
-                    >
+                {{-- Left large media --}}
+                <div class="relative w-2/3 h-full">
+                    @php
+                        $firstMedia = $mediaItems[0];
+                    @endphp
+                    @if($this->isVideo($firstMedia))
+                        <video class="object-cover w-full h-full select-none"></video>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                        </div>
+                    @else
+                        <img
+                            src="{{ $this->getCachedMediaUrl($firstMedia->path) }}"
+                            alt=""
+                            loading="lazy"
+                            class="object-cover w-full h-full select-none"
+                        >
+                    @endif
                 </div>
-                {{-- Right two images --}}
+                {{-- Right two smaller media items --}}
                 <div class="flex flex-col w-1/3 h-full">
-                    <div class="h-1/2">
-                        <img
-                            src="{{ $this->getCachedImageUrl($images[1]->path) }}"
-                            alt=""
-                            loading="lazy"
-                            class="object-cover w-full h-full select-none"
-                        >
-                    </div>
+                    @foreach($mediaItems->slice(1, 2) as $media)
+                        <div class="relative h-1/2">
+                            @if($this->isVideo($media))
+                                <video class="object-cover w-full h-full select-none"></video>
+                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                    <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                                </div>
+                            @else
+                                <img
+                                    src="{{ $this->getCachedMediaUrl($media->path) }}"
+                                    alt=""
+                                    loading="lazy"
+                                    class="object-cover w-full h-full select-none"
+                                >
+                            @endif
+                        </div>
+                    @endforeach
                     <div class="relative h-1/2">
-                        <img
-                            src="{{ $this->getCachedImageUrl($images[2]->path) }}"
-                            alt=""
-                            loading="lazy"
-                            class="object-cover w-full h-full select-none"
-                        >
+                        @php
+                            $thirdMedia = $mediaItems[2];
+                        @endphp
+                        @if($this->isVideo($thirdMedia))
+                            <video class="object-cover w-full h-full select-none"></video>
+                            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                <x-icon name="play-circle" class="w-12 h-12 text-white" />
+                            </div>
+                        @else
+                            <img
+                                src="{{ $this->getCachedMediaUrl($thirdMedia->path) }}"
+                                alt=""
+                                loading="lazy"
+                                class="object-cover w-full h-full select-none"
+                            >
+                        @endif
                         <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                             <span class="text-xl font-semibold text-white">
-                                +{{ $imageCount - 3 }}
+                                +{{ $mediaCount - 3 }}
                             </span>
                         </div>
                     </div>
@@ -131,6 +203,7 @@ new class extends Component
         @endif
     </div>
 
+    {{-- Log Details --}}
     <div class="grid grid-cols-2 mt-2">
         <div>
             <div><span class="text-gray-800">{{ $aircraftLog->airport->name }}</span></div>
@@ -142,6 +215,3 @@ new class extends Component
         </div>
     </div>
 </div>
-
-
-
