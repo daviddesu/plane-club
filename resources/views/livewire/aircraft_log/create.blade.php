@@ -8,8 +8,12 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\VideoIntelligence\V1\VideoIntelligenceServiceClient;
+use Google\Cloud\Vision\V1\Likelihood;
+use Google\Cloud\VideoIntelligence\V1\Feature as VideoFeature;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
@@ -37,8 +41,8 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
-    #[Validate(['media.*' => 'file|max:51200|mimes:jpeg,jpg,png,gif,mp4,mov,avi,wmv'])]
-    public array $media = []; // Accept both images and videos
+    #[Validate(['media.*' => 'file|max:102400'])]
+    public array $media = [];  // Handles both images and videos
 
     public function mount()
     {
@@ -48,67 +52,102 @@ new class extends Component
     }
 
     /**
-     * Analyze an image or video for sensitive content.
+     * Analyze image files for inappropriate content.
      */
-    public function analyzeMedia($mediaPath, $type): bool
+    public function analyzeImage($imagePath)
     {
         $imageAnnotator = new ImageAnnotatorClient();
 
         try {
-            if ($type === 'image') {
-                $imageData = file_get_contents($mediaPath);
-                $response = $imageAnnotator->safeSearchDetection($imageData);
-                $safeSearch = $response->getSafeSearchAnnotation();
+            $imageData = file_get_contents($imagePath);
+            $response = $imageAnnotator->safeSearchDetection($imageData);
+            $safeSearch = $response->getSafeSearchAnnotation();
 
-                if ($safeSearch) {
-                    $adult = $safeSearch->getAdult();
-                    $violence = $safeSearch->getViolence();
-                    $medical = $safeSearch->getMedical();
+            if ($safeSearch) {
+                $adult = $safeSearch->getAdult();
+                $violence = $safeSearch->getViolence();
+                $medical = $safeSearch->getMedical();
 
-                    $unacceptableLikelihoods = [
-                        \Google\Cloud\Vision\V1\Likelihood::LIKELY,
-                        \Google\Cloud\Vision\V1\Likelihood::VERY_LIKELY,
-                    ];
+                $unacceptableLikelihoods = [Likelihood::LIKELY, Likelihood::VERY_LIKELY];
 
-                    if (
-                        in_array($adult, $unacceptableLikelihoods) ||
-                        in_array($violence, $unacceptableLikelihoods) ||
-                        in_array($medical, $unacceptableLikelihoods)
-                    ) {
-                        $imageAnnotator->close();
-                        return false;
-                    }
+                if (in_array($adult, $unacceptableLikelihoods) || in_array($violence, $unacceptableLikelihoods) || in_array($medical, $unacceptableLikelihoods)) {
+                    $imageAnnotator->close();
+                    return false; // Inappropriate content found
                 }
-            } else if ($type === 'video') {
-                // Use a video moderation API, or return true as a placeholder
-                return true; // Placeholder, replace with actual moderation
             }
-
             $imageAnnotator->close();
-            return true;
+            return true; // Safe content
         } catch (\Exception $e) {
-            return false;
+            $imageAnnotator->close();
+            return false; // Error in processing
         }
     }
 
+    /**
+     * Analyze video files for inappropriate content.
+     */
+    public function analyzeVideo($videoPath)
+    {
+        $videoClient = new VideoIntelligenceServiceClient();
+
+        try {
+            $inputUri = "gs://{$videoPath}";
+            $features = [VideoFeature::EXPLICIT_CONTENT_DETECTION];
+            $operation = $videoClient->annotateVideo([
+                'inputUri' => $inputUri,
+                'features' => $features,
+            ]);
+
+            $operation->pollUntilComplete();
+
+            if ($operation->operationSucceeded()) {
+                $results = $operation->getResult()->getAnnotationResults()[0];
+                $explicitAnnotations = $results->getExplicitAnnotation();
+
+                foreach ($explicitAnnotations->getFrames() as $frame) {
+                    $pornographyLikelihood = $frame->getPornographyLikelihood();
+                    if ($pornographyLikelihood >= Likelihood::LIKELY) {
+                        $videoClient->close();
+                        return false; // Inappropriate content found in video
+                    }
+                }
+            }
+            $videoClient->close();
+            return true; // Safe video content
+        } catch (\Exception $e) {
+            $videoClient->close();
+            return false; // Error in processing
+        }
+    }
+
+    /**
+     * Store function for handling uploads and probabilistic content analysis.
+     */
     public function store()
     {
         $validated = $this->validate();
 
-        foreach ($this->media as $file) {
-            $fileType = $file->getMimeType();
-            $isSafe = false;
+        foreach ($this->media as $mediaFile) {
+            // Check if the file is an image or a video
+            $mimeType = $mediaFile->getMimeType();
 
-            // Check file type and perform content analysis accordingly
-            if (str_contains($fileType, 'image')) {
-                $isSafe = $this->analyzeMedia($file->getRealPath(), 'image');
-            } else if (str_contains($fileType, 'video')) {
-                $isSafe = $this->analyzeMedia($file->getRealPath(), 'video');
+            $isSafe = true; // Default to safe content
+
+            if (str_contains($mimeType, 'image')) {
+                // 1 in 5 chance to analyze image
+                if (rand(1, 5) === 1) {
+                    $isSafe = $this->analyzeImage($mediaFile->getRealPath());
+                }
+            } elseif (str_contains($mimeType, 'video')) {
+                // 1 in 10 chance to analyze video
+                if (rand(1, 10) === 1) {
+                    $isSafe = $this->analyzeVideo($mediaFile->store('video_temp', 'gcs'));
+                }
             }
 
             if (!$isSafe) {
-                Toaster::warning('The uploaded file contains inappropriate content and cannot be uploaded.');
-                throw new \RuntimeException("The uploaded file contains inappropriate content and cannot be uploaded.");
+                Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
+                throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
             }
         }
 
@@ -121,24 +160,20 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        foreach ($this->media as $file) {
-            $fileType = $file->getMimeType();
+        foreach ($this->media as $mediaFile) {
+            // Store the file (whether image or video) in S3 with appropriate cache settings
+            $storedFilePath = $mediaFile->store('aircraft', 's3', [
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ]);
 
-            // Store in S3 based on file type
-            if (str_contains($fileType, 'image')) {
-                $storedFilePath = $this->storeFileInS3($file, 'images');
-            } else if (str_contains($fileType, 'video')) {
-                $storedFilePath = $this->storeFileInS3($file, 'videos');
-            }
-
-            // Save media record in the database
-            auth()->user()->media()->create([
+            // Save media record
+            auth()->user()->mediaItems()->create([
                 "path" => $storedFilePath,
                 "aircraft_log_id" => $newAircraftLog->id,
             ]);
 
             // Cache the media URL
-            $this->cacheMediaUrl($storedFilePath, $fileType);
+            $this->cacheMediaUrl($storedFilePath);
         }
 
         Toaster::info('Log created successfully.');
@@ -148,28 +183,15 @@ new class extends Component
     }
 
     /**
-     * Store files in S3 with proper caching headers.
+     * Cache the S3 media URL immediately after uploading.
      */
-    public function storeFileInS3($file, $type): string
-    {
-        return $file->store($type, 's3', [
-            'CacheControl' => 'public, max-age=31536000, immutable',
-        ]);
-    }
-
-    /**
-     * Cache the media URL (image/video).
-     */
-    public function cacheMediaUrl(string $path, string $fileType): void
+    public function cacheMediaUrl(string $path): void
     {
         $cacheKey = "s3_media_url_" . md5($path);
-        $expiration = $fileType === 'image' ? now()->addDays(7) : now()->addHours(6);  // Shorter expiration for videos
-        $temporaryUrl = Storage::disk('s3')->temporaryUrl($path, $expiration);
-
-        Cache::put($cacheKey, $temporaryUrl, $expiration);
+        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
     }
 
-    public function removeUploadedFiles()
+    public function removeUploadedMedia()
     {
         $this->media = [];
     }
@@ -188,10 +210,19 @@ new class extends Component
         $this->media = [];
         $this->description = "";
     }
+
+    public function toggleMoreDetails()
+    {
+        if ($this->moreDetails) {
+            $this->moreDetails = true;
+        } else {
+            $this->moreDetails = false;
+        }
+    }
 }
-
-
 ?>
+
+
 <x-modal-card title="Add Photos/Videos" name="logModal">
     <form wire:submit='store()'>
         <div class="grid grid-cols-1 gap-4">
