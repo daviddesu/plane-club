@@ -52,71 +52,73 @@ new class extends Component
     }
 
     /**
-     * Analyze image files for inappropriate content.
+     * Convert HEIC image to JPEG using ImageMagick.
      */
-    public function analyzeImage($imagePath)
+    public function convertHEICtoJPEG($mediaFile)
     {
-        $imageAnnotator = new ImageAnnotatorClient();
+        // Get original HEIC file path
+        $heicFilePath = $mediaFile->getRealPath();
 
+        // Set the path to store the converted JPEG file
+        $convertedFilePath = storage_path('app/temp/' . $mediaFile->hashName() . '.jpg');
+
+        // Convert HEIC to JPEG using ImageMagick
         try {
-            $imageData = file_get_contents($imagePath);
-            $response = $imageAnnotator->safeSearchDetection($imageData);
-            $safeSearch = $response->getSafeSearchAnnotation();
-
-            if ($safeSearch) {
-                $adult = $safeSearch->getAdult();
-                $violence = $safeSearch->getViolence();
-                $medical = $safeSearch->getMedical();
-
-                $unacceptableLikelihoods = [Likelihood::LIKELY, Likelihood::VERY_LIKELY];
-
-                if (in_array($adult, $unacceptableLikelihoods) || in_array($violence, $unacceptableLikelihoods) || in_array($medical, $unacceptableLikelihoods)) {
-                    $imageAnnotator->close();
-                    return false; // Inappropriate content found
-                }
-            }
-            $imageAnnotator->close();
-            return true; // Safe content
+            exec("magick convert {$heicFilePath} {$convertedFilePath}");
+            return $convertedFilePath; // Return the converted file path
         } catch (\Exception $e) {
-            $imageAnnotator->close();
-            return false; // Error in processing
+            Toaster::warning('Failed to convert HEIC to JPEG: ' . $e->getMessage());
+            return false;
         }
     }
 
     /**
-     * Analyze video files for inappropriate content.
+     * Compress JPEG images using FFmpeg.
      */
-    public function analyzeVideo($videoPath)
+    public function compressImage($imageFile)
     {
-        $videoClient = new VideoIntelligenceServiceClient();
+        $imagePath = $imageFile->getRealPath();
+        $compressedPath = storage_path('app/temp/compressed_' . $imageFile->hashName() . '.jpg');
 
+        // Compress and resize the image (reduce quality, resize if needed)
         try {
-            $inputUri = "gs://{$videoPath}";
-            $features = [VideoFeature::EXPLICIT_CONTENT_DETECTION];
-            $operation = $videoClient->annotateVideo([
-                'inputUri' => $inputUri,
-                'features' => $features,
-            ]);
-
-            $operation->pollUntilComplete();
-
-            if ($operation->operationSucceeded()) {
-                $results = $operation->getResult()->getAnnotationResults()[0];
-                $explicitAnnotations = $results->getExplicitAnnotation();
-
-                foreach ($explicitAnnotations->getFrames() as $frame) {
-                    $pornographyLikelihood = $frame->getPornographyLikelihood();
-                    if ($pornographyLikelihood >= Likelihood::LIKELY) {
-                        $videoClient->close();
-                        return false; // Inappropriate content found in video
-                    }
-                }
-            }
-            $videoClient->close();
-            return true; // Safe video content
+            exec("ffmpeg -i {$imagePath} -vf scale=1280:-2 -q:v 7 {$compressedPath}");
+            return $compressedPath;
         } catch (\Exception $e) {
-            $videoClient->close();
-            return false; // Error in processing
+            Toaster::warning('Failed to compress image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Compress and upload video using FFmpeg.
+     */
+    public function compressAndUploadVideo($videoFile)
+    {
+        // Temporary file paths
+        $originalPath = $videoFile->getRealPath();
+        $compressedPath = storage_path('app/compressed_videos/' . $videoFile->hashName());
+
+        // Compress video using FFmpeg
+        try {
+            FFMpeg::fromDisk('local')
+                ->open($originalPath)
+                ->export()
+                ->toDisk('local')
+                ->inFormat((new \FFMpeg\Format\Video\X264('libmp3lame'))->setKiloBitrate(1000))  // Set bitrate (1000kbps)
+                ->resize(1280, 720)  // Set resolution to 720p
+                ->save($compressedPath);
+
+            // Upload the compressed video to S3
+            $storedFilePath = Storage::disk('s3')->putFile('aircraft/videos', new \Illuminate\Http\File($compressedPath), 'public');
+
+            // Clean up the temporary file
+            unlink($compressedPath);
+
+            return $storedFilePath;
+        } catch (\Exception $e) {
+            Toaster::warning('Failed to compress video: ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -134,37 +136,41 @@ new class extends Component
             $isSafe = true; // Default to safe content
 
             if (str_contains($mimeType, 'image')) {
+                // Check if it's an HEIC file and convert it to JPEG
+                if ($mimeType === 'image/heic') {
+                    $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
+                    if (!$convertedFilePath) {
+                        Toaster::warning('Failed to process HEIC file.');
+                        throw new \RuntimeException("The uploaded HEIC image could not be processed.");
+                    }
+                } else {
+                    $convertedFilePath = $mediaFile->getRealPath();
+                }
+
                 // 1 in 5 chance to analyze image
                 if (rand(1, 5) === 1) {
-                    $isSafe = $this->analyzeImage($mediaFile->getRealPath());
+                    $isSafe = $this->analyzeImage($convertedFilePath);
+                }
+
+                // Compress the image
+                $compressedFilePath = $this->compressImage($mediaFile);
+                if ($compressedFilePath) {
+                    $storedFilePath = Storage::disk('s3')->putFile('aircraft/images', new \Illuminate\Http\File($compressedFilePath), 'public');
                 }
             } elseif (str_contains($mimeType, 'video')) {
                 // 1 in 10 chance to analyze video
                 if (rand(1, 10) === 1) {
                     $isSafe = $this->analyzeVideo($mediaFile->store('video_temp', 'gcs'));
                 }
+
+                // Compress and upload the video
+                $storedFilePath = $this->compressAndUploadVideo($mediaFile);
             }
 
             if (!$isSafe) {
                 Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
                 throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
             }
-        }
-
-        $newAircraftLog = auth()->user()->aircraftLogs()->create([
-            "airport_id" => $this->airport,
-            "logged_at" => $this->loggedAt,
-            "description" => $this->description,
-            "airline_id" => $this->airline,
-            "registration" => strtoupper($this->registration),
-            "aircraft_id" => $this->aircraft,
-        ]);
-
-        foreach ($this->media as $mediaFile) {
-            // Store the file (whether image or video) in S3 with appropriate cache settings
-            $storedFilePath = $mediaFile->store('aircraft', 's3', [
-                'CacheControl' => 'public, max-age=31536000, immutable',
-            ]);
 
             // Save media record
             auth()->user()->mediaItems()->create([
@@ -210,16 +216,10 @@ new class extends Component
         $this->media = [];
         $this->description = "";
     }
-
-    public function toggleMoreDetails()
-    {
-        if ($this->moreDetails) {
-            $this->moreDetails = true;
-        } else {
-            $this->moreDetails = false;
-        }
-    }
 }
+
+
+
 ?>
 
 

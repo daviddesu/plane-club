@@ -24,6 +24,8 @@
 [x] A page to view logs and a page to view all images - image page will show fullscreen image when clicked
 [x] efficiently load images form AWS with pagination for images page and logs page
 [x] add video uploads
+[ ] Handle video compression
+[ ] Handle HEIC and other non jpeg or PNG upload types
 [ ] Add departure/destination airport, and also flight number
 [ ] Email verification on signup
 [ ] Send to facebook
@@ -61,3 +63,9 @@
 - npm
 - nginx
 - stripe cli (https://www.youtube.com/watch?v=2_BsWO5WRmU)
+
+sudo apt update
+sudo apt install ffmpeg (compression)
+
+sudo apt install imagemagick (image conversion, specifically heic to jpeg)
+
