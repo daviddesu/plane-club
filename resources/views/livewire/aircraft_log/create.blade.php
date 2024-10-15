@@ -241,7 +241,7 @@ new class extends Component
             }
         }
 
-        $aircraftLog = auth()->user()->aircraftLogs()->create([
+        $newAircraftLog = auth()->user()->aircraftLogs()->create([
             "airport_id" => $this->airport,
             "logged_at" => $this->loggedAt,
             "description" => $this->description,
@@ -326,6 +326,12 @@ new class extends Component
         $this->mediaPreviewUrls = [];
         $this->description = "";
     }
+
+    public function removeUploadedMedia()
+    {
+        $this->media = [];
+        $this->mediaPreviewUrls = [];
+    }
 }
 
 
@@ -394,6 +400,7 @@ new class extends Component
             </div>
 
             {{-- File upload for images and videos --}}
+            @if (!$mediaPreviewUrls)
             <div
                 x-data="{ isUploading: false, progress: 0 }"
                 x-on:livewire-upload-start="isUploading = true"
@@ -424,6 +431,7 @@ new class extends Component
                     </svg>
                 </div>
             </div>
+            @endif
 
             {{-- Media Preview --}}
             @if ($mediaPreviewUrls)
@@ -442,7 +450,7 @@ new class extends Component
         <div class="pt-2 border-b-2"></div>
         <div name="footer" class="flex justify-between gap-x-4">
             @if($media)
-                <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedFiles' />
+                <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
             @endif
             <div class="flex gap-x-4">
                 <x-button flat class="justify-center mt-4" label="Cancel" x-on:click="close" wire:click='close' />
