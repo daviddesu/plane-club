@@ -44,11 +44,104 @@ new class extends Component
     #[Validate(['media.*' => 'file|max:102400'])]
     public array $media = [];  // Handles both images and videos
 
+    public array $mediaPreviewUrls = [];  // Holds URLs for preview
+
+
+    /**
+     * Generate preview URLs for the media files.
+     */
+    public function updatedMedia()
+    {
+        $this->mediaPreviewUrls = [];
+
+        foreach ($this->media as $mediaFile) {
+            $mimeType = $mediaFile->getMimeType();
+
+            // If the file is HEIC, convert it to JPEG for preview
+            if ($mimeType === 'image/heic') {
+                $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
+                if ($convertedFilePath) {
+                    // Use the converted JPEG file for preview
+                    $this->mediaPreviewUrls[] = asset('storage/temp/' . basename($convertedFilePath));
+                } else {
+                    // If conversion failed, skip preview
+                    Toaster::warning('Failed to convert HEIC image for preview.');
+                }
+            } else {
+                // For non-HEIC files, show the default temporary URL
+                $this->mediaPreviewUrls[] = $mediaFile->temporaryUrl();
+            }
+        }
+    }
+
     public function mount()
     {
         $this->airports = Airport::all();
         $this->aircraftCollection = Aircraft::all();
         $this->airlines = Airline::all();
+    }
+
+    public function analyzeImage($imagePath)
+    {
+        $imageAnnotator = new ImageAnnotatorClient();
+
+        try {
+            $imageData = file_get_contents($imagePath);
+            $response = $imageAnnotator->safeSearchDetection($imageData);
+            $safeSearch = $response->getSafeSearchAnnotation();
+
+            if ($safeSearch) {
+                $adult = $safeSearch->getAdult();
+                $violence = $safeSearch->getViolence();
+                $medical = $safeSearch->getMedical();
+
+                $unacceptableLikelihoods = [Likelihood::LIKELY, Likelihood::VERY_LIKELY];
+
+                if (in_array($adult, $unacceptableLikelihoods) || in_array($violence, $unacceptableLikelihoods) || in_array($medical, $unacceptableLikelihoods)) {
+                    $imageAnnotator->close();
+                    return false; // Inappropriate content found
+                }
+            }
+            $imageAnnotator->close();
+            return true; // Safe content
+        } catch (\Exception $e) {
+            $imageAnnotator->close();
+            return false; // Error in processing
+        }
+    }
+
+    public function analyzeVideo($videoPath)
+    {
+        $videoClient = new VideoIntelligenceServiceClient();
+
+        try {
+            $inputUri = "gs://{$videoPath}";
+            $features = [VideoFeature::EXPLICIT_CONTENT_DETECTION];
+            $operation = $videoClient->annotateVideo([
+                'inputUri' => $inputUri,
+                'features' => $features,
+            ]);
+
+            $operation->pollUntilComplete();
+
+            if ($operation->operationSucceeded()) {
+                $results = $operation->getResult()->getAnnotationResults()[0];
+                $explicitAnnotations = $results->getExplicitAnnotation();
+
+                foreach ($explicitAnnotations->getFrames() as $frame) {
+                    $pornographyLikelihood = $frame->getPornographyLikelihood();
+                    if ($pornographyLikelihood >= Likelihood::LIKELY) {
+                        $videoClient->close();
+                        return false; // Inappropriate content found in video
+                    }
+                }
+            }
+            $videoClient->close();
+            return true; // Safe video content
+        } catch (\Exception $e) {
+            $videoClient->close();
+            return false; // Error in processing
+        }
     }
 
     /**
@@ -60,7 +153,7 @@ new class extends Component
         $heicFilePath = $mediaFile->getRealPath();
 
         // Set the path to store the converted JPEG file
-        $convertedFilePath = storage_path('app/temp/' . $mediaFile->hashName() . '.jpg');
+        $convertedFilePath = public_path('storage/temp/' . $mediaFile->hashName() . '.jpg');
 
         // Convert HEIC to JPEG using ImageMagick
         try {
@@ -93,7 +186,7 @@ new class extends Component
     /**
      * Compress and upload video using FFmpeg.
      */
-    public function compressAndUploadVideo($videoFile)
+    public function compressVideo($videoFile)
     {
         // Temporary file paths
         $originalPath = $videoFile->getRealPath();
@@ -109,13 +202,8 @@ new class extends Component
                 ->resize(1280, 720)  // Set resolution to 720p
                 ->save($compressedPath);
 
-            // Upload the compressed video to S3
-            $storedFilePath = Storage::disk('s3')->putFile('aircraft/videos', new \Illuminate\Http\File($compressedPath), 'public');
 
-            // Clean up the temporary file
-            unlink($compressedPath);
-
-            return $storedFilePath;
+            return $compressedPath;
         } catch (\Exception $e) {
             Toaster::warning('Failed to compress video: ' . $e->getMessage());
             return false;
@@ -136,6 +224,37 @@ new class extends Component
             $isSafe = true; // Default to safe content
 
             if (str_contains($mimeType, 'image')) {
+                // 1 in 5 chance to analyze image
+                if (rand(1, 5) === 1) {
+                    $isSafe = $this->analyzeImage($mediaFile->getRealPath());
+                }
+            } elseif (str_contains($mimeType, 'video')) {
+                // 1 in 10 chance to analyze video
+                if (rand(1, 10) === 1) {
+                    $isSafe = $this->analyzeVideo($mediaFile->store('video_temp', 'gcs'));
+                }
+            }
+
+            if (!$isSafe) {
+                Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
+                throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
+            }
+        }
+
+        $aircraftLog = auth()->user()->aircraftLogs()->create([
+            "airport_id" => $this->airport,
+            "logged_at" => $this->loggedAt,
+            "description" => $this->description,
+            "airline_id" => $this->airline,
+            "registration" => strtoupper($this->registration),
+            "aircraft_id" => $this->aircraft,
+        ]);
+
+        foreach ($this->media as $mediaFile) {
+            // Check if the file is an image or a video
+            $mimeType = $mediaFile->getMimeType();
+
+            if (str_contains($mimeType, 'image')) {
                 // Check if it's an HEIC file and convert it to JPEG
                 if ($mimeType === 'image/heic') {
                     $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
@@ -147,30 +266,20 @@ new class extends Component
                     $convertedFilePath = $mediaFile->getRealPath();
                 }
 
-                // 1 in 5 chance to analyze image
-                if (rand(1, 5) === 1) {
-                    $isSafe = $this->analyzeImage($convertedFilePath);
-                }
-
                 // Compress the image
                 $compressedFilePath = $this->compressImage($mediaFile);
-                if ($compressedFilePath) {
-                    $storedFilePath = Storage::disk('s3')->putFile('aircraft/images', new \Illuminate\Http\File($compressedFilePath), 'public');
-                }
             } elseif (str_contains($mimeType, 'video')) {
-                // 1 in 10 chance to analyze video
-                if (rand(1, 10) === 1) {
-                    $isSafe = $this->analyzeVideo($mediaFile->store('video_temp', 'gcs'));
-                }
-
                 // Compress and upload the video
-                $storedFilePath = $this->compressAndUploadVideo($mediaFile);
+                $compressedFilePath = $this->compressVideo($mediaFile);
             }
 
-            if (!$isSafe) {
-                Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
-                throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
-            }
+            $storedFilePath = Storage::disk('s3')->putFile('aircraft', new \Illuminate\Http\File($compressedFilePath), [
+                'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
+            ]);
+
+
+             // Clean up the temporary file
+             unlink($compressedFilePath);
 
             // Save media record
             auth()->user()->mediaItems()->create([
@@ -214,6 +323,7 @@ new class extends Component
         $this->airline = null;
         $this->aircraft = null;
         $this->media = [];
+        $this->mediaPreviewUrls = [];
         $this->description = "";
     }
 }
@@ -316,20 +426,16 @@ new class extends Component
             </div>
 
             {{-- Media Preview --}}
-            @if ($media)
-                <div class="max-w-6xl mx-auto duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view">
-                    <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-                        @foreach ($media as $key => $file)
-                            <li wire:key="{{ $key }}">
-                                @if (str_contains($file->getMimeType(), 'video'))
-                                    <video src="{{ $file->temporaryUrl() }}" controls class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]"></video>
-                                @else
-                                    <img src="{{ $file->temporaryUrl() }}" class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]" />
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
+            @if ($mediaPreviewUrls)
+            <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
+                <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+                    @foreach ($mediaPreviewUrls as $key => $previewUrl)
+                        <li wire:key="{{ $key }}">
+                            <img src="{{ $previewUrl }}" class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]" />
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
         </div>
 
