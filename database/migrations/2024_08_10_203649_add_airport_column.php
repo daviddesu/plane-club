@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('aircraft_logs', function (Blueprint $table) {
             $table->bigInteger('airport_id');
-            $table->foreign('airport_id')->references('id')->on('airport')->cascadeOnDelete();
+            $table->foreign('airport_id')->references('id')->on('airports')->cascadeOnDelete();
         });
     }
 
