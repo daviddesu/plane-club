@@ -1,0 +1,73 @@
+# fly.toml app configuration file generated for plane-club on 2024-10-16T09:52:12+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'plane-club'
+primary_region = 'lhr'
+console_command = 'php /var/www/html/artisan tinker'
+
+[build]
+  [build.args]
+    NODE_VERSION = '18'
+    PHP_VERSION = '8.3'
+
+[env]
+  LOG_CHANNEL = 'stderr'
+  LOG_LEVEL = 'info'
+  LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
+  SESSION_DRIVER = 'cookie'
+  SESSION_SECURE_COOKIE = 'true'
+  APP_NAME='Plane club'
+  APP_TIMEZONE='UTC'
+  APP_LOCALE='en'
+  APP_FALLBACK_LOCALE='en'
+  APP_FAKER_LOCALE='en_USss'
+  APP_MAINTENANCE_DRIVER='file'
+  BCRYPT_ROUNDS=12
+  LOG_STACK='single'
+  LOG_DEPRECATIONS_CHANNEL='null'
+  DB_CONNECTION='pgsql'
+  DB_PORT=5432
+  DB_DATABASE='plane_club'
+  SESSION_LIFETIME=120
+  SESSION_ENCRYPT='false'
+  SESSION_PATH='/'
+  SESSION_DOMAIN='null'
+  BROADCAST_CONNECTION='log'
+  FILESYSTEM_DISK='local'
+  QUEUE_CONNECTION='database'
+  CACHE_STORE='database'
+  CACHE_PREFIX=''
+  MAIL_MAILER='log'
+  MAIL_HOST='127.0.0.1'
+  MAIL_PORT=2525
+  MAIL_USERNAME='null'
+  MAIL_PASSWORD='null'
+  MAIL_ENCRYPTION='null'
+  MAIL_FROM_ADDRESS="hello@example.com"
+  MAIL_FROM_NAME="${APP_NAME}"
+  AWS_DEFAULT_REGION='eu-west-2'
+  AWS_BUCKET='plane-club'
+  AWS_USE_PATH_STYLE_ENDPOINT='false'
+  VITE_APP_NAME="${APP_NAME}"
+  SENTRY_LARAVEL_DSN='https://aaf3ac941437e394431925c0507f5d68@o4507527015563264.ingest.de.sentry.io/4507527024083024'
+  SENTRY_TRACES_SAMPLE_RATE=0.2
+  CASHIER_CURRENCY='gbp'
+
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[deploy]
+  release_command = "php /var/www/html/artisan migrate --force"

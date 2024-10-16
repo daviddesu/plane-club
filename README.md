@@ -71,3 +71,6 @@ sudo apt install ffmpeg (compression)
 
 sudo apt install imagemagick (image conversion, specifically heic to jpeg)
 
+  DATABASE_URL=postgres://plane_club:a9MqkN6dUncrKW2@plane-club-db.flycast:5432/plane_club?sslmode=disable
+
+
