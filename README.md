@@ -26,6 +26,8 @@
 [x] add video uploads
 [x] Handle video compression
 [x] Handle HEIC and other non jpeg or PNG upload types
+[x] Convert all temp storage to use S3 in production
+[ ] see how we can ustill use local on local dev
 [ ] Better log saveing process to prevent timeouts and informt he users the log is being created
 [ ] Make sure temp files are removed once persistsed to s3
 [ ] Add departure/destination airport, and also flight number
