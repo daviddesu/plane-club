@@ -69,7 +69,6 @@ new class extends Component
             return $thumbnailPath;
 
         } catch (\Exception $e) {
-            dd($e);
             Toaster::warning('Failed to extract thumbnail: ' . $e->getMessage());
             return false;
         }

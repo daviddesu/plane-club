@@ -54,6 +54,10 @@ console_command = 'php /var/www/html/artisan tinker'
   SENTRY_LARAVEL_DSN='https://aaf3ac941437e394431925c0507f5d68@o4507527015563264.ingest.de.sentry.io/4507527024083024'
   SENTRY_TRACES_SAMPLE_RATE=0.2
   CASHIER_CURRENCY='gbp'
+  FFMPEG_BINARIES=/usr/bin/ffmpeg
+  FFPROBE_BINARIES=/usr/bin/ffprobe
+
+
 
 
 [http_service]
