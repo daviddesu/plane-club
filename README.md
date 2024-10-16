@@ -39,6 +39,10 @@
 [ ] Beuutify sales page
 [ ] Subscription emails and verficiation and trial end prompts and actual
 [ ] trial days left banner (colapsable)
+[ ] Create prod setup
+[ ] S3 file backups
+[ ] DB backups?
+[ ] Setup stripe for local, staging and prod
 [ ] register business
 [ ] Business bank account
 [ ] Update stripe account
@@ -66,11 +70,14 @@
 - nginx
 - stripe cli (https://www.youtube.com/watch?v=2_BsWO5WRmU)
 
+## Dependencies:
+
 sudo apt update
 sudo apt install ffmpeg (compression)
 
 sudo apt install imagemagick (image conversion, specifically heic to jpeg)
 
-  DATABASE_URL=postgres://plane_club:a9MqkN6dUncrKW2@plane-club-db.flycast:5432/plane_club?sslmode=disable
+## Connect to staging/prod db
 
+Connect to DB = fly postgres connect -a plane-club-db
 
