@@ -14,6 +14,7 @@ class Media extends Model
         'path',
         'type',
         'aircraft_log_id',
+        'thumbnail_path',
     ];
 
     public function user(): BelongsTo
@@ -27,5 +28,10 @@ class Media extends Model
     public function aircraftLog(): BelongsTo
     {
         return $this->belongsTo(AircraftLog::class);
+    }
+
+    public function isVideo()
+    {
+        return $this->type == \App\Enums\Media::VIDEO->value;
     }
 }

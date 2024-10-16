@@ -24,15 +24,12 @@ new class extends Component
     // Get the S3 temporary URL with caching
     public function getCachedMediaUrl($mediaPath)
     {
+        if(!$mediaPath){
+            return null;
+        }
         return Cache::remember("s3_media_{$mediaPath}", now()->addDays(7), function() use ($mediaPath) {
             return Storage::disk('s3')->temporaryUrl($mediaPath, now()->addDays(7));
         });
-    }
-
-    // Determine if the media is a video based on its MIME type
-    public function isVideo($media)
-    {
-        return str_contains($media->mime_type, 'video');
     }
 }
 
@@ -55,10 +52,14 @@ new class extends Component
                 $firstMedia = $mediaItems->first();
             @endphp
 
-            @if($this->isVideo($firstMedia))
-                <div class="relative w-full h-full">
-                    <video class="object-cover w-full h-full select-none"></video>
-                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            @if($firstMedia->isVideo())
+                <div
+                    class="relative w-full h-full"
+                >
+                    <img class="object-cover w-full h-full select-none"
+                    src={{ $this->getCachedMediaUrl($firstMedia->thumbnail_path) }}
+                    />
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                         <x-icon name="play-circle" class="w-12 h-12 text-white" />
                     </div>
                 </div>
@@ -75,8 +76,10 @@ new class extends Component
             <div class="absolute inset-0 flex">
                 @foreach($mediaItems->take(2) as $media)
                     <div class="relative w-1/2 h-full">
-                        @if($this->isVideo($media))
-                            <video class="object-cover w-full h-full select-none"></video>
+                        @if($media->isVideo())
+                            <img class="object-cover w-full h-full select-none"
+                            src={{ $this->getCachedMediaUrl($firstMedia->thumbnail_path) }}
+                            ></img>
                             <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                 <x-icon name="play-circle" class="w-12 h-12 text-white" />
                             </div>
@@ -99,8 +102,10 @@ new class extends Component
                     @php
                         $firstMedia = $mediaItems[0];
                     @endphp
-                    @if($this->isVideo($firstMedia))
-                        <video class="object-cover w-full h-full select-none"></video>
+                    @if($firstMedia->isVideo())
+                        <img class="object-cover w-full h-full select-none"
+                        src={{ $this->getCachedMediaUrl($firstMedia->thumbnail_path) }}
+                        ></img>
                         <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                             <x-icon name="play-circle" class="w-12 h-12 text-white" />
                         </div>
@@ -117,8 +122,10 @@ new class extends Component
                 <div class="flex flex-col w-1/3 h-full">
                     @foreach($mediaItems->slice(1, 2) as $media)
                         <div class="relative h-1/2">
-                            @if($this->isVideo($media))
-                                <video class="object-cover w-full h-full select-none"></video>
+                            @if($media->isVideo())
+                                <img class="object-cover w-full h-full select-none"></
+                                src={{ $this->getCachedMediaUrl($media->thumbnail_path) }}
+                                >
                                 <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                     <x-icon name="play-circle" class="w-12 h-12 text-white" />
                                 </div>
@@ -142,8 +149,10 @@ new class extends Component
                     @php
                         $firstMedia = $mediaItems[0];
                     @endphp
-                    @if($this->isVideo($firstMedia))
-                        <video class="object-cover w-full h-full select-none"></video>
+                    @if($firstMedia->isVideo())
+                        <img class="object-cover w-full h-full select-none"
+                        src={{ $this->getCachedMediaUrl($firstMedia->thumbnail_path) }}
+                        ></img>
                         <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                             <x-icon name="play-circle" class="w-12 h-12 text-white" />
                         </div>
@@ -160,8 +169,11 @@ new class extends Component
                 <div class="flex flex-col w-1/3 h-full">
                     @foreach($mediaItems->slice(1, 2) as $media)
                         <div class="relative h-1/2">
-                            @if($this->isVideo($media))
-                                <video class="object-cover w-full h-full select-none"></video>
+                            @if($media->isVideo())
+                                <img class="object-cover w-full h-full select-none"
+                                src={{ $this->getCachedMediaUrl($media->thumbnail_path) }}
+
+                                ></img>
                                 <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                     <x-icon name="play-circle" class="w-12 h-12 text-white" />
                                 </div>
@@ -179,8 +191,10 @@ new class extends Component
                         @php
                             $thirdMedia = $mediaItems[2];
                         @endphp
-                        @if($this->isVideo($thirdMedia))
-                            <video class="object-cover w-full h-full select-none"></video>
+                        @if($thirdMedia->isVideo())
+                            <img class="object-cover w-full h-full select-none"
+                            src={{ $this->getCachedMediaUrl($thirdMedia->thumbnail_path) }}
+                            ></img>
                             <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                 <x-icon name="play-circle" class="w-12 h-12 text-white" />
                             </div>

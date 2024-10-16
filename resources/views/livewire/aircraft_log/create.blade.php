@@ -14,6 +14,7 @@ use Google\Cloud\VideoIntelligence\V1\Feature as VideoFeature;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\Media;
 
 new class extends Component
 {
@@ -41,44 +42,37 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
-    #[Validate(['media.*' => 'file|max:102400'])]
+    #[Validate(['media.*' => 'file|max:512000'])]
     public array $media = [];  // Handles both images and videos
 
-    public array $mediaPreviewUrls = [];  // Holds URLs for preview
-
-
-    /**
-     * Generate preview URLs for the media files.
-     */
-    public function updatedMedia()
-    {
-        $this->mediaPreviewUrls = [];
-
-        foreach ($this->media as $mediaFile) {
-            $mimeType = $mediaFile->getMimeType();
-
-            // If the file is HEIC, convert it to JPEG for preview
-            if ($mimeType === 'image/heic') {
-                $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
-                if ($convertedFilePath) {
-                    // Use the converted JPEG file for preview
-                    $this->mediaPreviewUrls[] = asset('storage/temp/' . basename($convertedFilePath));
-                } else {
-                    // If conversion failed, skip preview
-                    Toaster::warning('Failed to convert HEIC image for preview.');
-                }
-            } else {
-                // For non-HEIC files, show the default temporary URL
-                $this->mediaPreviewUrls[] = $mediaFile->temporaryUrl();
-            }
-        }
-    }
 
     public function mount()
     {
         $this->airports = Airport::all();
         $this->aircraftCollection = Aircraft::all();
         $this->airlines = Airline::all();
+    }
+
+    public function extractThumbnail($videoFile)
+    {
+        $originalPath = "/livewire-tmp/" . $videoFile->getFilename();
+        $thumbnailPath = "/temp/video_thumbnails/" . $videoFile->hashName() . ".jpg";
+
+        try {
+            FFMpeg::fromDisk('local')
+                ->open($originalPath)
+                ->getFrameFromSeconds(1)
+                ->export()
+                ->toDisk('local')
+                ->save($thumbnailPath);
+
+            return $thumbnailPath;
+
+        } catch (\Exception $e) {
+            dd($e);
+            Toaster::warning('Failed to extract thumbnail: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function analyzeImage($imagePath)
@@ -166,31 +160,13 @@ new class extends Component
     }
 
     /**
-     * Compress JPEG images using FFmpeg.
-     */
-    public function compressImage($imageFile)
-    {
-        $imagePath = $imageFile->getRealPath();
-        $compressedPath = storage_path('app/temp/compressed_' . $imageFile->hashName() . '.jpg');
-
-        // Compress and resize the image (reduce quality, resize if needed)
-        try {
-            exec("ffmpeg -i {$imagePath} -vf scale=1280:-2 -q:v 7 {$compressedPath}");
-            return $compressedPath;
-        } catch (\Exception $e) {
-            Toaster::warning('Failed to compress image: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Compress and upload video using FFmpeg.
      */
     public function compressVideo($videoFile)
     {
         // Temporary file paths
-        $originalPath = $videoFile->getRealPath();
-        $compressedPath = storage_path('app/compressed_videos/' . $videoFile->hashName());
+        $originalPath = "/livewire-tmp/" . $videoFile->getFilename();
+        $compressedPath = "/temp/compressed_videos/" . $videoFile->hashName();
 
         // Compress video using FFmpeg
         try {
@@ -198,12 +174,13 @@ new class extends Component
                 ->open($originalPath)
                 ->export()
                 ->toDisk('local')
-                ->inFormat((new \FFMpeg\Format\Video\X264('libmp3lame'))->setKiloBitrate(1000))  // Set bitrate (1000kbps)
-                ->resize(1280, 720)  // Set resolution to 720p
+                ->inFormat((new \FFMpeg\Format\Video\X264('libmp3lame'))->setKiloBitrate(1000))
+                ->addFilter('-vf', 'scale=1280:-2,setsar=1/1,transpose=1')  // Added transpose for orientation correction
+                ->addFilter('-vf', 'transpose=2') // Add transpose for further orientation correction if needed
+                ->addFilter('-vf', 'scale=\'if(gt(iw,1920),1920,-2)\':\'if(gt(ih,1080),1080,-2)\',setsar=1/1')
                 ->save($compressedPath);
 
-
-            return $compressedPath;
+            return storage_path('app'.$compressedPath);
         } catch (\Exception $e) {
             Toaster::warning('Failed to compress video: ' . $e->getMessage());
             return false;
@@ -231,7 +208,7 @@ new class extends Component
             } elseif (str_contains($mimeType, 'video')) {
                 // 1 in 10 chance to analyze video
                 if (rand(1, 10) === 1) {
-                    $isSafe = $this->analyzeVideo($mediaFile->store('video_temp', 'gcs'));
+                    $isSafe = $this->analyzeVideo($mediaFile->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
                 }
             }
 
@@ -266,25 +243,40 @@ new class extends Component
                     $convertedFilePath = $mediaFile->getRealPath();
                 }
 
-                // Compress the image
-                $compressedFilePath = $this->compressImage($mediaFile);
+                $filePath = $convertedFilePath;
+                $storedThumbnailFilePath = null;
             } elseif (str_contains($mimeType, 'video')) {
                 // Compress and upload the video
-                $compressedFilePath = $this->compressVideo($mediaFile);
+                $filePath = $this->compressVideo($mediaFile);
+                $thumbnailFilePath = $this->extractThumbnail($mediaFile);
+
+                $storedThumbnailFilePath = Storage::disk('s3')
+                    ->putFile(
+                        'aircraft/thumbnails',
+                        new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
+                        [
+                            'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
+                ]);
             }
 
-            $storedFilePath = Storage::disk('s3')->putFile('aircraft', new \Illuminate\Http\File($compressedFilePath), [
-                'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
+            $storedFilePath = Storage::disk('s3')
+                ->putFile(
+                    'aircraft',
+                    new \Illuminate\Http\File($filePath),
+                    [
+                        'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
             ]);
 
 
              // Clean up the temporary file
-             unlink($compressedFilePath);
+             unlink($filePath);
 
             // Save media record
             auth()->user()->mediaItems()->create([
                 "path" => $storedFilePath,
                 "aircraft_log_id" => $newAircraftLog->id,
+                "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
+                "thumbnail_path" => $storedThumbnailFilePath,
             ]);
 
             // Cache the media URL
@@ -295,6 +287,7 @@ new class extends Component
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
+
     }
 
     /**
@@ -304,11 +297,6 @@ new class extends Component
     {
         $cacheKey = "s3_media_url_" . md5($path);
         Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
-    }
-
-    public function removeUploadedMedia()
-    {
-        $this->media = [];
     }
 
     public function close()
@@ -322,15 +310,13 @@ new class extends Component
         $this->airport = null;
         $this->airline = null;
         $this->aircraft = null;
-        $this->media = [];
-        $this->mediaPreviewUrls = [];
         $this->description = "";
+        $this->removeUploadedMedia();
     }
 
     public function removeUploadedMedia()
     {
         $this->media = [];
-        $this->mediaPreviewUrls = [];
     }
 }
 
@@ -400,7 +386,7 @@ new class extends Component
             </div>
 
             {{-- File upload for images and videos --}}
-            @if (!$mediaPreviewUrls)
+            @if (!$media)
             <div
                 x-data="{ isUploading: false, progress: 0 }"
                 x-on:livewire-upload-start="isUploading = true"
@@ -434,15 +420,9 @@ new class extends Component
             @endif
 
             {{-- Media Preview --}}
-            @if ($mediaPreviewUrls)
+            @if ($media)
             <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-                    @foreach ($mediaPreviewUrls as $key => $previewUrl)
-                        <li wire:key="{{ $key }}">
-                            <img src="{{ $previewUrl }}" class="object-cover select-none w-full h-auto bg-gray-200 rounded aspect-[6/5] lg:aspect-[3/2] xl:aspect-[4/3]" />
-                        </li>
-                    @endforeach
-                </ul>
+                <p> {{ count($media) }} images and videos</p>
             </div>
             @endif
         </div>

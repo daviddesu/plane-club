@@ -24,8 +24,10 @@
 [x] A page to view logs and a page to view all images - image page will show fullscreen image when clicked
 [x] efficiently load images form AWS with pagination for images page and logs page
 [x] add video uploads
-[ ] Handle video compression
-[ ] Handle HEIC and other non jpeg or PNG upload types
+[x] Handle video compression
+[x] Handle HEIC and other non jpeg or PNG upload types
+[ ] Better log saveing process to prevent timeouts and informt he users the log is being created
+[ ] Make sure temp files are removed once persistsed to s3
 [ ] Add departure/destination airport, and also flight number
 [ ] Email verification on signup
 [ ] Send to facebook
