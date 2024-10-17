@@ -30,9 +30,9 @@ class AircraftLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function mediaItems(): HasMany
+    public function media(): HasOne
     {
-        return $this->hasMany(Media::class);
+        return $this->hasOne(Media::class);
     }
 
     public function airport(): BelongsTo

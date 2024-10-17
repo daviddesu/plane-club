@@ -42,8 +42,8 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
-    #[Validate(['media.*' => 'file|max:512000'])]
-    public array $media = [];  // Handles both images and videos
+    #[Validate('file|max:512000')]
+    public $media;  // Handles both images and videos
 
 
     public function mount()
@@ -193,29 +193,28 @@ new class extends Component
     {
         $validated = $this->validate();
 
-        foreach ($this->media as $mediaFile) {
-            // Check if the file is an image or a video
-            $mimeType = $mediaFile->getMimeType();
+        // Check if the file is an image or a video
+        $mimeType = $this->media->getMimeType();
 
-            $isSafe = true; // Default to safe content
+        $isSafe = true; // Default to safe content
 
-            if (str_contains($mimeType, 'image')) {
-                // 1 in 5 chance to analyze image
-                if (rand(1, 5) === 1) {
-                    $isSafe = $this->analyzeImage($mediaFile->getRealPath());
-                }
-            } elseif (str_contains($mimeType, 'video')) {
-                // 1 in 10 chance to analyze video
-                if (rand(1, 10) === 1) {
-                    $isSafe = $this->analyzeVideo($mediaFile->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
-                }
+        if (str_contains($mimeType, 'image')) {
+            // 1 in 5 chance to analyze image
+            if (rand(1, 5) === 1) {
+                $isSafe = $this->analyzeImage($this->media->getRealPath());
             }
-
-            if (!$isSafe) {
-                Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
-                throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
+        } elseif (str_contains($mimeType, 'video')) {
+            // 1 in 10 chance to analyze video
+            if (rand(1, 10) === 1) {
+                $isSafe = $this->analyzeVideo($this->media->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
             }
         }
+
+        if (!$isSafe) {
+            Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
+            throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
+        }
+
 
         $newAircraftLog = auth()->user()->aircraftLogs()->create([
             "airport_id" => $this->airport,
@@ -226,61 +225,60 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        foreach ($this->media as $mediaFile) {
-            // Check if the file is an image or a video
-            $mimeType = $mediaFile->getMimeType();
+        // Check if the file is an image or a video
+        $mimeType = $this->media->getMimeType();
 
-            if (str_contains($mimeType, 'image')) {
-                // Check if it's an HEIC file and convert it to JPEG
-                if ($mimeType === 'image/heic') {
-                    $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
-                    if (!$convertedFilePath) {
-                        Toaster::warning('Failed to process HEIC file.');
-                        throw new \RuntimeException("The uploaded HEIC image could not be processed.");
-                    }
-                } else {
-                    $convertedFilePath = $mediaFile->getRealPath();
+        if (str_contains($mimeType, 'image')) {
+            // Check if it's an HEIC file and convert it to JPEG
+            if ($mimeType === 'image/heic') {
+                $convertedFilePath = $this->convertHEICtoJPEG($this->media);
+                if (!$convertedFilePath) {
+                    Toaster::warning('Failed to process HEIC file.');
+                    throw new \RuntimeException("The uploaded HEIC image could not be processed.");
                 }
-
-                $filePath = $convertedFilePath;
-                $storedThumbnailFilePath = null;
-            } elseif (str_contains($mimeType, 'video')) {
-                // Compress and upload the video
-                $filePath = $this->compressVideo($mediaFile);
-                $thumbnailFilePath = $this->extractThumbnail($mediaFile);
-
-                $storedThumbnailFilePath = Storage::disk('s3')
-                    ->putFile(
-                        'aircraft/thumbnails',
-                        new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
-                        [
-                            'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
-                ]);
+            } else {
+                $convertedFilePath = $this->media->getRealPath();
             }
 
-            $storedFilePath = Storage::disk('s3')
+            $filePath = $convertedFilePath;
+            $storedThumbnailFilePath = null;
+        } elseif (str_contains($mimeType, 'video')) {
+            // Compress and upload the video
+            $filePath = $this->compressVideo($this->media);
+            $thumbnailFilePath = $this->extractThumbnail($this->media);
+
+            $storedThumbnailFilePath = Storage::disk('s3')
                 ->putFile(
-                    'aircraft',
-                    new \Illuminate\Http\File($filePath),
+                    'aircraft/thumbnails',
+                    new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
             ]);
-
-
-             // Clean up the temporary file
-             unlink($filePath);
-
-            // Save media record
-            auth()->user()->mediaItems()->create([
-                "path" => $storedFilePath,
-                "aircraft_log_id" => $newAircraftLog->id,
-                "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
-                "thumbnail_path" => $storedThumbnailFilePath,
-            ]);
-
-            // Cache the media URL
-            $this->cacheMediaUrl($storedFilePath);
         }
+
+        $storedFilePath = Storage::disk('s3')
+            ->putFile(
+                'aircraft',
+                new \Illuminate\Http\File($filePath),
+                [
+                    'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
+        ]);
+
+
+            // Clean up the temporary file
+            unlink($filePath);
+
+        // Save media record
+        auth()->user()->mediaItems()->create([
+            "path" => $storedFilePath,
+            "aircraft_log_id" => $newAircraftLog->id,
+            "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
+            "thumbnail_path" => $storedThumbnailFilePath,
+        ]);
+
+        // Cache the media URL
+        $this->cacheMediaUrl($storedFilePath);
+
 
         Toaster::info('Log created successfully.');
         $this->reset();
@@ -315,7 +313,7 @@ new class extends Component
 
     public function removeUploadedMedia()
     {
-        $this->media = [];
+        $this->media = null;
     }
 }
 
@@ -324,9 +322,49 @@ new class extends Component
 ?>
 
 
-<x-modal-card title="Add Photos/Videos" name="logModal">
+<x-modal-card title="Add a photo of a video as a log" name="logModal">
     <form wire:submit='store()'>
         <div class="grid grid-cols-1 gap-4">
+            {{-- File upload for images and videos --}}
+            @if (!$media)
+            <div
+                x-data="{ isUploading: false, progress: 0 }"
+                x-on:livewire-upload-start="isUploading = true"
+                x-on:livewire-upload-finish="isUploading = false"
+                x-on:livewire-upload-error="isUploading = false"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+            >
+                <label for="media">
+                    <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
+                        <div class="flex flex-col items-center justify-center">
+                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" />
+                            <p class="text-blue-600 dark:text-teal-600">
+                                Click to add an image or video
+                            </p>
+                        </div>
+                    </div>
+                </label>
+                <input type="file" id="media" wire:model="media" hidden />
+
+                @error('media.*')
+                    <span class="error">{{ $message }}</span>
+                @enderror
+
+                <!-- Progress Bar -->
+                <div x-show="isUploading" class="flex items-center justify-center h-20 col-span-1 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20.27,4.74a4.93,4.93,0,0,1,1.52,4.61a5.32,5.32,0,0,1-4.1,4.51a5.12,5.12,0,0,1-5.2-1.5a5.53,5.53,0,0,0,6.13-1.48A5.66,5.66,0,0,0,20.27,4.74ZM12.32,11.53a5.49,5.49,0,0,0-1.47-6.2A5.57,5.57,0,0,0,4.71,3.72a5.17,5.17,0,0,1,4.82-1.52a5.52,5.52,0,0,1,4.37,4.25a5.28,5.28,0,0,1-1.58,5.1Z"/>
+                    </svg>
+                </div>
+            </div>
+            @endif
+
+            {{-- Media Preview --}}
+            @if ($media)
+            <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
+                <p>File: {{ $media->getClientOriginalName() }}</p>
+            </div>
+            @endif
             <!-- Existing Form Inputs -->
             <div class="grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-datetime-picker
@@ -383,47 +421,6 @@ new class extends Component
                     style="text-transform: uppercase"
                 />
             </div>
-
-            {{-- File upload for images and videos --}}
-            @if (!$media)
-            <div
-                x-data="{ isUploading: false, progress: 0 }"
-                x-on:livewire-upload-start="isUploading = true"
-                x-on:livewire-upload-finish="isUploading = false"
-                x-on:livewire-upload-error="isUploading = false"
-                x-on:livewire-upload-progress="progress = $event.detail.progress"
-            >
-                <label for="media">
-                    <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
-                        <div class="flex flex-col items-center justify-center">
-                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" />
-                            <p class="text-blue-600 dark:text-teal-600">
-                                Click to add media (images or videos)
-                            </p>
-                        </div>
-                    </div>
-                </label>
-                <input type="file" id="media" wire:model="media" multiple hidden />
-
-                @error('media.*')
-                    <span class="error">{{ $message }}</span>
-                @enderror
-
-                <!-- Progress Bar -->
-                <div x-show="isUploading" class="flex items-center justify-center h-20 col-span-1 shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M20.27,4.74a4.93,4.93,0,0,1,1.52,4.61a5.32,5.32,0,0,1-4.1,4.51a5.12,5.12,0,0,1-5.2-1.5a5.53,5.53,0,0,0,6.13-1.48A5.66,5.66,0,0,0,20.27,4.74ZM12.32,11.53a5.49,5.49,0,0,0-1.47-6.2A5.57,5.57,0,0,0,4.71,3.72a5.17,5.17,0,0,1,4.82-1.52a5.52,5.52,0,0,1,4.37,4.25a5.28,5.28,0,0,1-1.58,5.1Z"/>
-                    </svg>
-                </div>
-            </div>
-            @endif
-
-            {{-- Media Preview --}}
-            @if ($media)
-            <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                <p> {{ count($media) }} images and videos</p>
-            </div>
-            @endif
         </div>
 
         <div class="pt-2 border-b-2"></div>

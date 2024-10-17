@@ -48,30 +48,34 @@ $logout = function (Logout $logout) {
                     </x-slot>
 
                     @if(Auth::check())
-                        <x-dropdown.item icon="user" label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
-                        <x-dropdown.item separator label="Logout" wire:click="logout" class="w-full text-start" />
+                        <x-dropdown.item label="Images & Videos" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
+                        <x-dropdown.item label="Aircraft" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
+                        <x-dropdown.item label="Airlines" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
+                        <x-dropdown.item label="Airports" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
+                        <x-dropdown.item separator label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
+                        <x-dropdown.item label="Logout" wire:click="logout" class="w-full text-start" />
                     @else
-                        <x-dropdown.item icon="user" label="Log in" class="text-sm" :href="route('login')" wire:navigate />
-                        <x-dropdown.item icon="user" label="Register" class="text-sm" :href="route('register')" wire:navigate />
+                        <x-dropdown.item label="Log in" class="text-sm" :href="route('login')" wire:navigate />
+                        <x-dropdown.item label="Register" class="text-sm" :href="route('register')" wire:navigate />
                     @endif
 
 
-
-                    {{-- <x-slot name="content">
-
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot> --}}
                 </x-dropdown>
             </div>
+
+            {{-- <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                {{ __('Images & Videos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                {{ __('Aircraft') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                {{ __('Airlines') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                {{ __('Airports') }}
+            </x-responsive-nav-link> --}}
+        </div>
 
             <!-- Hamburger -->
             <div class="flex items-center -me-2 sm:hidden">
@@ -104,13 +108,7 @@ $logout = function (Logout $logout) {
             @endif
         </div>
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate>
-                {{ __('Logs') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('aircraft_images')" :active="request()->routeIs('aircraft_images')" wire:navigate>
-                {{ __('Images') }}
-            </x-responsive-nav-link>
-        </div>
+
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
@@ -119,6 +117,19 @@ $logout = function (Logout $logout) {
 
             @if(Auth::check())
                 <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                        {{ __('Images & Videos') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                        {{ __('Aircraft') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                        {{ __('Airlines') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
+                        {{ __('Airports') }}
+                    </x-responsive-nav-link>
+
                     <x-responsive-nav-link :href="route('profile')" wire:navigate>
                         {{ __('Profile') }}
                     </x-responsive-nav-link>

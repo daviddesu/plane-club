@@ -6,6 +6,7 @@ use App\Models\AircraftLog;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
+use App\Models\Media;
 use Livewire\Volt\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -41,8 +42,10 @@ new class extends Component
     #[Validate]
     public ?string $registration = "";
 
-    public array $mediaItems = [];
-    public array $mediaUrls = [];
+    public ?Media $media = null;
+
+    public ?string $mediaUrl = "";
+
     public bool $editing = false;
     public bool $modalOpened = false;
 
@@ -56,7 +59,7 @@ new class extends Component
 
     public function loadAircraftLog($id): void
     {
-        $this->aircraftLog = AircraftLog::with('user', 'mediaItems', 'airport', 'airline', 'aircraft')->find($id);
+        $this->aircraftLog = AircraftLog::with('user', 'media', 'airport', 'airline', 'aircraft')->find($id);
 
         if ($this->aircraftLog) {
             $this->loggedAt = $this->aircraftLog->logged_at;
@@ -65,22 +68,8 @@ new class extends Component
             $this->airline_id = $this->aircraftLog->airline?->id;
             $this->aircraft_id = $this->aircraftLog->aircraft?->id;
             $this->registration = $this->aircraftLog->registration;
-
-            // Load all media with temporary URLs and add cache
-            $this->mediaItems = $this->aircraftLog->mediaItems->map(function ($media) {
-                return [
-                    'id' => $media->id,
-                    'tempUrl' => $this->getCachedMediaUrl($media->path),
-                    'is_video' => $media->isVideo(),
-                    'thumbnail_url' => $media->isVideo() ?? $this->getCachedMediaUrl($media->thumbnail_path),
-                ];
-            })->values()->toArray();
-
-            // Extract tempUrls into $this->mediaUrls
-            $this->mediaUrls = array_column($this->mediaItems, 'tempUrl');
-        } else {
-            $this->mediaItems = [];
-            $this->mediaUrls = [];
+            $this->media = $this->aircraftLog->media;
+            $this->mediaUrl = $this->getCachedMediaUrl($this->media->path);
         }
     }
 
@@ -95,6 +84,7 @@ new class extends Component
     }
 
     #[On('close_aircraft_log')]
+    #[On('aircraft_log-deleted')]
     public function closeLog()
     {
         $this->id = null;
@@ -108,8 +98,6 @@ new class extends Component
         $this->airports = Airport::all();
         $this->aircraft = Aircraft::all();
         $this->airlines = Airline::all();
-        $this->mediaItems = [];
-        $this->mediaUrls = [];
     }
 
     public function startEdit()
@@ -136,14 +124,6 @@ new class extends Component
 
         Toaster::info("Log updated");
         $this->dispatch('aircraft_log-updated');
-        $this->closeLog();
-    }
-
-    public function delete()
-    {
-        $this->aircraftLog->delete();
-        Toaster::info("Log deleted");
-        $this->dispatch('aircraft_log-deleted');
         $this->closeLog();
     }
 };
@@ -177,7 +157,7 @@ new class extends Component
                 @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
                     <div class="flex mb-4 space-x-2">
                         <button wire:click='startEdit' class="px-2 py-1 text-white bg-blue-500 rounded">Edit</button>
-                        <button wire:click='delete' class="px-2 py-1 text-white bg-red-500 rounded">Delete</button>
+                        <livewire:aircraft_log.delete lazy :aircraftLog="$aircraftLog">
                     </div>
                 @endif
 
@@ -248,39 +228,28 @@ new class extends Component
 
             <!-- Modal Content -->
             <div class="pt-4 ">
-                <!-- Media Gallery -->
                 <div class="p-4">
-                    @php
-                        $mediaCount = count($mediaItems);
-                        $columns = max(1, min($mediaCount, 3));
-                    @endphp
-
-                    <div x-data='mediaGallery({ mediaItems: @json($mediaItems) })' x-bind:key="$id" class="relative">
-                        <!-- Grid -->
-                        @if($mediaCount == 0)
-                            <p>No images or videos available.</p>
-                        @else
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            @foreach($mediaItems as $index => $media)
-                                    <div class="w-full h-80">
-                                        @if($media['is_video'])
-                                            <div class="relative">
-                                                <video controls
-                                                    src="{{ $media['tempUrl'] }}"
-                                                    class="object-contain w-full h-80"
-                                                    ></video>
-                                            </div>
-                                        @else
-                                            <img src="{{ $media['tempUrl'] }}"
-                                                 alt="Media"
-                                                 loading="lazy"
-                                                 class="object-cover w-full cursor-pointer h-80"
-                                                 @click="openModal({{ $index }})">
-                                        @endif
+                    <div x-data='mediaGallery(@json($mediaUrl))' x-bind:key="$id" class="relative">
+                        <div class="grid grid-cols-1">
+                            <div class="w-full h-80">
+                                @if($media->isVideo())
+                                    <div class="relative">
+                                        <video controls
+                                            autoplay
+                                            muted
+                                            src="{{ $mediaUrl }}"
+                                            class="object-contain w-full h-80"
+                                            ></video>
                                     </div>
-                                @endforeach
+                                @else
+                                    <img src="{{ $mediaUrl }}"
+                                            alt="Media"
+                                            loading="lazy"
+                                            class="object-contain w-full cursor-pointer h-80"
+                                            @click="openModal()">
+                                @endif
                             </div>
-                        @endif
+                        </div>
 
                         <!-- Fullscreen Modal for Media -->
                         <div
@@ -291,7 +260,7 @@ new class extends Component
                         >
                         <div class="relative max-w-full max-h-screen">
                             <img
-                                x-bind:src="mediaItems[mediaIndex].tempUrl"
+                                x-bind:src="mediaUrl"
                                 loading="lazy"
                                 class="object-contain max-w-full max-h-screen"
                             >
@@ -326,12 +295,10 @@ new class extends Component
             },
         }));
 
-        Alpine.data('mediaGallery', (data) => ({
+        Alpine.data('mediaGallery', (mediaUrl) => ({
             isOpen: false,
-            mediaIndex: 0,
-            mediaItems: data.mediaItems || [],
-            openModal(index) {
-                this.mediaIndex = index;
+            mediaUrl: mediaUrl || "",
+            openModal() {
                 this.isOpen = true;
                 document.body.classList.add('overflow-hidden');
             },
