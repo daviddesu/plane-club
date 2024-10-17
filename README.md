@@ -27,6 +27,9 @@
 [x] Handle video compression
 [x] Handle HEIC and other non jpeg or PNG upload types
 [x] Convert all temp storage to use S3 in production
+[ ] Change to just uploading one image per log. Submit and add another buttin
+[ ] Allow next log to poputa efrom the last details
+[ ] Filtered pages to show logs by, airport, aircraft, airline, date etc.
 [ ] see how we can ustill use local on local dev
 [ ] Better log saveing process to prevent timeouts and informt he users the log is being created
 [ ] Make sure temp files are removed once persistsed to s3
