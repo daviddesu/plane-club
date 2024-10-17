@@ -16,14 +16,6 @@ Route::get('/logs', [AircraftLogController::class, 'index'])
     ->middleware(['auth', Subscribed::class])
     ->name('aircraft_logs');
 
-Route::get('/images', [AircraftLogController::class, 'viewImages'])
-    ->middleware(['auth', Subscribed::class])
-    ->name('aircraft_images');
-
-Route::get('/log/{id}', [AircraftLogController::class, 'viewAircraftLog'])
-    ->middleware(['auth', 'verified', Subscribed::class])
-    ->name('aircraft_log');
-
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');

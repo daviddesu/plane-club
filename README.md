@@ -86,3 +86,7 @@ sudo apt install imagemagick (image conversion, specifically heic to jpeg)
 
 Connect to DB = fly postgres connect -a plane-club-db
 
+## Listen for stripe webhook locally with stripe cli
+
+stripe listen --forward-to plane-club.test/stripe/webhook --skip-verify
+

@@ -23,9 +23,25 @@ $logout = function (Logout $logout) {
                 </div>
             </div>
 
+            <!-- Navigation Links -->
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate>
+                    {{ __('Images & Videos') }}
+                </x-nav-link>
+                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
+                    {{ __('Aircraft') }}
+                </x-nav-link>
+                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
+                    {{ __('Airlines') }}
+                </x-nav-link>
+                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
+                    {{ __('Airports') }}
+                </x-nav-link>
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                @if(Auth::check())
+                @if(Auth::check() && Auth::user()->subscribedStripe())
                     <x-icon name="arrow-up-tray" class="w-5 h-5 text-gray-800 cursor-pointer dark:text-gray-200" x-on:click="$openModal('logModal')" />
                 @endif
                 <x-dropdown align="right" width="48">
@@ -48,11 +64,7 @@ $logout = function (Logout $logout) {
                     </x-slot>
 
                     @if(Auth::check())
-                        <x-dropdown.item label="Images & Videos" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
-                        <x-dropdown.item label="Aircraft" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
-                        <x-dropdown.item label="Airlines" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
-                        <x-dropdown.item label="Airports" class="text-sm" :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate />
-                        <x-dropdown.item separator label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
+                        <x-dropdown.item label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
                         <x-dropdown.item label="Logout" wire:click="logout" class="w-full text-start" />
                     @else
                         <x-dropdown.item label="Log in" class="text-sm" :href="route('login')" wire:navigate />
@@ -62,20 +74,6 @@ $logout = function (Logout $logout) {
 
                 </x-dropdown>
             </div>
-
-            {{-- <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                {{ __('Images & Videos') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                {{ __('Aircraft') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                {{ __('Airlines') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                {{ __('Airports') }}
-            </x-responsive-nav-link> --}}
-        </div>
 
             <!-- Hamburger -->
             <div class="flex items-center -me-2 sm:hidden">
@@ -107,7 +105,7 @@ $logout = function (Logout $logout) {
                 <div class="text-sm font-medium text-gray-500">{{ auth()->user()->email }}</div>
             @endif
         </div>
-        <div class="pt-2 pb-3 space-y-1">
+        <div class="pt-2 pb-3 space-y-1"></div>
 
 
         <!-- Responsive Settings Options -->

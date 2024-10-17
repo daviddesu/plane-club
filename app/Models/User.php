@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Media::class);
     }
+
+    public function subscribedStripe()
+    {
+        return $this->subscribed(env('STRIPE_PRODUCT_ID'));
+    }
 }
