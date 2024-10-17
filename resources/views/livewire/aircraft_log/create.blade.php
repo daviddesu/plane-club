@@ -42,7 +42,7 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
-    #[Validate(['media.*' => 'file|max:512000'])]
+    #[Validate('file|max:512000')]
     public array $media = [];  // Handles both images and videos
 
 
@@ -193,29 +193,28 @@ new class extends Component
     {
         $validated = $this->validate();
 
-        foreach ($this->media as $mediaFile) {
-            // Check if the file is an image or a video
-            $mimeType = $mediaFile->getMimeType();
+        // Check if the file is an image or a video
+        $mimeType = $media->getMimeType();
 
-            $isSafe = true; // Default to safe content
+        $isSafe = true; // Default to safe content
 
-            if (str_contains($mimeType, 'image')) {
-                // 1 in 5 chance to analyze image
-                if (rand(1, 5) === 1) {
-                    $isSafe = $this->analyzeImage($mediaFile->getRealPath());
-                }
-            } elseif (str_contains($mimeType, 'video')) {
-                // 1 in 10 chance to analyze video
-                if (rand(1, 10) === 1) {
-                    $isSafe = $this->analyzeVideo($mediaFile->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
-                }
+        if (str_contains($mimeType, 'image')) {
+            // 1 in 5 chance to analyze image
+            if (rand(1, 5) === 1) {
+                $isSafe = $this->analyzeImage($media->getRealPath());
             }
-
-            if (!$isSafe) {
-                Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
-                throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
+        } elseif (str_contains($mimeType, 'video')) {
+            // 1 in 10 chance to analyze video
+            if (rand(1, 10) === 1) {
+                $isSafe = $this->analyzeVideo($media->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
             }
         }
+
+        if (!$isSafe) {
+            Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
+            throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
+        }
+
 
         $newAircraftLog = auth()->user()->aircraftLogs()->create([
             "airport_id" => $this->airport,
@@ -226,61 +225,60 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        foreach ($this->media as $mediaFile) {
-            // Check if the file is an image or a video
-            $mimeType = $mediaFile->getMimeType();
+        // Check if the file is an image or a video
+        $mimeType = $media->getMimeType();
 
-            if (str_contains($mimeType, 'image')) {
-                // Check if it's an HEIC file and convert it to JPEG
-                if ($mimeType === 'image/heic') {
-                    $convertedFilePath = $this->convertHEICtoJPEG($mediaFile);
-                    if (!$convertedFilePath) {
-                        Toaster::warning('Failed to process HEIC file.');
-                        throw new \RuntimeException("The uploaded HEIC image could not be processed.");
-                    }
-                } else {
-                    $convertedFilePath = $mediaFile->getRealPath();
+        if (str_contains($mimeType, 'image')) {
+            // Check if it's an HEIC file and convert it to JPEG
+            if ($mimeType === 'image/heic') {
+                $convertedFilePath = $this->convertHEICtoJPEG($media);
+                if (!$convertedFilePath) {
+                    Toaster::warning('Failed to process HEIC file.');
+                    throw new \RuntimeException("The uploaded HEIC image could not be processed.");
                 }
-
-                $filePath = $convertedFilePath;
-                $storedThumbnailFilePath = null;
-            } elseif (str_contains($mimeType, 'video')) {
-                // Compress and upload the video
-                $filePath = $this->compressVideo($mediaFile);
-                $thumbnailFilePath = $this->extractThumbnail($mediaFile);
-
-                $storedThumbnailFilePath = Storage::disk('s3')
-                    ->putFile(
-                        'aircraft/thumbnails',
-                        new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
-                        [
-                            'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
-                ]);
+            } else {
+                $convertedFilePath = $media->getRealPath();
             }
 
-            $storedFilePath = Storage::disk('s3')
+            $filePath = $convertedFilePath;
+            $storedThumbnailFilePath = null;
+        } elseif (str_contains($mimeType, 'video')) {
+            // Compress and upload the video
+            $filePath = $this->compressVideo($media);
+            $thumbnailFilePath = $this->extractThumbnail($media);
+
+            $storedThumbnailFilePath = Storage::disk('s3')
                 ->putFile(
-                    'aircraft',
-                    new \Illuminate\Http\File($filePath),
+                    'aircraft/thumbnails',
+                    new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
             ]);
-
-
-             // Clean up the temporary file
-             unlink($filePath);
-
-            // Save media record
-            auth()->user()->mediaItems()->create([
-                "path" => $storedFilePath,
-                "aircraft_log_id" => $newAircraftLog->id,
-                "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
-                "thumbnail_path" => $storedThumbnailFilePath,
-            ]);
-
-            // Cache the media URL
-            $this->cacheMediaUrl($storedFilePath);
         }
+
+        $storedFilePath = Storage::disk('s3')
+            ->putFile(
+                'aircraft',
+                new \Illuminate\Http\File($filePath),
+                [
+                    'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
+        ]);
+
+
+            // Clean up the temporary file
+            unlink($filePath);
+
+        // Save media record
+        auth()->user()->mediaItems()->create([
+            "path" => $storedFilePath,
+            "aircraft_log_id" => $newAircraftLog->id,
+            "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
+            "thumbnail_path" => $storedThumbnailFilePath,
+        ]);
+
+        // Cache the media URL
+        $this->cacheMediaUrl($storedFilePath);
+
 
         Toaster::info('Log created successfully.');
         $this->reset();
@@ -421,7 +419,7 @@ new class extends Component
             {{-- Media Preview --}}
             @if ($media)
             <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                <p> {{ count($media) }} images and videos</p>
+                <p>File: {{ $media->getClientOriginalName() }}</p>
             </div>
             @endif
         </div>
