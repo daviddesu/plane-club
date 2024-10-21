@@ -41,12 +41,12 @@ new class extends Component
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLog->id }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
-        @if($aircraftLog->media->isVideo())
+        @if($aircraftLog->media?->isVideo())
             <div
                 class="relative w-full h-full"
             >
                 <img class="object-cover w-full h-full select-none"
-                src={{ $this->getCachedMediaUrl($aircraftLog->media->thumbnail_path) }}
+                src={{ $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path) }}
                 />
                 <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                     <x-icon name="play-circle" class="w-12 h-12 text-white" />
@@ -54,7 +54,7 @@ new class extends Component
             </div>
         @else
             <img
-                src="{{ $this->getCachedMediaUrl($aircraftLog->media->path) }}"
+                src="{{ $this->getCachedMediaUrl($aircraftLog->media?->path) }}"
                 alt=""
                 loading="lazy"
                 class="object-cover w-full h-full select-none"

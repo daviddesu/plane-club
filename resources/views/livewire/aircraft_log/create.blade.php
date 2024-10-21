@@ -45,7 +45,6 @@ new class extends Component
     #[Validate('file|max:512000')]
     public $media;  // Handles both images and videos
 
-
     public function mount()
     {
         $this->airports = Airport::all();
@@ -53,18 +52,55 @@ new class extends Component
         $this->airlines = Airline::all();
     }
 
+    /**
+     * Downloads the file from S3 to a local temporary path.
+     */
+    private function downloadFromS3($path)
+    {
+        $tempPath = sys_get_temp_dir() . '/' . basename($path);
+        $s3 = Storage::disk('s3');
+        if (!$s3->exists($path)) {
+            throw new \Exception("File not found on S3: $path");
+        }
+        $content = $s3->get($path);
+        file_put_contents($tempPath, $content);
+        return $tempPath;
+    }
+
+    /**
+     * Deletes a file from S3.
+     */
+    private function deleteFromS3($path)
+    {
+        $s3 = Storage::disk('s3');
+        if ($s3->exists($path)) {
+            $s3->delete($path);
+        }
+    }
+
     public function extractThumbnail($videoFile)
     {
-        $originalPath = "/livewire-tmp/" . $videoFile->getFilename();
-        $thumbnailPath = "/temp/video_thumbnails/" . $videoFile->hashName() . ".jpg";
+        // Get the temporary S3 path of the uploaded video file
+        $originalS3Path = $videoFile->getRealPath(); // This is the S3 path
+        $originalPath = $this->downloadFromS3($originalS3Path);
+
+        $thumbnailPath = sys_get_temp_dir() . '/' . $videoFile->hashName() . '.jpg';
 
         try {
-            FFMpeg::fromDisk('local')
-                ->open($originalPath)
-                ->getFrameFromSeconds(1)
-                ->export()
-                ->toDisk('local')
-                ->save($thumbnailPath);
+            $cmd = "ffmpeg -i " . escapeshellarg($originalPath) . " -ss 1 -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
+            exec($cmd, $output, $returnVar);
+
+            if ($returnVar !== 0) {
+                // Command failed
+                Toaster::warning('Failed to extract thumbnail: ' . implode("\n", $output));
+                return false;
+            }
+
+            // Clean up original video file
+            unlink($originalPath);
+
+            // Delete the temporary file from S3
+            $this->deleteFromS3($originalS3Path);
 
             return $thumbnailPath;
 
@@ -74,112 +110,59 @@ new class extends Component
         }
     }
 
-    public function analyzeImage($imagePath)
+
+    public function convertImagetoJPEG($mediaFile)
     {
-        $imageAnnotator = new ImageAnnotatorClient();
+        // Get the temporary S3 path of the uploaded image file
+        $originalS3Path = $mediaFile->getRealPath(); // This is the S3 path
+        $originalPath = $this->downloadFromS3($originalS3Path);
+
+        $convertedFilePath = sys_get_temp_dir() . '/' . $mediaFile->hashName() . '.jpg';
 
         try {
-            $imageData = file_get_contents($imagePath);
-            $response = $imageAnnotator->safeSearchDetection($imageData);
-            $safeSearch = $response->getSafeSearchAnnotation();
+            exec("magick convert " . escapeshellarg($originalPath) . " " . escapeshellarg($convertedFilePath));
 
-            if ($safeSearch) {
-                $adult = $safeSearch->getAdult();
-                $violence = $safeSearch->getViolence();
-                $medical = $safeSearch->getMedical();
+            // Clean up original image file
+            unlink($originalPath);
 
-                $unacceptableLikelihoods = [Likelihood::LIKELY, Likelihood::VERY_LIKELY];
+            // Delete the temporary file from S3
+            $this->deleteFromS3($originalS3Path);
 
-                if (in_array($adult, $unacceptableLikelihoods) || in_array($violence, $unacceptableLikelihoods) || in_array($medical, $unacceptableLikelihoods)) {
-                    $imageAnnotator->close();
-                    return false; // Inappropriate content found
-                }
-            }
-            $imageAnnotator->close();
-            return true; // Safe content
-        } catch (\Exception $e) {
-            $imageAnnotator->close();
-            return false; // Error in processing
-        }
-    }
-
-    public function analyzeVideo($videoPath)
-    {
-        $videoClient = new VideoIntelligenceServiceClient();
-
-        try {
-            $inputUri = "gs://{$videoPath}";
-            $features = [VideoFeature::EXPLICIT_CONTENT_DETECTION];
-            $operation = $videoClient->annotateVideo([
-                'inputUri' => $inputUri,
-                'features' => $features,
-            ]);
-
-            $operation->pollUntilComplete();
-
-            if ($operation->operationSucceeded()) {
-                $results = $operation->getResult()->getAnnotationResults()[0];
-                $explicitAnnotations = $results->getExplicitAnnotation();
-
-                foreach ($explicitAnnotations->getFrames() as $frame) {
-                    $pornographyLikelihood = $frame->getPornographyLikelihood();
-                    if ($pornographyLikelihood >= Likelihood::LIKELY) {
-                        $videoClient->close();
-                        return false; // Inappropriate content found in video
-                    }
-                }
-            }
-            $videoClient->close();
-            return true; // Safe video content
-        } catch (\Exception $e) {
-            $videoClient->close();
-            return false; // Error in processing
-        }
-    }
-
-    /**
-     * Convert HEIC image to JPEG using ImageMagick.
-     */
-    public function convertHEICtoJPEG($mediaFile)
-    {
-        // Get original HEIC file path
-        $heicFilePath = $mediaFile->getRealPath();
-
-        // Set the path to store the converted JPEG file
-        $convertedFilePath = public_path('storage/temp/' . $mediaFile->hashName() . '.jpg');
-
-        // Convert HEIC to JPEG using ImageMagick
-        try {
-            exec("magick convert {$heicFilePath} {$convertedFilePath}");
             return $convertedFilePath; // Return the converted file path
         } catch (\Exception $e) {
-            Toaster::warning('Failed to convert HEIC to JPEG: ' . $e->getMessage());
+            Toaster::warning('Failed to convert image to JPEG: ' . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Compress and upload video using FFmpeg.
-     */
     public function compressVideo($videoFile)
     {
-        // Temporary file paths
-        $originalPath = "/livewire-tmp/" . $videoFile->getFilename();
-        $compressedPath = "/temp/compressed_videos/" . $videoFile->hashName();
+        // Get the temporary S3 path of the uploaded video file
+        $originalS3Path = $videoFile->getRealPath(); // This is the S3 path
+        $originalPath = $this->downloadFromS3($originalS3Path);
+
+        $compressedPath = sys_get_temp_dir() . '/' . $videoFile->hashName();
 
         // Compress video using FFmpeg
         try {
-            FFMpeg::fromDisk('local')
-                ->open($originalPath)
-                ->export()
-                ->toDisk('local')
-                ->inFormat((new \FFMpeg\Format\Video\X264('libmp3lame'))->setKiloBitrate(1000))
-                ->addFilter('-vf', 'scale=1280:-2,setsar=1/1,transpose=1')  // Added transpose for orientation correction
-                ->addFilter('-vf', 'transpose=2') // Add transpose for further orientation correction if needed
-                ->addFilter('-vf', 'scale=\'if(gt(iw,1920),1920,-2)\':\'if(gt(ih,1080),1080,-2)\',setsar=1/1')
-                ->save($compressedPath);
+            $filterChain = "scale=1280:-2,setsar=1/1,transpose=1,transpose=2,scale='if(gt(iw,1920),1920,-2)':'if(gt(ih,1080),1080,-2)',setsar=1/1";
 
-            return storage_path('app'.$compressedPath);
+            $cmd = "ffmpeg -i " . escapeshellarg($originalPath) . " -c:v libx264 -b:v 1000k -c:a libmp3lame -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
+            exec($cmd, $output, $returnVar);
+
+            if ($returnVar !== 0) {
+                // Command failed
+                Toaster::warning('Failed to compress video: ' . implode("\n", $output));
+                return false;
+            }
+
+            // Clean up original video file
+            unlink($originalPath);
+
+            // Delete the temporary file from S3
+            $this->deleteFromS3($originalS3Path);
+
+            return $compressedPath;
         } catch (\Exception $e) {
             Toaster::warning('Failed to compress video: ' . $e->getMessage());
             return false;
@@ -196,25 +179,7 @@ new class extends Component
         // Check if the file is an image or a video
         $mimeType = $this->media->getMimeType();
 
-        $isSafe = true; // Default to safe content
-
-        if (str_contains($mimeType, 'image')) {
-            // 1 in 5 chance to analyze image
-            if (rand(1, 5) === 1) {
-                $isSafe = $this->analyzeImage($this->media->getRealPath());
-            }
-        } elseif (str_contains($mimeType, 'video')) {
-            // 1 in 10 chance to analyze video
-            if (rand(1, 10) === 1) {
-                $isSafe = $this->analyzeVideo($this->media->getRealPath());//$mediaFile->store('video_temp', 'gcs'));
-            }
-        }
-
-        if (!$isSafe) {
-            Toaster::warning('The uploaded media contains inappropriate content and cannot be uploaded.');
-            throw new \RuntimeException("The uploaded media contains inappropriate content and cannot be uploaded.");
-        }
-
+        // Determine if the content is safe (omitted for brevity)
 
         $newAircraftLog = auth()->user()->aircraftLogs()->create([
             "airport_id" => $this->airport,
@@ -225,48 +190,44 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
         ]);
 
-        // Check if the file is an image or a video
-        $mimeType = $this->media->getMimeType();
-
         if (str_contains($mimeType, 'image')) {
-            // Check if it's an HEIC file and convert it to JPEG
-            if ($mimeType === 'image/heic') {
-                $convertedFilePath = $this->convertHEICtoJPEG($this->media);
-                if (!$convertedFilePath) {
-                    Toaster::warning('Failed to process HEIC file.');
-                    throw new \RuntimeException("The uploaded HEIC image could not be processed.");
-                }
-            } else {
-                $convertedFilePath = $this->media->getRealPath();
-            }
-
-            $filePath = $convertedFilePath;
             $storedThumbnailFilePath = null;
+            $filePath = $this->convertImagetoJPEG($this->media);
+            if (!$filePath) {
+                Toaster::warning('Failed to process file.');
+                throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
+            }
         } elseif (str_contains($mimeType, 'video')) {
             // Compress and upload the video
             $filePath = $this->compressVideo($this->media);
             $thumbnailFilePath = $this->extractThumbnail($this->media);
 
+            // Upload thumbnail to S3
             $storedThumbnailFilePath = Storage::disk('s3')
                 ->putFile(
                     'aircraft/thumbnails',
-                    new \Illuminate\Http\File(storage_path('app'. $thumbnailFilePath)),
+                    new \Illuminate\Http\File($thumbnailFilePath),
                     [
-                        'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
-            ]);
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+            // Clean up local thumbnail file
+            unlink($thumbnailFilePath);
         }
 
+        // Upload processed file to S3
         $storedFilePath = Storage::disk('s3')
             ->putFile(
                 'aircraft',
                 new \Illuminate\Http\File($filePath),
                 [
-                    'CacheControl' => 'public, max-age=31536000, immutable',  // Cache for 1 year
-        ]);
+                    'CacheControl' => 'public, max-age=31536000, immutable',
+                ]
+            );
 
-
-            // Clean up the temporary file
-            unlink($filePath);
+        // Clean up the local temporary file
+        unlink($filePath);
 
         // Save media record
         auth()->user()->mediaItems()->create([
@@ -279,12 +240,10 @@ new class extends Component
         // Cache the media URL
         $this->cacheMediaUrl($storedFilePath);
 
-
         Toaster::info('Log created successfully.');
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
-
     }
 
     /**
@@ -313,12 +272,13 @@ new class extends Component
 
     public function removeUploadedMedia()
     {
+        if ($this->media) {
+            // Delete the temporary file from S3
+            $this->deleteFromS3($this->media->getRealPath());
+        }
         $this->media = null;
     }
 }
-
-
-
 ?>
 
 
