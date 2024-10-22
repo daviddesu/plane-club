@@ -121,3 +121,40 @@ fly logs --process-group web
 fly logs --process-group queue
 fly logs --process-group scheduler
 ```
+
+### Monitoring and Managing Jobs
+
+#### Viewing Jobs in the Database
+You can monitor queued jobs directly in your database by querying the jobs table.
+
+```sql
+SELECT * FROM jobs;
+```
+
+#### Clearing the Queue
+To delete all pending jobs from the database queue:
+
+```bash
+php artisan queue:flush
+```
+
+#### Handling Failed Jobs
+Laravel stores failed jobs in the failed_jobs table.
+
+View Failed Jobs:
+
+```sql
+SELECT * FROM failed_jobs;
+```
+
+#### Retry Failed Jobs:
+
+```bash
+php artisan queue:retry all
+```
+
+#### Delete Failed Jobs:
+
+```bash
+php artisan queue:flush --failed
+```
