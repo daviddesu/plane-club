@@ -12,6 +12,11 @@ console_command = 'php /var/www/html/artisan tinker'
     NODE_VERSION = '18'
     PHP_VERSION = '8.3'
 
+[processes]
+  app = ""
+  queue = "php artisan queue:work --sleep=3 --tries=3 --timeout=3600"
+  scheduler = "php artisan schedule:work"
+
 [env]
   LOG_CHANNEL = 'stderr'
   LOG_LEVEL = 'info'
@@ -57,7 +62,6 @@ console_command = 'php /var/www/html/artisan tinker'
   FFMPEG_BINARIES='/usr/bin/ffmpeg'
   FFPROBE_BINARIES='/usr/bin/ffprobe'
   TEMP_FILE_UPLOAD_HOST='s3'
-  APP_PROCESS = 'web'
 
 
 
@@ -69,7 +73,7 @@ console_command = 'php /var/www/html/artisan tinker'
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ['web']
+  processes = ['app']
 
 [[vm]]
   memory = '1gb'
@@ -78,28 +82,3 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [deploy]
   release_command = "php /var/www/html/artisan migrate --force"
-
-[processes]
-  web = ""
-  queue = "/var/www/html/.fly/scripts/start.sh queue"
-  scheduler = "/var/www/html/.fly/scripts/start.sh scheduler"
-
-
-[[services]]
-  internal_port = 8080
-  processes = ["web"]
-  protocol = "tcp"
-
-  [services.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-

@@ -41,7 +41,9 @@ new class extends Component
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLog->id }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
-        @if($aircraftLog->media?->isVideo())
+        @if($aircraftLog->media?->isVideo() && $aircraftLog->media?->isProcessing())
+            <p>Processing...</p>
+        @elseif ($aircraftLog->media?->isVideo())
             <div
                 class="relative w-full h-full"
             >

@@ -209,7 +209,7 @@ new class extends Component
         } elseif (str_contains($mimeType, 'video')) {
             // Save media record with status 'processing'
             $mediaItem = auth()->user()->mediaItems()->create([
-                "path" => null,
+                "path" => "",
                 "aircraft_log_id" => $newAircraftLog->id,
                 "type" => Media::VIDEO->value,
                 "thumbnail_path" => null,
