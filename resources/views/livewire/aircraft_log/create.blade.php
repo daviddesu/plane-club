@@ -78,16 +78,35 @@ new class extends Component
         }
     }
 
-    public function extractThumbnail($videoFile)
+    /**
+     * Prepares the media file for local processing.
+     */
+    private function prepareMediaFile()
     {
-        // Get the temporary S3 path of the uploaded video file
-        $originalS3Path = $videoFile->getRealPath(); // This is the S3 path
-        $originalPath = $this->downloadFromS3($originalS3Path);
+        if (env('TEMP_FILE_UPLOAD_HOST') === 's3') {
+            // Livewire temporary uploads are stored on S3
+            $originalS3Path = $this->media->getRealPath(); // S3 path
+            $localPath = $this->downloadFromS3($originalS3Path);
 
-        $thumbnailPath = sys_get_temp_dir() . '/' . $videoFile->hashName() . '.jpg';
+            // Delete the temporary file from S3 after downloading
+            $this->deleteFromS3($originalS3Path);
+
+            return $localPath;
+        } else {
+            // Livewire temporary uploads are stored locally
+            return $this->media->getRealPath();
+        }
+    }
+
+    /**
+     * Extracts a thumbnail from a video file.
+     */
+    public function extractThumbnail($videoPath)
+    {
+        $thumbnailPath = sys_get_temp_dir() . '/' . uniqid('thumb_', true) . '.jpg';
 
         try {
-            $cmd = "ffmpeg -i " . escapeshellarg($originalPath) . " -ss 1 -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
+            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -ss 1 -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
             exec($cmd, $output, $returnVar);
 
             if ($returnVar !== 0) {
@@ -95,12 +114,6 @@ new class extends Component
                 Toaster::warning('Failed to extract thumbnail: ' . implode("\n", $output));
                 return false;
             }
-
-            // Clean up original video file
-            unlink($originalPath);
-
-            // Delete the temporary file from S3
-            $this->deleteFromS3($originalS3Path);
 
             return $thumbnailPath;
 
@@ -110,23 +123,23 @@ new class extends Component
         }
     }
 
-
-    public function convertImagetoJPEG($mediaFile)
+    /**
+     * Converts an image to JPEG format using ImageMagick.
+     */
+     public function convertImagetoJPEG($imagePath)
     {
-        // Get the temporary S3 path of the uploaded image file
-        $originalS3Path = $mediaFile->getRealPath(); // This is the S3 path
-        $originalPath = $this->downloadFromS3($originalS3Path);
+        // Check if the image is already a JPEG
+        $mimeType = $this->getMimeType($imagePath);
 
-        $convertedFilePath = sys_get_temp_dir() . '/' . $mediaFile->hashName() . '.jpg';
+        if ($mimeType === 'image/jpeg' || $mimeType === 'image/jpg') {
+            // Image is already JPEG, return the original path
+            return $imagePath;
+        }
+
+        $convertedFilePath = sys_get_temp_dir() . '/' . uniqid('image_', true) . '.jpg';
 
         try {
-            exec("magick convert " . escapeshellarg($originalPath) . " " . escapeshellarg($convertedFilePath));
-
-            // Clean up original image file
-            unlink($originalPath);
-
-            // Delete the temporary file from S3
-            $this->deleteFromS3($originalS3Path);
+            exec("magick convert " . escapeshellarg($imagePath) . " " . escapeshellarg($convertedFilePath));
 
             return $convertedFilePath; // Return the converted file path
         } catch (\Exception $e) {
@@ -135,19 +148,18 @@ new class extends Component
         }
     }
 
-    public function compressVideo($videoFile)
+    /**
+     * Compresses a video using FFmpeg.
+     */
+    public function compressVideo($videoPath)
     {
-        // Get the temporary S3 path of the uploaded video file
-        $originalS3Path = $videoFile->getRealPath(); // This is the S3 path
-        $originalPath = $this->downloadFromS3($originalS3Path);
-
-        $compressedPath = sys_get_temp_dir() . '/' . $videoFile->hashName();
+        $compressedPath = sys_get_temp_dir() . '/' . uniqid('video_', true) . '.mp4';
 
         // Compress video using FFmpeg
         try {
-            $filterChain = "scale=1280:-2,setsar=1/1,transpose=1,transpose=2,scale='if(gt(iw,1920),1920,-2)':'if(gt(ih,1080),1080,-2)',setsar=1/1";
+            $filterChain = "scale=1280:-2,setsar=1/1";
 
-            $cmd = "ffmpeg -i " . escapeshellarg($originalPath) . " -c:v libx264 -b:v 1000k -c:a libmp3lame -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
+            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -b:v 1000k -c:a aac -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
             exec($cmd, $output, $returnVar);
 
             if ($returnVar !== 0) {
@@ -156,16 +168,28 @@ new class extends Component
                 return false;
             }
 
-            // Clean up original video file
-            unlink($originalPath);
-
-            // Delete the temporary file from S3
-            $this->deleteFromS3($originalS3Path);
-
             return $compressedPath;
         } catch (\Exception $e) {
             Toaster::warning('Failed to compress video: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    private function getMimeType($filePath)
+    {
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $filePath);
+            finfo_close($finfo);
+            return $mimeType;
+        } else {
+            // Fallback to getimagesize for images
+            $imageInfo = getimagesize($filePath);
+            if ($imageInfo && isset($imageInfo['mime'])) {
+                return $imageInfo['mime'];
+            }
+            // Unable to determine MIME type
+            return null;
         }
     }
 
@@ -176,10 +200,16 @@ new class extends Component
     {
         $validated = $this->validate();
 
-        // Check if the file is an image or a video
-        $mimeType = $this->media->getMimeType();
+        // Prepare the media file for local processing
+        $mediaFilePath = $this->prepareMediaFile();
 
-        // Determine if the content is safe (omitted for brevity)
+        // Get the MIME type from the local file
+        $mimeType = $this->getMimeType($mediaFilePath);
+
+        if (!$mimeType) {
+            Toaster::warning('Unable to determine the MIME type of the uploaded file.');
+            throw new \RuntimeException("Unable to determine the MIME type of the uploaded file.");
+        }
 
         $newAircraftLog = auth()->user()->aircraftLogs()->create([
             "airport_id" => $this->airport,
@@ -191,16 +221,27 @@ new class extends Component
         ]);
 
         if (str_contains($mimeType, 'image')) {
-            $storedThumbnailFilePath = null;
-            $filePath = $this->convertImagetoJPEG($this->media);
+            // Convert image to JPEG if necessary
+            $filePath = $this->convertImagetoJPEG($mediaFilePath);
             if (!$filePath) {
-                Toaster::warning('Failed to process file.');
+                Toaster::warning('Failed to process image.');
                 throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
             }
+            $storedThumbnailFilePath = null;
         } elseif (str_contains($mimeType, 'video')) {
             // Compress and upload the video
-            $filePath = $this->compressVideo($this->media);
-            $thumbnailFilePath = $this->extractThumbnail($this->media);
+            $filePath = $this->compressVideo($mediaFilePath);
+            if (!$filePath) {
+                Toaster::warning('Failed to compress video.');
+                throw new \RuntimeException("The uploaded video could not be processed.");
+            }
+
+            // Extract thumbnail
+            $thumbnailFilePath = $this->extractThumbnail($mediaFilePath);
+            if (!$thumbnailFilePath) {
+                Toaster::warning('Failed to extract video thumbnail.');
+                throw new \RuntimeException("The video thumbnail could not be extracted.");
+            }
 
             // Upload thumbnail to S3
             $storedThumbnailFilePath = Storage::disk('s3')
@@ -226,8 +267,15 @@ new class extends Component
                 ]
             );
 
-        // Clean up the local temporary file
-        unlink($filePath);
+        // Clean up the local temporary files
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        // Avoid deleting the same file twice
+        if ($filePath !== $mediaFilePath && file_exists($mediaFilePath)) {
+            unlink($mediaFilePath); // Delete the original local media file
+        }
 
         // Save media record
         auth()->user()->mediaItems()->create([
@@ -272,14 +320,18 @@ new class extends Component
 
     public function removeUploadedMedia()
     {
+        // Livewire handles local temporary file cleanup automatically
         if ($this->media) {
-            // Delete the temporary file from S3
-            $this->deleteFromS3($this->media->getRealPath());
+            if (env('TEMP_FILE_UPLOAD_HOST') == 's3') {
+                // Delete the temporary file from S3
+                $this->deleteFromS3($this->media->getRealPath());
+            }
         }
         $this->media = null;
     }
 }
 ?>
+
 
 
 <x-modal-card title="Add a photo of a video as a log" name="logModal">
@@ -311,11 +363,10 @@ new class extends Component
                 @enderror
 
                 <!-- Progress Bar -->
-                <div x-show="isUploading" class="flex items-center justify-center h-20 col-span-1 shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M20.27,4.74a4.93,4.93,0,0,1,1.52,4.61a5.32,5.32,0,0,1-4.1,4.51a5.12,5.12,0,0,1-5.2-1.5a5.53,5.53,0,0,0,6.13-1.48A5.66,5.66,0,0,0,20.27,4.74ZM12.32,11.53a5.49,5.49,0,0,0-1.47-6.2A5.57,5.57,0,0,0,4.71,3.72a5.17,5.17,0,0,1,4.82-1.52a5.52,5.52,0,0,1,4.37,4.25a5.28,5.28,0,0,1-1.58,5.1Z"/>
-                    </svg>
-                </div>
+            <div x-show="isUploading" class="mt-4">
+                <progress max="100" x-bind:value="progress" class="w-full h-4"></progress>
+                <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
+            </div>
             </div>
             @endif
 
