@@ -22,6 +22,7 @@ new class extends Component
     #[On('aircraft_log-deleted')]
     public function getAircraftLogs(): void
     {
+        $this->aircraftLogs = New Collection();
         $this->aircraftLogs = auth()->user()->aircraftLogs()->latest()->get();
     }
 

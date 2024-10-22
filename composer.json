@@ -16,6 +16,7 @@
         "masmerise/livewire-toaster": "^2.3",
         "pbmedia/laravel-ffmpeg": "^8.5",
         "posthog/posthog-php": "^3.3",
+        "predis/predis": "^2.2",
         "sentry/sentry-laravel": "^4.9",
         "wireui/wireui": "^2.0"
     },

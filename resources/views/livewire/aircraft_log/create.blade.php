@@ -99,31 +99,6 @@ new class extends Component
     }
 
     /**
-     * Extracts a thumbnail from a video file.
-     */
-    public function extractThumbnail($videoPath)
-    {
-        $thumbnailPath = sys_get_temp_dir() . '/' . uniqid('thumb_', true) . '.jpg';
-
-        try {
-            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -ss 1 -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
-            exec($cmd, $output, $returnVar);
-
-            if ($returnVar !== 0) {
-                // Command failed
-                Toaster::warning('Failed to extract thumbnail: ' . implode("\n", $output));
-                return false;
-            }
-
-            return $thumbnailPath;
-
-        } catch (\Exception $e) {
-            Toaster::warning('Failed to extract thumbnail: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Converts an image to JPEG format using ImageMagick.
      */
      public function convertImagetoJPEG($imagePath)
@@ -148,32 +123,7 @@ new class extends Component
         }
     }
 
-    /**
-     * Compresses a video using FFmpeg.
-     */
-    public function compressVideo($videoPath)
-    {
-        $compressedPath = sys_get_temp_dir() . '/' . uniqid('video_', true) . '.mp4';
 
-        // Compress video using FFmpeg
-        try {
-            $filterChain = "scale=1280:-2,setsar=1/1";
-
-            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -b:v 1000k -c:a aac -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
-            exec($cmd, $output, $returnVar);
-
-            if ($returnVar !== 0) {
-                // Command failed
-                Toaster::warning('Failed to compress video: ' . implode("\n", $output));
-                return false;
-            }
-
-            return $compressedPath;
-        } catch (\Exception $e) {
-            Toaster::warning('Failed to compress video: ' . $e->getMessage());
-            return false;
-        }
-    }
 
     private function getMimeType($filePath)
     {
@@ -193,9 +143,6 @@ new class extends Component
         }
     }
 
-    /**
-     * Store function for handling uploads and probabilistic content analysis.
-     */
     public function store()
     {
         $validated = $this->validate();
@@ -221,74 +168,64 @@ new class extends Component
         ]);
 
         if (str_contains($mimeType, 'image')) {
-            // Convert image to JPEG if necessary
+            // Process image synchronously (since it's quick)
             $filePath = $this->convertImagetoJPEG($mediaFilePath);
             if (!$filePath) {
                 Toaster::warning('Failed to process image.');
                 throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
             }
-            $storedThumbnailFilePath = null;
-        } elseif (str_contains($mimeType, 'video')) {
-            // Compress and upload the video
-            $filePath = $this->compressVideo($mediaFilePath);
-            if (!$filePath) {
-                Toaster::warning('Failed to compress video.');
-                throw new \RuntimeException("The uploaded video could not be processed.");
-            }
 
-            // Extract thumbnail
-            $thumbnailFilePath = $this->extractThumbnail($mediaFilePath);
-            if (!$thumbnailFilePath) {
-                Toaster::warning('Failed to extract video thumbnail.');
-                throw new \RuntimeException("The video thumbnail could not be extracted.");
-            }
-
-            // Upload thumbnail to S3
-            $storedThumbnailFilePath = Storage::disk('s3')
+            // Upload processed file to S3
+            $storedFilePath = Storage::disk('s3')
                 ->putFile(
-                    'aircraft/thumbnails',
-                    new \Illuminate\Http\File($thumbnailFilePath),
+                    'aircraft',
+                    new \Illuminate\Http\File($filePath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
                     ]
                 );
 
-            // Clean up local thumbnail file
-            unlink($thumbnailFilePath);
+            // Clean up the local temporary files
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            if ($filePath !== $mediaFilePath && file_exists($mediaFilePath)) {
+                unlink($mediaFilePath);
+            }
+
+            // Save media record
+            $mediaItem = auth()->user()->mediaItems()->create([
+                "path" => $storedFilePath,
+                "aircraft_log_id" => $newAircraftLog->id,
+                "type" => Media::IMAGE->value,
+                "thumbnail_path" => null,
+                'status' => 'processed',
+            ]);
+
+            // Cache the media URL
+            $this->cacheMediaUrl($storedFilePath);
+
+            Toaster::info('Log created successfully.');
+        } elseif (str_contains($mimeType, 'video')) {
+            // Save media record with status 'processing'
+            $mediaItem = auth()->user()->mediaItems()->create([
+                "path" => null,
+                "aircraft_log_id" => $newAircraftLog->id,
+                "type" => Media::VIDEO->value,
+                "thumbnail_path" => null,
+                'status' => 'processing',
+            ]);
+
+            // Dispatch job to process video
+            ProcessVideoUpload::dispatch($mediaItem, $mediaFilePath);
+
+            Toaster::info('Your video is being processed. It will appear once processing is complete.');
+        } else {
+            // Unsupported media type
+            Toaster::warning('Unsupported media type uploaded.');
+            throw new \RuntimeException("Unsupported media type uploaded.");
         }
 
-        // Upload processed file to S3
-        $storedFilePath = Storage::disk('s3')
-            ->putFile(
-                'aircraft',
-                new \Illuminate\Http\File($filePath),
-                [
-                    'CacheControl' => 'public, max-age=31536000, immutable',
-                ]
-            );
-
-        // Clean up the local temporary files
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
-
-        // Avoid deleting the same file twice
-        if ($filePath !== $mediaFilePath && file_exists($mediaFilePath)) {
-            unlink($mediaFilePath); // Delete the original local media file
-        }
-
-        // Save media record
-        auth()->user()->mediaItems()->create([
-            "path" => $storedFilePath,
-            "aircraft_log_id" => $newAircraftLog->id,
-            "type" => str_contains($mimeType, 'video') ? Media::VIDEO->value : Media::IMAGE->value,
-            "thumbnail_path" => $storedThumbnailFilePath,
-        ]);
-
-        // Cache the media URL
-        $this->cacheMediaUrl($storedFilePath);
-
-        Toaster::info('Log created successfully.');
         $this->reset();
         $this->dispatch('aircraft_log-created');
         $this->mount();
