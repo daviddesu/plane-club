@@ -4,6 +4,7 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Collection;
+use App\Jobs\ProcessVideoUpload;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
