@@ -54,6 +54,11 @@ RUN chmod 754 /usr/local/bin/start-nginx
 COPY . /var/www/html
 WORKDIR /var/www/html
 
+
+# Copy start.sh to its location after application code
+COPY .fly/scripts/start.sh /var/www/html/.fly/scripts/start.sh
+RUN chmod +x /var/www/html/.fly/scripts/start.sh
+
 # 4. Setup application dependencies
 RUN composer install --optimize-autoloader --no-dev \
     && mkdir -p storage/logs \

@@ -81,8 +81,9 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [processes]
   web = ""
-  queue = "APP_PROCESS=queue"
-  scheduler = "APP_PROCESS=scheduler"
+  queue = "/var/www/html/.fly/scripts/start.sh queue"
+  scheduler = "/var/www/html/.fly/scripts/start.sh scheduler"
+
 
 [[services]]
   internal_port = 8080
