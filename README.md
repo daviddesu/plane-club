@@ -90,3 +90,34 @@ Connect to DB = fly postgres connect -a plane-club-db
 
 stripe listen --forward-to plane-club.test/stripe/webhook --skip-verify
 
+## Running web server and task server (for queues)
+### Summary of Commands
+
+#### Building the Docker Image
+```bash
+docker build -t plane-club-app .
+```
+
+#### Running Locally
+Web Server: `docker run -p 8080:8080 plane-club-app`
+Queue Worker: `docker run -e APP_PROCESS=queue plane-club-app`
+Scheduler: `docker run -e APP_PROCESS=scheduler plane-club-app`
+
+#### Deploying to Fly.io
+```bash
+fly deploy
+```
+
+#### Scaling Processes
+```bash
+fly scale count web=2
+fly scale count queue=1
+fly scale count scheduler=1
+```
+
+#### Monitoring Logs
+```bash
+fly logs --process-group web
+fly logs --process-group queue
+fly logs --process-group scheduler
+```

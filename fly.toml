@@ -57,6 +57,8 @@ console_command = 'php /var/www/html/artisan tinker'
   FFMPEG_BINARIES='/usr/bin/ffmpeg'
   FFPROBE_BINARIES='/usr/bin/ffprobe'
   TEMP_FILE_UPLOAD_HOST='s3'
+  QUEUE_CONNECTION='redis'
+  APP_PROCESS = 'web'
 
 
 
@@ -77,3 +79,27 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [deploy]
   release_command = "php /var/www/html/artisan migrate --force"
+
+[processes]
+  web = ""
+  queue = "APP_PROCESS=queue"
+  scheduler = "APP_PROCESS=scheduler"
+
+[[services]]
+  internal_port = 8080
+  processes = ["web"]
+  protocol = "tcp"
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
