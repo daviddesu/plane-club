@@ -62,7 +62,7 @@ console_command = 'php /var/www/html/artisan tinker'
   CASHIER_CURRENCY='gbp'
   FFMPEG_BINARIES='/usr/bin/ffmpeg'
   FFPROBE_BINARIES='/usr/bin/ffprobe'
-  TEMP_FILE_UPLOAD_HOST='s3'
+  FILE_UPLOAD_HOST='s3'
 
 
 

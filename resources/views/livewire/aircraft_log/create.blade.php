@@ -84,7 +84,7 @@ new class extends Component
      */
     private function prepareMediaFile()
     {
-        if (env('TEMP_FILE_UPLOAD_HOST') === 's3') {
+        if (env('FILE_UPLOAD_HOST') === 's3') {
             // Livewire temporary uploads are stored on S3
             $originalS3Path = $this->media->getRealPath(); // S3 path
             $localPath = $this->downloadFromS3($originalS3Path);
@@ -269,8 +269,8 @@ new class extends Component
      */
     public function cacheMediaUrl(string $path): void
     {
-        $cacheKey = "s3_media_url_" . md5($path);
-        Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
+            $cacheKey = "s3_media_url_" . md5($path);
+            Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
     }
 
     public function close()

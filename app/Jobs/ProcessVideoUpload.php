@@ -83,6 +83,7 @@ class ProcessVideoUpload implements ShouldQueue
             $mediaItem->update([
                 'path' => $storedFilePath,
                 'thumbnail_path' => $storedThumbnailFilePath,
+                'raw_video_path' => null,
                 'status' => 'processed',
             ]);
 
