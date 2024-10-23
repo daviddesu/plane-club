@@ -9,78 +9,112 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Media;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 
 class ProcessVideoUpload implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $mediaItem;
-    public $mediaFilePath;
+    public $mediaItemId;
+
     /**
      * Create a new job instance.
      */
-    public function __construct(Media $mediaItem, $mediaFilePath)
+    public function __construct($mediaItemId)
     {
-        $this->mediaItem = $mediaItem;
-        $this->mediaFilePath = $mediaFilePath;
+        $this->mediaItemId = $mediaItemId;
     }
-
 
     public function handle()
     {
-        // Compress Video
-        $compressedPath = $this->compressVideo($this->mediaFilePath);
+        try {
+            // Reload the media item from the database
+            $mediaItem = Media::find($this->mediaItemId);
 
-        if (!$compressedPath) {
-            // Handle failure (e.g., log error, update media item status)
-            return;
+            if (!$mediaItem) {
+                throw new \Exception('Media item not found with ID: ' . $this->mediaItemId);
+            }
+
+            Log::info('Processing video for Media Item ID: ' . $this->mediaItemId);
+
+            // Download raw video from S3 to a local temporary file
+            $rawVideoLocalPath = sys_get_temp_dir() . '/' . uniqid('raw_video_', true) . '.mov'; // Assuming original file is .mov
+
+            $rawVideoStream = Storage::disk('s3')->get($mediaItem->raw_video_path);
+            file_put_contents($rawVideoLocalPath, $rawVideoStream);
+
+            Log::info('Raw video downloaded to: ' . $rawVideoLocalPath);
+
+            // Compress Video
+            $compressedPath = $this->compressVideo($rawVideoLocalPath);
+
+            Log::info('Video compressed successfully for Media Item ID: ' . $this->mediaItemId);
+
+            // Extract Thumbnail
+            $thumbnailPath = $this->extractThumbnail($compressedPath);
+
+            Log::info('Thumbnail extracted successfully for Media Item ID: ' . $this->mediaItemId);
+
+            // Upload Files to S3
+            // Upload compressed video
+            $storedFilePath = Storage::disk('s3')
+                ->putFile(
+                    'aircraft',
+                    new \Illuminate\Http\File($compressedPath),
+                    [
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+            // Upload thumbnail
+            $storedThumbnailFilePath = Storage::disk('s3')
+                ->putFile(
+                    'aircraft/thumbnails',
+                    new \Illuminate\Http\File($thumbnailPath),
+                    [
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+            Log::info('Files uploaded to S3 for Media Item ID: ' . $this->mediaItemId);
+
+            // Update MediaItem with paths
+            $mediaItem->update([
+                'path' => $storedFilePath,
+                'thumbnail_path' => $storedThumbnailFilePath,
+                'status' => 'processed',
+            ]);
+
+            Log::info('Media Item updated to processed for ID: ' . $this->mediaItemId);
+
+            // Clean up local files
+            $this->cleanUpFiles([$compressedPath, $thumbnailPath, $rawVideoLocalPath]);
+
+            Log::info('ProcessVideoUpload job completed for Media Item ID: ' . $this->mediaItemId);
+
+            // Optionally, delete the raw video from S3
+            Storage::disk('s3')->delete($mediaItem->raw_video_path);
+            Log::info('Deleted raw video from S3 for Media Item ID: ' . $this->mediaItemId);
+
+        } catch (\Exception $e) {
+            Log::error('ProcessVideoUpload job failed for Media Item ID: ' . $this->mediaItemId . '. Error: ' . $e->getMessage());
+            if (isset($mediaItem)) {
+                $mediaItem->update(['status' => 'failed']);
+            }
+            // Optionally, rethrow the exception
+            // throw $e;
         }
+    }
 
-        // Extract Thumbnail
-        $thumbnailPath = $this->extractThumbnail($this->mediaFilePath);
-
-        if (!$thumbnailPath) {
-            // Handle failure
-            return;
+    private function cleanUpFiles(array $filePaths)
+    {
+        foreach ($filePaths as $path) {
+            if (file_exists($path)) {
+                unlink($path);
+                Log::info('Deleted temporary file: ' . $path);
+            }
         }
-
-        // Upload Files to S3
-        $storedFilePath = Storage::disk('s3')
-            ->putFile(
-                'aircraft',
-                new \Illuminate\Http\File($compressedPath),
-                [
-                    'CacheControl' => 'public, max-age=31536000, immutable',
-                ]
-            );
-
-        $storedThumbnailFilePath = Storage::disk('s3')
-            ->putFile(
-                'aircraft/thumbnails',
-                new \Illuminate\Http\File($thumbnailPath),
-                [
-                    'CacheControl' => 'public, max-age=31536000, immutable',
-                ]
-            );
-
-        // Update MediaItem with paths
-        $this->mediaItem->update([
-            'path' => $storedFilePath,
-            'thumbnail_path' => $storedThumbnailFilePath,
-            'status' => 'processed',
-        ]);
-
-        // Clean up local files
-        if (file_exists($compressedPath)) {
-            unlink($compressedPath);
-        }
-        if (file_exists($thumbnailPath)) {
-            unlink($thumbnailPath);
-        }
-        if (file_exists($this->mediaFilePath)) {
-            unlink($this->mediaFilePath);
-        }
-
     }
 
     /**
@@ -95,38 +129,61 @@ class ProcessVideoUpload implements ShouldQueue
             $filterChain = "scale=1280:-2,setsar=1/1";
 
             $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -b:v 1000k -c:a aac -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
+
+            // Initialize output and return variables
+            $output = [];
+            $returnVar = 0;
+
+            // Execute the command and capture the output
             exec($cmd, $output, $returnVar);
+
+            // Log the command and output for debugging
+            Log::info('FFmpeg command:', ['cmd' => $cmd]);
+            Log::info('FFmpeg output:', ['output' => $output]);
 
             if ($returnVar !== 0) {
                 // Command failed
+                $errorMessage = implode("\n", $output);
+                Log::error('FFmpeg failed with return code ' . $returnVar . ': ' . $errorMessage);
                 return false;
             }
 
             return $compressedPath;
         } catch (\Exception $e) {
+            Log::error('Exception in compressVideo: ' . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Extracts a thumbnail from a video file.
-     */
     public function extractThumbnail($videoPath)
     {
         $thumbnailPath = sys_get_temp_dir() . '/' . uniqid('thumb_', true) . '.jpg';
 
         try {
             $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -ss 1 -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
+
+            // Initialize output and return variables
+            $output = [];
+            $returnVar = 0;
+
+            // Execute the command and capture the output
             exec($cmd, $output, $returnVar);
+
+            // Log the command and output for debugging
+            Log::info('FFmpeg command for thumbnail:', ['cmd' => $cmd]);
+            Log::info('FFmpeg output for thumbnail:', ['output' => $output]);
 
             if ($returnVar !== 0) {
                 // Command failed
+                $errorMessage = implode("\n", $output);
+                Log::error('FFmpeg failed to extract thumbnail with return code ' . $returnVar . ': ' . $errorMessage);
                 return false;
             }
 
             return $thumbnailPath;
 
         } catch (\Exception $e) {
+            Log::error('Exception in extractThumbnail: ' . $e->getMessage());
             return false;
         }
     }

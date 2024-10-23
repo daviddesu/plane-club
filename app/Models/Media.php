@@ -16,6 +16,7 @@ class Media extends Model
         'aircraft_log_id',
         'thumbnail_path',
         'status',
+        'raw_video_path',
     ];
 
     public function user(): BelongsTo

@@ -33,6 +33,7 @@ console_command = 'php /var/www/html/artisan tinker'
   LOG_STACK='single'
   LOG_DEPRECATIONS_CHANNEL='null'
   DB_CONNECTION='pgsql'
+  DB_QUEUE_CONNECTION='pgsql'
   DB_PORT=5432
   DB_DATABASE='plane_club'
   SESSION_LIFETIME=120

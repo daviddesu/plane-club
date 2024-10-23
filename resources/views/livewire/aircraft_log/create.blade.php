@@ -210,6 +210,7 @@ new class extends Component
                 "type" => Media::IMAGE->value,
                 "thumbnail_path" => null,
                 'status' => 'processed',
+                'raw_video_path' => null,
             ]);
 
             // Cache the media URL
@@ -217,6 +218,21 @@ new class extends Component
 
             Toaster::info('Log created successfully.');
         } elseif (str_contains($mimeType, 'video')) {
+            // Upload raw video file to S3
+            $rawVideoPath = Storage::disk('s3')
+                ->putFile(
+                    'aircraft/raw_videos',
+                    new \Illuminate\Http\File($mediaFilePath),
+                    [
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+            // Clean up the local temporary file
+            if (file_exists($mediaFilePath)) {
+                unlink($mediaFilePath);
+            }
+
             // Save media record with status 'processing'
             $mediaItem = auth()->user()->mediaItems()->create([
                 "path" => "",
@@ -224,12 +240,19 @@ new class extends Component
                 "type" => Media::VIDEO->value,
                 "thumbnail_path" => null,
                 'status' => 'processing',
+                'raw_video_path' => $rawVideoPath, // Store the path to the raw video
             ]);
 
             // Dispatch job to process video
-            ProcessVideoUpload::dispatch($mediaItem, $mediaFilePath);
-
-            Toaster::info('Your video is being processed. It will appear once processing is complete.');
+            try {
+                ProcessVideoUpload::dispatch($mediaItem->id);
+                Log::info('Dispatched ProcessVideoUpload job for Media Item ID: ' . $mediaItem->id);
+                Toaster::info('Your video is being processed. It will appear once processing is complete.');
+            } catch (\Exception $e) {
+                Log::error('Failed to dispatch ProcessVideoUpload job: ' . $e->getMessage());
+                Toaster::warning('Failed to dispatch video processing job.');
+                throw $e;
+            }
         } else {
             // Unsupported media type
             Toaster::warning('Unsupported media type uploaded.');
