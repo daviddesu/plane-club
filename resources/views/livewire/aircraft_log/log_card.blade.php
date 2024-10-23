@@ -21,16 +21,28 @@ new class extends Component
             ->find($aircraftLogId);
     }
 
-    // Get the S3 temporary URL with caching
     public function getCachedMediaUrl($mediaPath)
     {
-        if(!$mediaPath){
+        if (!$mediaPath) {
             return null;
         }
-        return Cache::remember("s3_media_{$mediaPath}", now()->addDays(7), function() use ($mediaPath) {
-            return Storage::disk('s3')->temporaryUrl($mediaPath, now()->addDays(7));
+
+        $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
+        $cacheKey = "media_url_" . md5($mediaPath);
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($mediaPath, $storageDisk) {
+            $driverName = getenv('FILESYSTEM_DISK');
+
+            if ($driverName === 's3') {
+                // For S3, generate a temporary URL
+                return $storageDisk->temporaryUrl($mediaPath, now()->addDays(7));
+            } else {
+                // For local, generate a URL using asset() or url()
+                return asset('storage/' . $mediaPath);
+            }
         });
     }
+
 }
 
 ?>

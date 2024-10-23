@@ -38,10 +38,18 @@ class ProcessVideoUpload implements ShouldQueue
 
             Log::info('Processing video for Media Item ID: ' . $this->mediaItemId);
 
-            // Download raw video from S3 to a local temporary file
-            $rawVideoLocalPath = sys_get_temp_dir() . '/' . uniqid('raw_video_', true) . '.mov'; // Assuming original file is .mov
+            // Determine the storage disk
+            $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
 
-            $rawVideoStream = Storage::disk('s3')->get($mediaItem->raw_video_path);
+            // Download raw video from the uploads disk to a local temporary file
+            $rawVideoLocalPath = sys_get_temp_dir() . '/' . uniqid('raw_video_', true);
+
+            // Get the file extension
+            $extension = pathinfo($mediaItem->raw_video_path, PATHINFO_EXTENSION);
+            $rawVideoLocalPath .= '.' . $extension;
+
+            // Fetch the file content
+            $rawVideoStream = $storageDisk->get($mediaItem->raw_video_path);
             file_put_contents($rawVideoLocalPath, $rawVideoStream);
 
             Log::info('Raw video downloaded to: ' . $rawVideoLocalPath);
@@ -56,9 +64,9 @@ class ProcessVideoUpload implements ShouldQueue
 
             Log::info('Thumbnail extracted successfully for Media Item ID: ' . $this->mediaItemId);
 
-            // Upload Files to S3
+            // Upload Files to the uploads disk
             // Upload compressed video
-            $storedFilePath = Storage::disk('s3')
+            $storedFilePath = $storageDisk
                 ->putFile(
                     'aircraft',
                     new \Illuminate\Http\File($compressedPath),
@@ -68,7 +76,7 @@ class ProcessVideoUpload implements ShouldQueue
                 );
 
             // Upload thumbnail
-            $storedThumbnailFilePath = Storage::disk('s3')
+            $storedThumbnailFilePath = $storageDisk
                 ->putFile(
                     'aircraft/thumbnails',
                     new \Illuminate\Http\File($thumbnailPath),
@@ -77,7 +85,7 @@ class ProcessVideoUpload implements ShouldQueue
                     ]
                 );
 
-            Log::info('Files uploaded to S3 for Media Item ID: ' . $this->mediaItemId);
+            Log::info('Files uploaded to storage for Media Item ID: ' . $this->mediaItemId);
 
             // Update MediaItem with paths
             $mediaItem->update([
@@ -94,9 +102,9 @@ class ProcessVideoUpload implements ShouldQueue
 
             Log::info('ProcessVideoUpload job completed for Media Item ID: ' . $this->mediaItemId);
 
-            // Optionally, delete the raw video from S3
-            Storage::disk('s3')->delete($mediaItem->raw_video_path);
-            Log::info('Deleted raw video from S3 for Media Item ID: ' . $this->mediaItemId);
+            // Optionally, delete the raw video from the storage
+            $storageDisk->delete($mediaItem->raw_video_path);
+            Log::info('Deleted raw video from storage for Media Item ID: ' . $this->mediaItemId);
 
         } catch (\Exception $e) {
             Log::error('ProcessVideoUpload job failed for Media Item ID: ' . $this->mediaItemId . '. Error: ' . $e->getMessage());

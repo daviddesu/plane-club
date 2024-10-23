@@ -73,13 +73,25 @@ new class extends Component
         }
     }
 
-    public function getCachedMediaUrl(string $path): string
+    public function getCachedMediaUrl($mediaPath)
     {
-        // Cache the media URL for 7 days
-        $cacheKey = "s3_media_url_" . md5($path);
+        if (!$mediaPath) {
+            return null;
+        }
 
-        return Cache::remember($cacheKey, now()->addDays(7), function () use ($path) {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addDays(7));
+        $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
+        $cacheKey = "media_url_" . md5($mediaPath);
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($mediaPath, $storageDisk) {
+            $driverName = getenv('FILESYSTEM_DISK');
+
+            if ($driverName === 's3') {
+                // For S3, generate a temporary URL
+                return $storageDisk->temporaryUrl($mediaPath, now()->addDays(7));
+            } else {
+                // For local, generate a URL using asset() or url()
+                return asset('storage/' . $mediaPath);
+            }
         });
     }
 

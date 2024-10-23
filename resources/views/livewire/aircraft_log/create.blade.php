@@ -84,7 +84,7 @@ new class extends Component
      */
     private function prepareMediaFile()
     {
-        if (env('FILE_UPLOAD_HOST') === 's3') {
+        if (env('FILESYSTEM_DISK') === 's3') {
             // Livewire temporary uploads are stored on S3
             $originalS3Path = $this->media->getRealPath(); // S3 path
             $localPath = $this->downloadFromS3($originalS3Path);
@@ -186,7 +186,7 @@ new class extends Component
             }
 
             // Upload processed file to S3
-            $storedFilePath = Storage::disk('s3')
+            $storedFilePath = Storage::disk(getenv('FILESYSTEM_DISK'))
                 ->putFile(
                     'aircraft',
                     new \Illuminate\Http\File($filePath),
@@ -219,7 +219,7 @@ new class extends Component
             Toaster::info('Log created successfully.');
         } elseif (str_contains($mimeType, 'video')) {
             // Upload raw video file to S3
-            $rawVideoPath = Storage::disk('s3')
+            $rawVideoPath = Storage::disk(getenv('FILESYSTEM_DISK'))
                 ->putFile(
                     'aircraft/raw_videos',
                     new \Illuminate\Http\File($mediaFilePath),
@@ -264,14 +264,23 @@ new class extends Component
         $this->mount();
     }
 
-    /**
-     * Cache the S3 media URL immediately after uploading.
-     */
     public function cacheMediaUrl(string $path): void
-    {
-            $cacheKey = "s3_media_url_" . md5($path);
-            Cache::put($cacheKey, Storage::disk('s3')->temporaryUrl($path, now()->addDays(7)), now()->addDays(7));
+{
+    $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
+    $cacheKey = "media_url_" . md5($path);
+
+    $driverName = getenv('FILESYSTEM_DISK');
+
+    if ($driverName === 's3') {
+        // For S3, generate a temporary URL
+        $url = $storageDisk->temporaryUrl($path, now()->addDays(7));
+    } else {
+        // For local, generate a URL using asset() or url()
+        $url = asset('storage/' . $path);
     }
+
+    Cache::put($cacheKey, $url, now()->addDays(7));
+}
 
     public function close()
     {
@@ -292,7 +301,7 @@ new class extends Component
     {
         // Livewire handles local temporary file cleanup automatically
         if ($this->media) {
-            if (env('TEMP_FILE_UPLOAD_HOST') == 's3') {
+            if (env('FILESYSTEM_DISK') == 's3') {
                 // Delete the temporary file from S3
                 $this->deleteFromS3($this->media->getRealPath());
             }
