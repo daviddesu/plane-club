@@ -99,10 +99,7 @@ new class extends Component
         }
     }
 
-    /**
-     * Converts an image to JPEG format using ImageMagick.
-     */
-     public function convertImagetoJPEG($imagePath)
+    public function convertImagetoJPEG($imagePath)
     {
         // Check if the image is already a JPEG
         $mimeType = $this->getMimeType($imagePath);
@@ -114,16 +111,28 @@ new class extends Component
 
         $convertedFilePath = sys_get_temp_dir() . '/' . uniqid('image_', true) . '.jpg';
 
-        try {
-            exec("magick convert " . escapeshellarg($imagePath) . " " . escapeshellarg($convertedFilePath));
+        // Initialize variables to capture output and status
+        $output = [];
+        $returnVar = 0;
 
-            return $convertedFilePath; // Return the converted file path
-        } catch (\Exception $e) {
-            Toaster::warning('Failed to convert image to JPEG: ' . $e->getMessage());
+        // Use 'convert' instead of 'magick convert'
+        exec("convert " . escapeshellarg($imagePath) . " " . escapeshellarg($convertedFilePath) . " 2>&1", $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            // Conversion failed
+            $errorMessage = implode("\n", $output);
+            Toaster::warning('Failed to convert image to JPEG: ' . $errorMessage);
             return false;
         }
-    }
 
+        // Check if the output file exists
+        if (!file_exists($convertedFilePath)) {
+            Toaster::warning('Conversion failed: Output file not found.');
+            return false;
+        }
+
+        return $convertedFilePath; // Return the converted file path
+    }
 
 
     private function getMimeType($filePath)
