@@ -28,11 +28,10 @@
 [x] Handle HEIC and other non jpeg or PNG upload types
 [x] Convert all temp storage to use S3 in production
 [x] Change to just uploading one image per log. Submit and add another buttin
-[ ] Allow next log to poputa efrom the last details
-[ ] Filtered pages to show logs by, airport, aircraft, airline, date etc.
+[x] Better log saveing process to prevent timeouts and informt he users the log is being created
+[x] Make sure temp files are removed once persistsed to s3
+[x] Filtered pages to show logs by, airport, aircraft, airline, date etc.
 [ ] see how we can ustill use local on local dev
-[ ] Better log saveing process to prevent timeouts and informt he users the log is being created
-[ ] Make sure temp files are removed once persistsed to s3
 [ ] Add departure/destination airport, and also flight number
 [ ] Email verification on signup
 [ ] Send to facebook
@@ -55,6 +54,7 @@
 
 ## Later
 
+[ ] Allow next log to poputa efrom the last details
 [ ] Show avatar on log
 [ ] Like other people logs
 [ ] Google and facebook auth (clerk maybe?)

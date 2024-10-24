@@ -7,11 +7,23 @@ use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
-    public AircraftLog $aircraftLog;
+    public int $aircraftLogId;
+    public string $loggedAt;
+
+    public ?string $airportName = null;
+    public ?string $aircraftType = null;
+    public ?string $airlineName = null;
+
+    public bool $isVideo = false;
+    public bool $isProcessing = false;
+    public ?string $thumbnailPath = null;
+    public ?string $mediaPath = null;
+
+
 
     public function mount(int $aircraftLogId): void
     {
-        $this->aircraftLog = AircraftLog::with([
+        $aircraftLog = AircraftLog::with([
                 'user',
                 'media',
                 'airline',
@@ -19,9 +31,19 @@ new class extends Component
                 'aircraft'
             ])
             ->find($aircraftLogId);
+
+            $this->aircraftLogId = $aircraftLog->id;
+            $this->isVideo = $aircraftLog->media?->isVideo() ?? false;
+            $this->isProcessing = $aircraftLog->media?->isProcessing() ?? false;
+            $this->thumbnailPath = $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path);
+            $this->mediaPath = $this->getCachedMediaUrl($aircraftLog->media?->path);
+            $this->airportName = $aircraftLog->airport->name ?? '';
+            $this->loggedAt = $aircraftLog->logged_at->format('d/m/Y');
+            $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
+            $this->airlineName = $aircraftLog->airline?->name ?? '';
     }
 
-    public function getCachedMediaUrl($mediaPath)
+    public function getCachedMediaUrl($mediaPath): ?string
     {
         if (!$mediaPath) {
             return null;
@@ -50,17 +72,17 @@ new class extends Component
 <div>
     {{-- Media Container with rectangular aspect ratio --}}
     <div
-        x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLog->id }}});"
+        x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLogId }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
-        @if($aircraftLog->media?->isVideo() && $aircraftLog->media?->isProcessing())
+        @if($isVideo && $isProcessing)
             <p>Processing...</p>
-        @elseif ($aircraftLog->media?->isVideo())
+        @elseif ($isVideo)
             <div
                 class="relative w-full h-full"
             >
                 <img class="object-cover w-full h-full select-none"
-                src={{ $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path) }}
+                src={{ $thumbnailPath }}
                 />
                 <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                     <x-icon name="play-circle" class="w-12 h-12 text-white" />
@@ -68,7 +90,7 @@ new class extends Component
             </div>
         @else
             <img
-                src="{{ $this->getCachedMediaUrl($aircraftLog->media?->path) }}"
+                src="{{ $mediaPath }}"
                 alt=""
                 loading="lazy"
                 class="object-cover w-full h-full select-none"
@@ -79,12 +101,12 @@ new class extends Component
     {{-- Log Details --}}
     <div class="grid grid-cols-2 mt-2">
         <div>
-            <div><span class="text-gray-800">{{ $aircraftLog->airport->name }}</span></div>
-            <div><small class="text-xs text-gray-600">{{ (new DateTime($aircraftLog->logged_at))->format('d/m/Y') }}</small></div>
+            <div><span class="text-gray-800">{{ $airportName }}</span></div>
+            <div><small class="text-xs text-gray-600">{{ $loggedAt }}</small></div>
         </div>
         <div>
-            <div><small class="text-xs text-gray-600">{{ $aircraftLog->aircraft?->getFormattedName() }}</small></div>
-            <div><small class="text-xs text-gray-600">{{ $aircraftLog->airline?->name }}</small></div>
+            <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
+            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
         </div>
     </div>
 </div>

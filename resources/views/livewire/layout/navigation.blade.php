@@ -25,18 +25,7 @@ $logout = function (Logout $logout) {
 
             <!-- Navigation Links -->
             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('aircraft_logs')" wire:navigate>
-                    {{ __('Images & Videos') }}
-                </x-nav-link>
-                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
-                    {{ __('Aircraft') }}
-                </x-nav-link>
-                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
-                    {{ __('Airlines') }}
-                </x-nav-link>
-                <x-nav-link :href="route('aircraft_logs')" :active="request()->routeIs('signup')" wire:navigate>
-                    {{ __('Airports') }}
-                </x-nav-link>
+
             </div>
 
             <!-- Settings Dropdown -->
@@ -115,19 +104,6 @@ $logout = function (Logout $logout) {
 
             @if(Auth::check())
                 <div class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                        {{ __('Images & Videos') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                        {{ __('Aircraft') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                        {{ __('Airlines') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('aircraft_logs')" wire:navigate>
-                        {{ __('Airports') }}
-                    </x-responsive-nav-link>
-
                     <x-responsive-nav-link :href="route('profile')" wire:navigate>
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
