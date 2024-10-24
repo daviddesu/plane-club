@@ -5,13 +5,13 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use Livewire\Volt\Component;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 
 
 new class extends Component
 {
-    public Collection $aircraftLogs;
+    public Collection $aircraftLogIds;
     public Collection $aircraftTypes;
     public Collection $airlines;
     public Collection $airports;
@@ -24,8 +24,16 @@ new class extends Component
     public $selectedAirline = null;
     public $selectedAirport = null;
 
+    // Pagination
+    public int $perPage = 20;
+    public int $page = 1;
+    public bool $hasMorePages = true;
+    public bool $isLoading = false;
+
     public function mount(): void
     {
+        $this->aircraftLogIds = collect();
+
         // Load filter options
         $this->aircraftTypes = Aircraft::all();
         $this->airlines = Airline::all();
@@ -53,14 +61,20 @@ new class extends Component
             ];
         })->toArray();
 
-        $this->getAircraftLogs();
+        $this->getAircraftLogs(true);
     }
 
     #[On('aircraft_log-created')]
     #[On('aircraft_log-updated')]
     #[On('aircraft_log-deleted')]
-    public function getAircraftLogs(): void
+    public function getAircraftLogs(bool $reset = false): void
     {
+        if ($reset) {
+            $this->page = 1;
+            $this->aircraftLogIds = collect();
+            $this->hasMorePages = true;
+        }
+
         $query = auth()->user()->aircraftLogs()->latest();
 
         if ($this->selectedAircraftType) {
@@ -75,22 +89,46 @@ new class extends Component
             $query->where('airport_id', $this->selectedAirport);
         }
 
-        $this->aircraftLogs = $query->get();
+        $logs = $query->skip($this->perPage * ($this->page - 1))
+                    ->take($this->perPage + 1)
+                    ->pluck('id');
+
+        if ($logs->count() > $this->perPage) {
+            $this->hasMorePages = true;
+            $logs = $logs->slice(0, $this->perPage);
+        } else {
+            $this->hasMorePages = false;
+        }
+
+        $this->aircraftLogIds = $this->aircraftLogIds->concat($logs);
+        $this->page++;
     }
 
-    public function updatedSelectedAircraftType(): void
+    public function updatedSelectedAircraftType($value): void
     {
-        $this->getAircraftLogs();
+        $this->selectedAircraftType = $value ?: null;
+        $this->getAircraftLogs(true);
     }
 
-    public function updatedSelectedAirline(): void
+    public function updatedSelectedAirline($value): void
     {
-        $this->getAircraftLogs();
+        $this->selectedAirline = $value ?: null;
+        $this->getAircraftLogs(true);
     }
 
-    public function updatedSelectedAirport(): void
+    public function updatedSelectedAirport($value): void
     {
-        $this->getAircraftLogs();
+        $this->selectedAirport = $value ?: null;
+        $this->getAircraftLogs(true);
+    }
+
+    public function loadMore(): void
+    {
+        if ($this->hasMorePages && !$this->isLoading) {
+            $this->isLoading = true;
+            $this->getAircraftLogs();
+            $this->isLoading = false;
+        }
     }
 }
 ?>
@@ -144,15 +182,25 @@ new class extends Component
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">
             <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
-                @foreach($this->aircraftLogs as $aircraftLog)
+                @foreach($this->aircraftLogIds as $aircraftLogId)
                     <li>
                         <livewire:aircraft_log.log_card
-                            wire:key="aircraftLog-{{ $aircraftLog->id }}"
-                            :aircraftLogId="$aircraftLog->id"
+                            wire:key="aircraftLog-{{ $aircraftLogId }}"
+                            :aircraftLogId="$aircraftLogId"
                         />
                     </li>
                 @endforeach
             </ul>
+
+            @if ($hasMorePages)
+                <div
+                    x-data
+                    x-intersect:enter="$wire.loadMore()"
+                    class="py-4 text-center"
+                >
+                    <span wire:loading.delay>Loading...</span>
+                </div>
+            @endif
         </div>
     </div>
 </div>
