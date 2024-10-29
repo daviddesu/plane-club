@@ -92,7 +92,21 @@ Connect to DB = fly postgres connect -a plane-club-db
 
 ## Listen for stripe webhook locally with stripe cli
 
-stripe listen --forward-to plane-club.test/stripe/webhook --skip-verify
+- for staging do the same but without the local listener. And for prod do it in non sandbox mode.
+
+- Sanbox not setup
+    - Setup sandbox on stripe
+    - setup a new webhook on stripe with all
+    - Setup a new product
+- make sure key and secret are in env
+- Make sure sandbox product is in env
+- make sure price is in env
+- start local listener:
+
+```bash
+stripe listen --forward-to https://plane-club.test/stripe/webhook --skip-verify
+```
+- copy webhook signing secret to env
 
 ## Running web server and task server (for queues)
 ### Summary of Commands
