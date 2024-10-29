@@ -38,18 +38,57 @@
 [x] Email verification on signup
 [x] User area upgrades for subscription view and cancel
 [x] User delete not working
-[ ] Auth themeing
-[ ] S3 look at cors to specifiyt he correct domain
-[ ] Send to facebook
+[x] Auth themeing
+[ ] Download button
+[ ] Email service for staging and prod
 [ ] Perfection pass
-[ ] Beuutify sales page
-[ ] Subscription emails and verficiation and trial end prompts and actual
-[ ] trial days left banner (colapsable)
+    [ ] Sales page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] register page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] Login page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] email verification page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] Verification email
+        [ ] Mobile
+        [ ] Desktop
+    [ ] profile page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] Ending sub process
+        [ ] Mobile
+        [ ] Desktop
+    [ ] deleteing profile process
+        [ ] Mobile
+        [ ] Desktop
+    [ ] logs page
+        [ ] Mobile
+        [ ] Desktop
+    [ ] Adding a log process
+        [ ] Mobile
+        [ ] Desktop
+    [ ] Viewing a log
+        [ ] Mobile
+        [ ] Desktop
+    [ ] removing a log
+        [ ] Mobile
+        [ ] Desktop
+    [ ] editing a log
+        [ ] Mobile
+        [ ] Desktop
+[ ] Compile list of airports
+[ ] Compile list of airlines
+[ ] Compile list of aircraft
+[ ] S3 look at cors to specifiyt he correct domain
 [ ] Create prod setup
 [ ] Emails on prod
 [ ] S3 file backups
 [ ] DB backups?
-[ ] Setup stripe for local, staging and prod
 [ ] register business
 [ ] Business bank account
 [ ] Update stripe account
@@ -57,6 +96,7 @@
 
 ## Later
 
+[ ] Send to facebook
 [ ] Allow next log to poputa efrom the last details
 [ ] Upload and show avatar to nav bar
 [ ] Show avatar on log

@@ -254,6 +254,9 @@ new class extends Component
 
             // Dispatch job to process video
             try {
+                if(env('FLY_QUEUE_MACHINE_ID')){
+                    Artisan::call('machine:start', ['id' => env('FLY_QUEUE_MACHINE_ID')]);
+                }
                 ProcessVideoUpload::dispatch($mediaItem->id);
                 Log::info('Dispatched ProcessVideoUpload job for Media Item ID: ' . $mediaItem->id);
                 Toaster::info('Your video is being processed. It will appear once processing is complete.');

@@ -53,6 +53,8 @@ new class extends Component
 
     public ?string $mediaUrl = "";
 
+    public string $fileName = "";
+
     public bool $editing = false;
     public bool $modalOpened = false;
 
@@ -66,7 +68,7 @@ new class extends Component
 
     public function loadAircraftLog($id): void
     {
-        $this->aircraftLog = AircraftLog::with('user', 'media', 'airport', 'airline', 'aircraft')->find($id);
+        $this->aircraftLog = AircraftLog::with('user', 'media', 'departureAirport', 'arrivalAirport', 'airline', 'aircraft')->find($id);
 
         if ($this->aircraftLog) {
             $this->loggedAt = $this->aircraftLog->logged_at;
@@ -79,7 +81,27 @@ new class extends Component
             $this->registration = $this->aircraftLog->registration;
             $this->media = $this->aircraftLog->media;
             $this->mediaUrl = $this->getCachedMediaUrl($this->media->path);
+            $this->fileName = $this->generateFileName();
         }
+    }
+
+    public function generateFileName()
+    {
+        $name = "Plane-club-";
+        $name .= (new \DateTime($this->loggedAt))->format("Y-m-d");
+
+        if($this->aircraftLog->departureAirport){
+            $name .= "-{$this->aircraftLog->departureAirport->code}";
+        }
+
+        if($this->aircraftLog->arrivalAirport){
+            $name .= "-{$this->aircraftLog->arrivalAirport->code}";
+        }
+
+        if($this->aircraftLog->aircraft){
+            $name .= "-{$this->aircraftLog->aircraft->model}-{$this->aircraftLog->aircraft->varient}";
+        }
+        return $name;
     }
 
     public function getCachedMediaUrl($mediaPath)
@@ -135,7 +157,9 @@ new class extends Component
     {
         $validated = $this->validate();
         $this->aircraftLog->update([
-            "airport_id" => $this->airport_id,
+            "arrival_airport_id" => $this->arrival_airport_id,
+            "departure_airport_id" => $this->departure_airport_id,
+            "status" => $this->status,
             "logged_at" => $this->loggedAt,
             "description" => $this->description,
             "airline_id" => $this->airline_id,
@@ -179,6 +203,8 @@ new class extends Component
                     <div class="flex mb-4 space-x-2">
                         <button wire:click='startEdit' class="px-2 py-1 text-white bg-blue-500 rounded">Edit</button>
                         <livewire:aircraft_log.delete lazy :aircraftLog="$aircraftLog">
+                        <a href="{{ $mediaUrl }}" download="{{ $fileName }}"><button  class="px-2 py-1 text-white bg-blue-500 rounded">Edit</button></a>
+
                     </div>
                 @endif
 
@@ -270,7 +296,7 @@ new class extends Component
                 @else
                     <!-- Display Log Details -->
                     <p class="mb-2 text-gray-700 text-md">Date: {{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
-                    <p class="mb-2 text-gray-700 text-md">{{ $aircraftLog?->departure_airport->name }} ({{ $aircraftLog?->departure_airport->code }}) -> {{ $aircraftLog?->arrival_airport->name }} ({{ $aircraftLog?->arrival_airport->code }})</p>
+                    <p class="mb-2 text-gray-700 text-md">{{ $aircraftLog?->departureAirport?->name }} ({{ $aircraftLog?->departureAirport?->code }}) -> {{ $aircraftLog?->arrivalAirport?->name }} ({{ $aircraftLog?->arrivalAirport?->code }})</p>
                     <p class="mb-2 text-gray-700 text-md">Status: {{ FlyingStatus::getNameByStatus($status) }}</p>
                     <p class="mb-2 text-gray-700 text-md">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
                     <p class="mb-2 text-gray-700 text-md">Registration: {{ $aircraftLog?->registration }}</p>
