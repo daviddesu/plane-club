@@ -34,6 +34,7 @@ class SalesController extends Controller
 
     public function checkoutSuccess(Request $request)
     {
+        dd($request);
         session()->flash('success-message', 'Welcome to Plane Club. Its great to have you on board!');
 
         return redirect()->route('verification.notice');

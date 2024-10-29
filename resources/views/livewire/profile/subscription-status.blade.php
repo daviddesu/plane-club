@@ -12,7 +12,7 @@ new class extends Component {
         $this->subscription = auth()->user()->subscription(env('STRIPE_PRODUCT_ID'));
     }
 
-        public function cancelSubscription()
+    public function cancelSubscription()
     {
         $user = auth()->user();
         $user->subscription(env('STRIPE_PRODUCT_ID'))->cancel();
@@ -52,7 +52,7 @@ new class extends Component {
         @if ($subscription && $subscription->onGracePeriod())
 
             <div class="mt-6 space-y-6">
-                <p>Your subscription has been canceled and will end on {{ $subscription->ends_at->format('Y-m-d') }}. After this date your account and data will be deleted.</p>
+                <p>Your subscription has been canceled and will end on {{ $subscription?->ends_at->format('Y-m-d') }}. After this date your account and data will be deleted.</p>
                 <x-primary-button wire:click="resumeSubscription">Resume Subscription</x-primary-button>
             </div>
         @elseif ($subscription && $subscription->valid())
@@ -63,7 +63,7 @@ new class extends Component {
             </div>
         @else
             <div class="mt-6 space-y-6">
-                <p>You do not have an active subscription. Your data account will be deleted on {{ $subscription->ends_at->add('1M')->format('Y-m-d') }}</p>
+                <p>You do not have an active subscription. Your data account will be deleted on {{ $subscription?->ends_at->add('1M')->format('Y-m-d') }}</p>
             </div>
         @endif
     </div>

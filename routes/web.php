@@ -21,15 +21,15 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::get('/checkout', [SalesController::class, 'checkout'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('checkout');
 
 Route::get('/checkout/success', [SalesController::class, 'checkoutSuccess'])
-    ->middleware(['auth', 'verified', Subscribed::class])
+    ->middleware(['auth', Subscribed::class])
     ->name('checkout-success');
 
 Route::view('/checkout/cancel', [SalesController::class, 'checkoutCancel'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('checkout-cancel');
 
 require __DIR__ . '/auth.php';

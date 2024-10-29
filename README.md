@@ -37,8 +37,7 @@
 [x] Production queue efficiency 
 [x] Email verification on signup
 [x] User area upgrades for subscription view and cancel
-[ ] User delete not working
-[ ] Add avatar to nav bar
+[x] User delete not working
 [ ] Auth themeing
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Send to facebook
@@ -59,6 +58,7 @@
 ## Later
 
 [ ] Allow next log to poputa efrom the last details
+[ ] Upload and show avatar to nav bar
 [ ] Show avatar on log
 [ ] Like other people logs
 [ ] Google and facebook auth (clerk maybe?)
