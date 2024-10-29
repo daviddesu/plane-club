@@ -39,8 +39,8 @@
 [x] User area upgrades for subscription view and cancel
 [x] User delete not working
 [x] Auth themeing
-[ ] Download button
-[ ] Email service for staging and prod
+[x] Download button
+[x] Email service for staging and prod
 [ ] Perfection pass
     [ ] Sales page
         [ ] Mobile
