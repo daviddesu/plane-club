@@ -8,13 +8,15 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Media;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 
 class ProcessVideoUpload implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable {dispatch as traitDispatch;}
+    use InteractsWithQueue, Queueable, SerializesModels;
 
     public $mediaItemId;
 
@@ -195,5 +197,11 @@ class ProcessVideoUpload implements ShouldQueue
             Log::error('Exception in extractThumbnail: ' . $e->getMessage());
             return false;
         }
+    }
+
+    public static function dispatch(...$arguments)
+    {
+        Artisan::call('machine:start', ['id' => env('FLY_QUEUE_MACHINE_ID')]);
+        self::traitDispatch(...$arguments);
     }
 }

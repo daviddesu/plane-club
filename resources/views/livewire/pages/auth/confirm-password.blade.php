@@ -27,7 +27,7 @@ $confirmPassword = function () {
 
     session(['auth.password_confirmed_at' => time()]);
 
-    $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    $this->redirectIntended(default: route('aircraft_logs', absolute: false), navigate: true);
 };
 
 ?>
@@ -44,7 +44,7 @@ $confirmPassword = function () {
 
             <x-text-input wire:model="password"
                           id="password"
-                          class="block mt-1 w-full"
+                          class="block w-full mt-1"
                           type="password"
                           name="password"
                           required autocomplete="current-password" />

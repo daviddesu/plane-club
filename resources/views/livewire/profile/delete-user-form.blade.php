@@ -12,6 +12,7 @@ rules(['password' => ['required', 'string', 'current_password']]);
 
 $deleteUser = function (Logout $logout) {
     $this->validate();
+    Auth::user()->subscription(env('STRIPE_PRODUCT_ID'))->cancelNow();
 
     tap(Auth::user(), $logout(...))->delete();
 
@@ -33,10 +34,10 @@ $deleteUser = function (Logout $logout) {
 
     <x-danger-button
         x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
+        x-on:click.prevent="$openModal('confirm-user-deletion')"
     >{{ __('Delete Account') }}</x-danger-button>
 
-    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
+    <x-modal-card name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
         <form wire:submit="deleteUser" class="p-6">
 
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -55,14 +56,14 @@ $deleteUser = function (Logout $logout) {
                     id="password"
                     name="password"
                     type="password"
-                    class="mt-1 block w-3/4"
+                    class="block w-3/4 mt-1"
                     placeholder="{{ __('Password') }}"
                 />
 
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
 
-            <div class="mt-6 flex justify-end">
+            <div class="flex justify-end mt-6">
                 <x-secondary-button x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
                 </x-secondary-button>

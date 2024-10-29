@@ -14,7 +14,7 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [processes]
   app = ""
-  queue = "php artisan queue:work --sleep=3 --tries=3 --timeout=3600"
+  queue = "php artisan queue:work --stop-when-empty"
   scheduler = "php artisan schedule:work"
 
 [env]
@@ -62,9 +62,8 @@ console_command = 'php /var/www/html/artisan tinker'
   CASHIER_CURRENCY='gbp'
   FFMPEG_BINARIES='/usr/bin/ffmpeg'
   FFPROBE_BINARIES='/usr/bin/ffprobe'
-
-
-
+  FLY_APP_NAME='plane-club'
+  FLY_QUEUE_MACHINE_ID='9080577c23e648'
 
 
 [http_service]

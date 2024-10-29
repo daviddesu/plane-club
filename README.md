@@ -31,19 +31,23 @@
 [x] Better log saveing process to prevent timeouts and informt he users the log is being created
 [x] Make sure temp files are removed once persistsed to s3
 [x] Filtered pages to show logs by, airport, aircraft, airline, date etc.
-[ ] see how we can ustill use local on local dev
-[ ] Add departure/destination airport, and also flight number
-[ ] Email verification on signup
-[ ] Send to facebook
-[ ] User area upgrades for subscription view and cancel
+[x] see how we can ustill use local on local dev
+[x] Pagination
+[x] Add departure/destination airport, and also flight number and landing, takeoff, inflight 
+[x] Production queue efficiency 
+[x] Email verification on signup
+[x] User area upgrades for subscription view and cancel
+[ ] User delete not working
 [ ] Add avatar to nav bar
 [ ] Auth themeing
 [ ] S3 look at cors to specifiyt he correct domain
+[ ] Send to facebook
 [ ] Perfection pass
 [ ] Beuutify sales page
 [ ] Subscription emails and verficiation and trial end prompts and actual
 [ ] trial days left banner (colapsable)
 [ ] Create prod setup
+[ ] Emails on prod
 [ ] S3 file backups
 [ ] DB backups?
 [ ] Setup stripe for local, staging and prod

@@ -5,26 +5,44 @@
         </h2>
     </x-slot>
 
-    @if (!auth()->user()->subscribed(env('STRIPE_PRODUCT_ID')))
-            <div class="alert alert-success">
-                <x-alert title="Please activate your subscription to use Plane Club." warning />
-            </div>
-        @endif
+    @if (session()->has('message'))
+        <div class="p-4 mt-4 bg-green-100 rounded-md">
+            {{ session('message') }}
+        </div>
+    @endif
 
     <div class="py-12">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
+
+
+
+            <!-- Update Profile Information -->
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
                 <div class="max-w-xl">
                     <livewire:profile.update-profile-information-form />
                 </div>
             </div>
 
+            <!-- Update Password -->
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
                 <div class="max-w-xl">
                     <livewire:profile.update-password-form />
                 </div>
             </div>
 
+            <!-- Subscription Status -->
+            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
+                <livewire:profile.subscription-status />
+            </div>
+
+            <!-- Update Payment Method -->
+            @if (auth()->user()->subscribed())
+                <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
+                    <livewire:profile.update-payment-method />
+                </div>
+            @endif
+
+            <!-- Delete User -->
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
                 <div class="max-w-xl">
                     <livewire:profile.delete-user-form />

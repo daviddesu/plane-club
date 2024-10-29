@@ -36,7 +36,7 @@ class SalesController extends Controller
     {
         session()->flash('success-message', 'Welcome to Plane Club. Its great to have you on board!');
 
-        return redirect()->route('aircraft_logs');
+        return redirect()->route('verification.notice');
 
     }
 

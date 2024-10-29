@@ -8,6 +8,7 @@ use App\Jobs\ProcessVideoUpload;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
+use App\Enums\FlyingStatus;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\VideoIntelligence\V1\VideoIntelligenceServiceClient;
 use Google\Cloud\Vision\V1\Likelihood;
@@ -29,7 +30,13 @@ new class extends Component
     public ?string $loggedAt;
 
     #[Validate('required')]
-    public ?string $airport = null;
+    public ?string $status = null;
+
+    #[Validate('required_if:status,1,2')]
+    public ?string $departureAirport = null;
+
+    #[Validate('required_if:status,2,3')]
+    public ?string $arrivalAirport = null;
 
     #[Validate]
     public ?string $airline = null;
@@ -169,7 +176,9 @@ new class extends Component
         }
 
         $newAircraftLog = auth()->user()->aircraftLogs()->create([
-            "airport_id" => $this->airport,
+            "arrival_airport_id" => $this->arrivalAirport,
+            "departure_airport_id" => $this->departureAirport,
+            "status" => $this->status,
             "logged_at" => $this->loggedAt,
             "description" => $this->description,
             "airline_id" => $this->airline,
@@ -290,7 +299,9 @@ new class extends Component
     private function resetProperties()
     {
         $this->loggedAt = null;
-        $this->airport = null;
+        $this->departureAirport = null;
+        $this->arrivalAirport = null;
+        $this->status = null;
         $this->airline = null;
         $this->aircraft = null;
         $this->description = "";
@@ -367,9 +378,33 @@ new class extends Component
 
                 <x-select
                     class="pd-2"
-                    label="Airport"
+                    label="Status"
                     placeholder="Please select"
-                    wire:model='airport'
+                    wire:model='status'
+                >
+                    <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
+                    <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
+                    <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
+                </x-select>
+
+                <x-select
+                    class="pd-2"
+                    label="Departure airport"
+                    placeholder="Please select"
+                    wire:model='departureAirport'
+                    searchable="true"
+                    min-items-for-search="2"
+                >
+                    @foreach ($airports as $airport)
+                        <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
+                    @endforeach
+                </x-select>
+
+                <x-select
+                    class="pd-2"
+                    label="Arrival airport"
+                    placeholder="Please select"
+                    wire:model='arrivalAirport'
                     searchable="true"
                     min-items-for-search="2"
                 >

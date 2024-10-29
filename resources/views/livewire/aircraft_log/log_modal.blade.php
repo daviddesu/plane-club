@@ -7,6 +7,7 @@ use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Media;
+use App\Enums\FlyingStatus;
 use Livewire\Volt\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -28,7 +29,13 @@ new class extends Component
     public ?string $loggedAt = null;
 
     #[Validate('required')]
-    public ?string $airport_id = null;
+    public ?string $status = null;
+
+    #[Validate('required_if:status,1,2')]
+    public ?string $departure_airport_id = null;
+
+    #[Validate('required_if:status,2,3')]
+    public ?string $arrival_airport_id = null;
 
     #[Validate]
     public ?string $airline_id = null;
@@ -63,7 +70,9 @@ new class extends Component
 
         if ($this->aircraftLog) {
             $this->loggedAt = $this->aircraftLog->logged_at;
-            $this->airport_id = $this->aircraftLog->airport?->id;
+            $this->arrival_airport_id = $this->aircraftLog->arrivalAirport?->id;
+            $this->departure_airport_id = $this->aircraftLog->departureAirport?->id;
+            $this->status = $this->aircraftLog->status;
             $this->description = $this->aircraftLog->description;
             $this->airline_id = $this->aircraftLog->airline?->id;
             $this->aircraft_id = $this->aircraftLog->aircraft?->id;
@@ -181,47 +190,78 @@ new class extends Component
                             <label class="block text-gray-700">Date</label>
                             <input type="date" wire:model="loggedAt" class="w-full px-2 py-1 border rounded">
                         </div>
-                        <!-- Airport Field -->
+                        <!-- Status Field -->
                         <div class="mb-2">
-                            <label class="block text-gray-700">Airport</label>
-                            <select wire:model="airport_id" class="w-full px-2 py-1 border rounded">
-                                <option value="">Select Airport</option>
-                                @foreach ($airports as $airport)
-                                    <option value="{{ $airport->id }}">{{ $airport->name }} ({{ $airport->code }})</option>
-                                @endforeach
-                            </select>
+                            <x-select
+                                class="pd-2"
+                                label="Status"
+                                placeholder="Please select"
+                                wire:model='status'
+                            >
+                                <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::DEPARTING->name)) }}" />
+                                <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::ARRIVING->name)) }}" />
+                                <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ strtolower(ucfirst(FlyingStatus::IN_FLIGHT->name)) }}" />
+                            </x-select>
                         </div>
+                        <!-- Departure Airport Field -->
+                        <x-select
+                            class="pd-2"
+                            label="Airport"
+                            placeholder="Please select"
+                            wire:model='departure_airport_id'
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($airports as $airport)
+                                <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
+                            @endforeach
+                        </x-select>
+                        <!-- Arrival Airport Field -->
+                        <x-select
+                            class="pd-2"
+                            label="Airport"
+                            placeholder="Please select"
+                            wire:model='arrival_airport_id'
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($airports as $airport)
+                                <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
+                            @endforeach
+                        </x-select>
                         <!-- Airline Field -->
-                        <div class="mb-2">
-                            <label class="block text-gray-700">Airline</label>
-                            <select wire:model="airline_id" class="w-full px-2 py-1 border rounded">
-                                <option value="">Select Airline</option>
-                                @foreach ($airlines as $airline)
-                                    <option value="{{ $airline->id }}">{{ $airline->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-select
+                            class="pd-2"
+                            label="Airline"
+                            placeholder="Please select"
+                            wire:model='airline_id'
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($airlines as $airline)
+                                <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
+                            @endforeach
+                        </x-select>
                         <!-- Aircraft Field -->
-                        <div class="mb-2">
-                            <label class="block text-gray-700">Aircraft</label>
-                            <select wire:model="aircraft_id" class="w-full px-2 py-1 border rounded">
-                                <option value="">Select Aircraft</option>
-                                @foreach ($aircraft as $aircraftType)
-                                    <option value="{{ $aircraftType->id }}">{{ $aircraftType->manufacturer }} {{ $aircraftType->model }}-{{ $aircraftType->varient }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-select
+                            class="pd-2"
+                            label="Aircraft"
+                            placeholder="Please select"
+                            wire:model='aircraft_id'
+                            searchable="true"
+                            min-items-for-search="2"
+                        >
+                            @foreach ($aircraftCollection as $aircraftType)
+                                <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer}} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
+                            @endforeach
+                        </x-select>
                         <!-- Registration Field -->
-                        <div class="mb-2">
-                            <label class="block text-gray-700">Registration</label>
-                            <input type="text" wire:model="registration" class="w-full px-2 py-1 uppercase border rounded">
-                        </div>
-                        <!-- Description Field -->
-                        <div class="mb-2">
-                            <label class="block text-gray-700">Description</label>
-                            <textarea wire:model="description" class="w-full px-2 py-1 border rounded"></textarea>
-                        </div>
-
+                        <x-input
+                            label="Registration"
+                            placeholder="G-PNCB"
+                            wire:model='registration'
+                            style="text-transform: uppercase"
+                        />
                         <div class="flex mt-4 space-x-2">
                             <button type="button" wire:click='stopEdit' class="px-2 py-1 text-white bg-gray-500 rounded">Cancel</button>
                             <button type="submit" class="px-2 py-1 text-white bg-green-500 rounded">Save</button>
@@ -230,10 +270,11 @@ new class extends Component
                 @else
                     <!-- Display Log Details -->
                     <p class="mb-2 text-gray-700 text-md">Date: {{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</p>
+                    <p class="mb-2 text-gray-700 text-md">{{ $aircraftLog?->departure_airport->name }} ({{ $aircraftLog?->departure_airport->code }}) -> {{ $aircraftLog?->arrival_airport->name }} ({{ $aircraftLog?->arrival_airport->code }})</p>
+                    <p class="mb-2 text-gray-700 text-md">Status: {{ FlyingStatus::getNameByStatus($status) }}</p>
                     <p class="mb-2 text-gray-700 text-md">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
                     <p class="mb-2 text-gray-700 text-md">Registration: {{ $aircraftLog?->registration }}</p>
                     <p class="mb-2 text-gray-700 text-md">Airline: {{ $aircraftLog?->airline?->name }}</p>
-                    <p class="mb-2 text-gray-700 text-md">Airport: {{ $aircraftLog?->airport->name }} ({{ $aircraftLog?->airport->code }})</p>
                     <p class="text-gray-700 text-md">{{ $aircraftLog?->description }}</p>
                 @endif
             </div>

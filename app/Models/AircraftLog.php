@@ -18,7 +18,9 @@ class AircraftLog extends Model
 
     protected $fillable = [
         'description',
-        'airport_id',
+        'arrival_airport_id',
+        'departure_airport_id',
+        'status',
         'logged_at',
         'airline_id',
         'registration',
@@ -35,7 +37,12 @@ class AircraftLog extends Model
         return $this->hasOne(Media::class);
     }
 
-    public function airport(): BelongsTo
+    public function departureAirport(): BelongsTo
+    {
+        return $this->belongsTo(Airport::class);
+    }
+
+    public function arrivalAirport(): BelongsTo
     {
         return $this->belongsTo(Airport::class);
     }

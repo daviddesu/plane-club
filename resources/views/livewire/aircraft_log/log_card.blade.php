@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AircraftLog;
+use App\Enums\FlyingStatus;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -10,7 +11,9 @@ new class extends Component
     public int $aircraftLogId;
     public string $loggedAt;
 
-    public ?string $airportName = null;
+    public ?string $arrivalAirportName = null;
+    public ?string $departureAirportName = null;
+    public ?string $status = null;
     public ?string $aircraftType = null;
     public ?string $airlineName = null;
 
@@ -27,7 +30,8 @@ new class extends Component
                 'user',
                 'media',
                 'airline',
-                'airport',
+                'arrivalAirport',
+                'departureAirport',
                 'aircraft'
             ])
             ->find($aircraftLogId);
@@ -37,7 +41,9 @@ new class extends Component
             $this->isProcessing = $aircraftLog->media?->isProcessing() ?? false;
             $this->thumbnailPath = $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path);
             $this->mediaPath = $this->getCachedMediaUrl($aircraftLog->media?->path);
-            $this->airportName = $aircraftLog->airport->name ?? '';
+            $this->arrivalAirportName = $aircraftLog->arrivalAirport->name ?? '';
+            $this->departureAirportName = $aircraftLog->departureAirport->name ?? '';
+            $this->status = $aircraftLog->status;
             $this->loggedAt = $aircraftLog->logged_at->format('d/m/Y');
             $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
             $this->airlineName = $aircraftLog->airline?->name ?? '';
@@ -99,10 +105,13 @@ new class extends Component
     </div>
 
     {{-- Log Details --}}
+    <div>
+        <div><span class="text-gray-800">{{ $departureAirportName }} -> {{ $arrivalAirportName }}</span></div>
+    </div>
     <div class="grid grid-cols-2 mt-2">
         <div>
-            <div><span class="text-gray-800">{{ $airportName }}</span></div>
             <div><small class="text-xs text-gray-600">{{ $loggedAt }}</small></div>
+            <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
         </div>
         <div>
             <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
