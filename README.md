@@ -81,12 +81,21 @@
     [ ] editing a log
         [ ] Mobile
         [ ] Desktop
+[ ] Legal docs and address on home page and profile page
+    [ ] Privacy policy
+        [ ] Data retnetion schedule
+    [ ] Terms and conditions
+    [ ] Marketing preferences on user profile page
+[ ] Create emails
+    [ ] Admin [alias -> David]
+    [ ] Support
+    [ ] David
+    [ ] Privacy [alias -> David]
 [ ] Compile list of airports
 [ ] Compile list of airlines
 [ ] Compile list of aircraft
 [ ] S3 look at cors to specifiyt he correct domain
-[ ] Create prod setup
-[ ] Emails on prod
+[ ] Convert staging to prod
 [ ] S3 file backups
 [ ] DB backups?
 [ ] register business
@@ -96,6 +105,7 @@
 
 ## Later
 
+[ ] Staging env
 [ ] Send to facebook
 [ ] Allow next log to poputa efrom the last details
 [ ] Upload and show avatar to nav bar
@@ -216,3 +226,5 @@ php artisan queue:retry all
 ```bash
 php artisan queue:flush --failed
 ```
+
+

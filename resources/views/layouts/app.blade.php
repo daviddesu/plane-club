@@ -20,6 +20,13 @@
             posthog.init('phc_9P4bssfAQEZUcYEYjvQFrRcS3ApwrNTMDPQySGFlqAl',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only' // or 'always' to create profiles for anonymous users as well
                 })
         </script>
+
+        @if(!Auth::check())
+        <script
+            type="text/javascript"
+            src="https://app.termly.io/resource-blocker/a569d0d4-62c0-484c-976d-d4892e3c0026?autoBlock=on"
+            ></script>
+        @endif
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -59,7 +66,11 @@
                 {{-- Modals --}}
                 @if(Auth::check())
                     <livewire:aircraft_log.create />
+                @else
+                    <a href="#" class="termly-display-preferences">Consent Preferences</a>
                 @endif
+
+
             </main>
         </div>
         <x-toaster-hub />

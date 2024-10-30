@@ -20,6 +20,15 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+Route::view('privacy-policy', 'privacy-policy')
+    ->name('privacy-policy');
+
+Route::view('terms-conditions', 'terms-conditions')
+    ->name('terms-conditions');
+
+Route::view('cookie-policy', 'cookie-policy')
+    ->name('cookie-policy');
+
 Route::get('/checkout', [SalesController::class, 'checkout'])
     ->middleware(['auth'])
     ->name('checkout');
