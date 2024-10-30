@@ -26,7 +26,7 @@ new class extends Component
   <!-- Features Section -->
   <section class="py-20">
     <div class="container px-6 mx-auto">
-        <h4 class="mb-12 text-3xl text-center text-cyan-800">Plane club provides a seamless experience for plane spotters to upload and showcase their high-quality photos and videos, tagging them with detailed information about the aircraft, airlines, and locations.</h4>
+        <h4 class="mb-12 text-3xl text-center text-cyan-800">Seamlessly upload and showcase your photos and videos. Tagging them with detailed information about the aircraft, airlines, and locations.</h4>
       <h2 class="mb-12 text-3xl font-bold text-center text-slate-700">Why Choose Plane Club?</h2>
       <div class="flex flex-wrap">
         <!-- Feature 1 -->
