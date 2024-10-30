@@ -66,8 +66,6 @@
                 {{-- Modals --}}
                 @if(Auth::check())
                     <livewire:aircraft_log.create />
-                @else
-                    <a href="#" class="termly-display-preferences">Consent Preferences</a>
                 @endif
 
 

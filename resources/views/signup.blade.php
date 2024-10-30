@@ -61,8 +61,23 @@ new class extends Component
 
   <!-- Footer -->
   <footer class="py-6 bg-gray-800">
-    <div class="container px-6 mx-auto text-center">
-      <p class="text-white">&copy; 2024 Plane Club. All rights reserved.</p>
+    <div class="container grid grid-cols-2 px-10 text-center">
+        <div>
+            <a class="text-white" href="/privacy-policy">Privacy Policy</a><br>
+            <a class="text-white" href="/terms-conditions">Terms of Service</a><br>
+            <a class="text-white" href="/cookie policy">Cookie Policy</a><br>
+            <a class="text-white" href="#" class="termly-display-preferences">Consent Preferences</a>
+        </div>
+        <div>
+            <p class="text-white">Contact: <a href="mailto:support@planeclub.app">support@planeclub.app</a></p><br>
+            <p class="text-white underline" >Address</p>
+            <p class="text-white" >Third Floor, 3 Hill Street</p>
+            <p class="text-white" >Edinburgh</p>
+            <p class="text-white" >EH2 3JP</p>
+        </div>
+    </div>
+    <div class="container px-6 pt-4 mx-auto text-center">
+      <p class="text-white">&copy; 2024 Plane Club LTD All rights reserved.</p>
     </div>
   </footer>
 </x-app-layout>
