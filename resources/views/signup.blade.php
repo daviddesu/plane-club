@@ -18,7 +18,7 @@ new class extends Component
         <img src="/logo.png" class="object-center h-80" />
         <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
         <p class="mb-8 text-xl text-cyan-600">Log your aviation journey for £19.99/month</p>
-        <a href="/register" class="px-8 py-3 text-lg text-white bg-blue-600 rounded-full">Ready to board</a>
+        <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Ready to board</a>
     </div>
     </div>
   </section>
@@ -55,7 +55,7 @@ new class extends Component
     <div class="container px-6 mx-auto text-center">
         <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
         <p class="mb-8 text-xl text-white">Continue your aviation journey with Plane Club for just £19.99 per month.</p>
-      <a href="/signup" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Hop aboard</a>
+      <a href="/signup" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Ready to board</a>
     </div>
   </section>
 
