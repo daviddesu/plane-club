@@ -342,8 +342,8 @@ new class extends Component
                 <label for="media">
                     <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
                         <div class="flex flex-col items-center justify-center">
-                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-blue-600 dark:text-teal-600" />
-                            <p class="text-blue-600 dark:text-teal-600">
+                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-cyan-800 dark:text-cyan-200" />
+                            <p class="text-cyan-800 dark:text-cyan-200">
                                 Click to add an image or video
                             </p>
                         </div>
@@ -457,7 +457,7 @@ new class extends Component
                 <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
             @endif
             <div class="flex gap-x-4">
-                <x-button flat class="justify-center mt-4" label="Cancel" x-on:click="close" wire:click='close' />
+                <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
                 <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
             </div>
         </div>

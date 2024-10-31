@@ -41,6 +41,11 @@
 [x] Auth themeing
 [x] Download button
 [x] Email service for staging and prod
+[ ] Legal docs and address on home page and profile page
+    [ ] Privacy policy
+        [ ] Data retnetion schedule
+    [ ] Terms and conditions
+    [ ] Marketing preferences on user profile page
 [ ] Perfection pass
     [ ] Sales page
         [ ] Mobile
@@ -81,11 +86,9 @@
     [ ] editing a log
         [ ] Mobile
         [ ] Desktop
-[ ] Legal docs and address on home page and profile page
-    [ ] Privacy policy
-        [ ] Data retnetion schedule
-    [ ] Terms and conditions
-    [ ] Marketing preferences on user profile page
+    [ ] Legal docs
+        [ ] Mobile
+        [ ] Desktop
 [ ] Create emails
     [ ] Admin [alias -> David]
     [ ] Support
