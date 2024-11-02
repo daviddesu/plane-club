@@ -47,7 +47,7 @@ $logout = function (Logout $logout) {
                             <button
                                 class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
                                 @if(Auth::check())
-                                    <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                                    <div x-data="{{ json_encode(['name' => auth()->user()->username]) }}" x-text="name"
                                         x-on:profile-updated.window="name = $event.detail.name"></div>
                                 @endif
                                 <div class="ms-1">
@@ -92,7 +92,7 @@ $logout = function (Logout $logout) {
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="px-4">
             @if(Auth::check())
-                <div class="text-base font-medium text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->name]) }}"
+                <div class="text-base font-medium text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->username]) }}"
                     x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
                 <div class="text-sm font-medium text-gray-500">{{ auth()->user()->email }}</div>
             @endif

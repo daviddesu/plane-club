@@ -15,10 +15,11 @@ new class extends Component
 <section class="h-screen bg-center bg-cover bg-grey-200">
     <div class="flex items-center justify-center h-full bg-gray-400 bg-opacity-50">
       <div class="text-center">
-        <img src="/logo.png" class="object-center h-80" />
+        <img src="/logo.png" class="justify-center h-auto w-76" />
+
         <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
-        <p class="mb-8 text-xl text-cyan-600">Log your aviation journey for £19.99/month</p>
-        <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Ready to board</a>
+        <p class="mb-8 text-xl text-cyan-600">£24.99/month</p>
+        <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Join</a>
     </div>
     </div>
   </section>
@@ -45,7 +46,7 @@ new class extends Component
           <p class="text-slate-700">Maintain a detailed database of all your aircraft, all in one place. Filter down your history to see all photos and videos by aircraft type, route or airline.</p>
         </div>
       </div>
-      <p class="mt-8 text-xl text-center text-cyan-800">Experience all these features for £19.99/month</p>
+      <p class="mt-8 text-xl text-center text-cyan-800">Experience all these features for £24.99/month</p>
 
     </div>
   </section>
@@ -54,8 +55,8 @@ new class extends Component
   <section class="py-20 bg-cyan-800">
     <div class="container px-6 mx-auto text-center">
         <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
-        <p class="mb-8 text-xl text-white">Continue your aviation journey with Plane Club for just £19.99 per month.</p>
-      <a href="/signup" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Ready to board</a>
+        <p class="mb-8 text-xl text-white">Get started with Plane Club for just £24.99 per month.</p>
+      <a href="/signup" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Join</a>
     </div>
   </section>
 

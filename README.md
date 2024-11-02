@@ -41,27 +41,27 @@
 [x] Auth themeing
 [x] Download button
 [x] Email service for staging and prod
-[ ] Legal docs and address on home page and profile page
-    [ ] Privacy policy
-        [ ] Data retnetion schedule
-    [ ] Terms and conditions
-    [ ] Marketing preferences on user profile page
+[x] Legal docs and address on home page and profile page
+    [x] Privacy policy
+        [x] Data retnetion schedule
+    [x] Terms and conditions
+    [x] Marketing preferences on user profile page
 [ ] Perfection pass
-    [ ] Sales page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] register page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] Login page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] email verification page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] Verification email
-        [ ] Mobile
-        [ ] Desktop
+    [x] Sales page
+        [x] Mobile
+        [x] Desktop
+    [x] register page
+        [x] Mobile
+        [x] Desktop
+    [x] Login page
+        [x] Mobile
+        [x] Desktop
+    [x] email verification page
+        [x] Mobile
+        [x] Desktop
+    [x] Verification email
+        [x] Mobile
+        [x] Desktop
     [ ] profile page
         [ ] Mobile
         [ ] Desktop

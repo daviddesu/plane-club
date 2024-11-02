@@ -35,6 +35,13 @@
                 <livewire:profile.subscription-status />
             </div>
 
+            <!-- Marketing preferences -->
+            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
+                <div class="max-w-xl">
+                    <livewire:profile.marketing-preferences />
+                </div>
+            </div>
+
             <!-- Update Payment Method -->
             @if (auth()->user()->subscribed())
                 <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
@@ -46,6 +53,14 @@
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
                 <div class="max-w-xl">
                     <livewire:profile.delete-user-form />
+                </div>
+            </div>
+
+            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
+                <div class="max-w-xl">
+                    <a href="/privacy-policy">Privacy Policy</a><br>
+                    <a href="/terms-conditions">Terms of Service</a><br>
+                    <a href="/cookie policy">Cookie Policy</a><br>
                 </div>
             </div>
         </div>

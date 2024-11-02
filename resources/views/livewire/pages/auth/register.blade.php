@@ -14,15 +14,19 @@ layout('layouts.guest');
 
 state([
     'name' => '',
+    'username' => '',
     'email' => '',
     'password' => '',
-    'password_confirmation' => ''
+    'password_confirmation' => '',
+    'marketing_preferences' => false
 ]);
 
 rules([
     'name' => ['required', 'string', 'max:255'],
+    'username' => ['required', 'string', 'max:255', 'unique:users,username'],
     'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
     'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+    'marketing_preferences' => ['accepted'],
 ]);
 
 $register = function () {
@@ -46,6 +50,13 @@ $register = function () {
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input wire:model="name" id="name" class="block w-full mt-1" type="text" name="name" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        <!-- Username -->
+        <div class="mt-4">
+            <x-input-label for="username" :value="__('Username')" />
+            <x-text-input wire:model="username" id="username" class="block w-full mt-1" type="text" name="username" required autocomplete="username" />
+            <x-input-error :messages="$errors->get('username')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
@@ -76,6 +87,15 @@ $register = function () {
                             name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <!-- Marketing Preferences Checkbox -->
+        <div class="mt-4">
+            <label for="marketing_preferences" class="inline-flex items-center">
+                <input id="marketing_preferences" type="checkbox" wire:model="marketing_preferences" class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" required>
+                <span class="ml-2 text-sm text-gray-600">I have read and understand the <a class="underline" href="/privacy-policy">privacy</a> and <a class="underline" href="/cookies-policy">cookies</a> policies and agree to receive marketing communications</span>
+            </label>
+            <x-input-error :messages="$errors->get('marketing_preferences')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
