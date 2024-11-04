@@ -326,8 +326,8 @@ new class extends Component
 ?>
 
 
-
-<x-modal-card title="Add a photo of a video as a log" name="logModal">
+<div>
+<x-modal-card title="Add a log" name="logModal">
     <form wire:submit='store()'>
         <div class="grid grid-cols-1 gap-4">
             {{-- File upload for images and videos --}}
@@ -356,10 +356,10 @@ new class extends Component
                 @enderror
 
                 <!-- Progress Bar -->
-            <div x-show="isUploading" class="mt-4">
-                <progress max="100" x-bind:value="progress" class="w-full h-4"></progress>
-                <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
-            </div>
+                <div x-show="isUploading" class="mt-4">
+                    <progress max="100" x-bind:value="progress" class="w-full h-4 progress-bar"></progress>
+                    <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
+                </div>
             </div>
             @endif
 
@@ -463,6 +463,36 @@ new class extends Component
         </div>
     </form>
 </x-model-card>
+
+<style>
+    /* Remove default appearance */
+    progress.progress-bar {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 1rem; /* Adjust the height as needed */
+    }
+
+    /* Style the progress bar background */
+    progress.progress-bar::-webkit-progress-bar {
+        background-color: #6b7280; /* grey-500 */
+        border-radius: 0.5rem; /* Rounded corners */
+    }
+
+    /* Style the progress value */
+    progress.progress-bar::-webkit-progress-value {
+        background-color: #155e75; /* cyan-800 */
+        border-radius: 0.5rem; /* Match the parent border radius */
+    }
+
+    /* For Firefox */
+    progress.progress-bar::-moz-progress-bar {
+        background-color: #155e75; /* cyan-800 */
+        border-radius: 0.5rem;
+    }
+</style>
+</div>
+
 
 @script
     <script>
