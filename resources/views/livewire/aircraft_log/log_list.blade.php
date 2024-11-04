@@ -137,46 +137,55 @@ new class extends Component
 
 <div class="w-full h-full select-none">
     <div class="max-w-6xl mx-auto">
-        <!-- Filters -->
-        <div class="flex flex-col gap-4 mb-4 sm:flex-row">
-            <!-- Aircraft Type Filter -->
-            <div class="flex-1">
-                <x-select
-                    wire:model.live="selectedAircraftType"
-                    label="Aircraft Type"
-                    placeholder="All Aircraft Types"
-                    :options="$aircraftOptions"
-                    option-label="name"
-                    option-value="id"
-                    searchable
-                />
-            </div>
+        <!-- Filters Dropdown -->
+        <div class="flex justify-end mb-4">
+            <x-dropdown height="5xl" width="2xl" position="bottom-end" persistent="true">
+                <x-slot name="trigger">
+                    <x-button class="bg-cyan-800" label="Filters" primary />
+                </x-slot>
 
-            <!-- Airline Filter -->
-            <div class="flex-1">
-                <x-select
-                    wire:model.live="selectedAirline"
-                    label="Airline"
-                    placeholder="All Airlines"
-                    :options="$airlineOptions"
-                    option-label="name"
-                    option-value="id"
-                    searchable
-                />
-            </div>
+                <!-- Dropdown Content -->
+                <div class="p-4 space-y-4">
+                    <!-- Aircraft Type Filter -->
+                    <div>
+                        <x-select
+                            wire:model.live="selectedAircraftType"
+                            label="Aircraft Type"
+                            placeholder="All Aircraft Types"
+                            :options="$aircraftOptions"
+                            option-label="name"
+                            option-value="id"
+                            searchable
+                        />
+                    </div>
 
-            <!-- Airport Filter -->
-            <div class="flex-1">
-                <x-select
-                    wire:model.live="selectedAirport"
-                    label="Airport"
-                    placeholder="All Airports"
-                    :options="$airportOptions"
-                    option-label="name"
-                    option-value="id"
-                    searchable
-                />
-            </div>
+                    <!-- Airline Filter -->
+                    <div>
+                        <x-select
+                            wire:model.live="selectedAirline"
+                            label="Airline"
+                            placeholder="All Airlines"
+                            :options="$airlineOptions"
+                            option-label="name"
+                            option-value="id"
+                            searchable
+                        />
+                    </div>
+
+                    <!-- Airport Filter -->
+                    <div>
+                        <x-select
+                            wire:model.live="selectedAirport"
+                            label="Airport"
+                            placeholder="All Airports"
+                            :options="$airportOptions"
+                            option-label="name"
+                            option-value="id"
+                            searchable
+                        />
+                    </div>
+                </div>
+            </x-dropdown>
         </div>
 
         <!-- Logs -->

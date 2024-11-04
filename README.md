@@ -62,15 +62,15 @@
     [x] Verification email
         [x] Mobile
         [x] Desktop
-    [ ] profile page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] Ending sub process
-        [ ] Mobile
-        [ ] Desktop
-    [ ] deleteing profile process
-        [ ] Mobile
-        [ ] Desktop
+    [x] profile page
+        [x] Mobile
+        [x] Desktop
+    [x] Ending sub process
+        [x] Mobile
+        [x] Desktop
+    [x] deleteing profile process
+        [x] Mobile
+        [x] Desktop
     [ ] logs page
         [ ] Mobile
         [ ] Desktop
