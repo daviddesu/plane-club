@@ -116,14 +116,13 @@ new class extends Component
             </span></div>
     </div>
     <div class="grid grid-cols-3 mt-2">
-        <div>
-            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
+        <div class="col-span-1">
             <div><small class="text-xs text-gray-600">{{ $loggedAt }}</small></div>
+            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
         </div>
-        <div>
-            <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
+        <div class="col-span-2">
             <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
-
+            <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
         </div>
         <div></div>
     </div>

@@ -31,7 +31,7 @@ new class extends Component
 <div x-data="{ modalOpen: false }"
     @keydown.escape.window="modalOpen = false"
     :class="{ 'z-40': modalOpen }" class="relative w-auto h-auto">
-    <button @click="modalOpen=true" class="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium text-white transition-colors bg-red-500 border rounded-md hover:bg-red-800 active:bg-red-800 focus:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-900/60 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none">Delete</button>
+    <x-mini-button @click="modalOpen=true" rounded icon="trash" flat red interaction="negative" />
     <template x-teleport="body">
         <div x-show="modalOpen" class="fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen" x-cloak>
             <div x-show="modalOpen"

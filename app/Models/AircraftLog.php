@@ -24,7 +24,8 @@ class AircraftLog extends Model
         'logged_at',
         'airline_id',
         'registration',
-        'aircraft_id'
+        'aircraft_id',
+        'flight_number',
     ];
 
     public function user(): BelongsTo

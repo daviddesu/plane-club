@@ -50,6 +50,9 @@ new class extends Component
     #[Validate]
     public string $registration = "";
 
+    #[Validate]
+    public string $flightNumber = "";
+
     #[Validate('file|max:512000')]
     public $media;  // Handles both images and videos
 
@@ -184,6 +187,7 @@ new class extends Component
             "airline_id" => $this->airline,
             "registration" => strtoupper($this->registration),
             "aircraft_id" => $this->aircraft,
+            "flight_number" => $this->flightNumber,
         ]);
 
         if (str_contains($mimeType, 'image')) {
@@ -441,6 +445,13 @@ new class extends Component
                         <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer}} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
                     @endforeach
                 </x-select>
+
+                <x-input
+                    label="Flight Number"
+                    placeholder="BA1234"
+                    wire:model='flightNUmber'
+                    style="text-transform: uppercase"
+                />
 
                 <x-input
                     label="Registration"
