@@ -75,7 +75,7 @@ new class extends Component
 
 ?>
 
-<div>
+<x-card padding="none">
     {{-- Media Container with rectangular aspect ratio --}}
     <div
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLogId }}});"
@@ -105,17 +105,27 @@ new class extends Component
     </div>
 
     {{-- Log Details --}}
+    <div class="p-4">
     <div>
-        <div><span class="text-gray-800">{{ $departureAirportName }} -> {{ $arrivalAirportName }}</span></div>
+        <div><span class="text-gray-800">
+            <x-badge flat slate label="DEP" />
+                {{ $departureAirportName }}
+            <x-icon name="arrow-right" class="inline-block w-5 h-3" />
+            <x-badge flat slate label="ARV" />
+                {{ $arrivalAirportName }}
+            </span></div>
     </div>
-    <div class="grid grid-cols-2 mt-2">
+    <div class="grid grid-cols-3 mt-2">
         <div>
+            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
             <div><small class="text-xs text-gray-600">{{ $loggedAt }}</small></div>
-            <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
         </div>
         <div>
             <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
-            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
+            <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
+
         </div>
+        <div></div>
     </div>
-</div>
+    </div>
+</x-card>

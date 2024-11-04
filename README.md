@@ -71,12 +71,12 @@
     [x] deleteing profile process
         [x] Mobile
         [x] Desktop
-    [ ] logs page
-        [ ] Mobile
-        [ ] Desktop
-    [ ] Adding a log process
-        [ ] Mobile
-        [ ] Desktop
+    [x] logs page
+        [x] Mobile
+        [x] Desktop
+    [x] Adding a log process
+        [x] Mobile
+        [x] Desktop
     [ ] Viewing a log
         [ ] Mobile
         [ ] Desktop
