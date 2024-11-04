@@ -60,7 +60,7 @@
                 <div class="max-w-xl">
                     <a href="/privacy-policy">Privacy Policy</a><br>
                     <a href="/terms-conditions">Terms of Service</a><br>
-                    <a href="/cookie policy">Cookie Policy</a><br>
+                    <a href="/cookie-policy">Cookie Policy</a><br>
                 </div>
             </div>
         </div>

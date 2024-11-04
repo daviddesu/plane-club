@@ -66,7 +66,7 @@ new class extends Component
         <div>
             <a class="text-white" href="/privacy-policy">Privacy Policy</a><br>
             <a class="text-white" href="/terms-conditions">Terms of Service</a><br>
-            <a class="text-white" href="/cookie policy">Cookie Policy</a><br>
+            <a class="text-white" href="/cookie-policy">Cookie Policy</a><br>
             <a class="text-white" href="#" class="termly-display-preferences">Consent Preferences</a>
         </div>
         <div>

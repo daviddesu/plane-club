@@ -77,18 +77,19 @@
     [x] Adding a log process
         [x] Mobile
         [x] Desktop
-    [ ] Viewing a log
-        [ ] Mobile
-        [ ] Desktop
-    [ ] removing a log
-        [ ] Mobile
-        [ ] Desktop
-    [ ] editing a log
-        [ ] Mobile
-        [ ] Desktop
-    [ ] Legal docs
-        [ ] Mobile
-        [ ] Desktop
+    [x] Viewing a log
+        [x] Mobile
+        [x] Desktop
+    [x] removing a log
+        [x] Mobile
+        [x] Desktop
+    [x] editing a log
+        [x] Mobile
+        [x] Desktop
+    [x] Legal docs
+        [x] Mobile
+        [x] Desktop
+[ ] Log delete issues
 [ ] Create emails
     [ ] Admin [alias -> David]
     [ ] Support

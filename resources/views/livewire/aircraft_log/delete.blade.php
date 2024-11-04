@@ -19,7 +19,7 @@ new class extends Component
 
     public function delete(): void
     {
-        Storage::disk('s3')->delete($this->aircraftLog->media->path);
+        Storage::disk(getenv('FILESYSTEM_DISK'))->delete($this->aircraftLog->media->path);
         $this->aircraftLog->delete();
         Toaster::info("Log deleted");
         $this->dispatch('aircraft_log-deleted');
