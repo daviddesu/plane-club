@@ -89,18 +89,18 @@
     [x] Legal docs
         [x] Mobile
         [x] Desktop
-[ ] Log delete issues
-[ ] Create emails
-    [ ] Admin [alias -> David]
-    [ ] Support
-    [ ] David
-    [ ] Privacy [alias -> David]
+[x] Log delete issues
+[x] Create emails
+    [x] Admin [alias -> David]
+    [x] Support
+    [x] David
+    [x] Privacy [alias -> David]
 [ ] Compile list of airports
 [ ] Compile list of airlines
 [ ] Compile list of aircraft
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Convert staging to prod
-[ ] S3 file backups
+[x] S3 file backups
 [ ] DB backups?
 [ ] register business
 [ ] Business bank account
@@ -123,7 +123,8 @@
 [ ] Show all public logs
 [ ] Comment on public logs
 [ ] Scale down image safety checks as the user proves trustworthy. e,g, 100% for first month, reduced to a % probbaility that   decreases over time, probably to a minumum of 10% of uploads checked?
-
+[ ] AWS backup recovery process
+[ ] DB backup recovery process
 
 ## Local env
 - PHP

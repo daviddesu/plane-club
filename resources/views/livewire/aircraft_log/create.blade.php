@@ -53,8 +53,8 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file|max:512000')]
-    public $media;  // Handles both images and videos
+    #[Validate('file|mimetypes:video/mp4,video/quicktime|mimes:mp4,mov|max:153600')]
+    public $media; // 150 MB in kilobytes (150 MB * 1024 KB/MB)
 
     public function mount()
     {
@@ -350,6 +350,7 @@ new class extends Component
                             <p class="text-cyan-800 dark:text-cyan-200">
                                 Click to add an image or video
                             </p>
+                            <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
                         </div>
                     </div>
                 </label>

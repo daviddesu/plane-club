@@ -58,6 +58,7 @@
 
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-800 sm:rounded-lg">
                 <div class="max-w-xl">
+                    <p>Need help? Let us know by contacting us at <a href="mailto:support@planeclub.app">support@planeclub.app</a></p><br>
                     <a href="/privacy-policy">Privacy Policy</a><br>
                     <a href="/terms-conditions">Terms of Service</a><br>
                     <a href="/cookie-policy">Cookie Policy</a><br>
