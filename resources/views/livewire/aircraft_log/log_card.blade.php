@@ -5,6 +5,8 @@ use App\Enums\FlyingStatus;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\On;
+
 
 new class extends Component
 {
@@ -22,9 +24,7 @@ new class extends Component
     public ?string $thumbnailPath = null;
     public ?string $mediaPath = null;
 
-
-
-    public function mount(int $aircraftLogId): void
+    protected function loadAircraftLog(int $aircraftLogId): void
     {
         $aircraftLog = AircraftLog::with([
                 'user',
@@ -47,6 +47,20 @@ new class extends Component
             $this->loggedAt = $aircraftLog->logged_at->format('d/m/Y');
             $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
             $this->airlineName = $aircraftLog->airline?->name ?? '';
+    }
+
+
+    public function mount(int $aircraftLogId): void
+    {
+        $this->loadAircraftLog($aircraftLogId);
+    }
+
+    #[On('aircraft_log-updated')]
+    public function refreshIfNeeded($aircraftLogId)
+    {
+        if ($this->aircraftLogId == $aircraftLogId) {
+            $this->loadAircraftLog($aircraftLogId);
+        }
     }
 
     public function getCachedMediaUrl($mediaPath): ?string
@@ -76,13 +90,14 @@ new class extends Component
 ?>
 
 <x-card padding="none">
+    @if($aircraftLogId)
     {{-- Media Container with rectangular aspect ratio --}}
     <div
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLogId }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
         @if($isVideo && $isProcessing)
-            <p>Processing...</p>
+        <p class="text-center text-cyan-800">Processing</p>
         @elseif ($isVideo)
             <div
                 class="relative w-full h-full"
@@ -127,4 +142,5 @@ new class extends Component
         <div></div>
     </div>
     </div>
+    @endif
 </x-card>

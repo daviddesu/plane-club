@@ -392,6 +392,7 @@ new class extends Component
                     <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
                     <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
                     <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
+                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
                 </x-select>
 
                 <x-select
@@ -449,7 +450,7 @@ new class extends Component
                 <x-input
                     label="Flight Number"
                     placeholder="BA1234"
-                    wire:model='flightNUmber'
+                    wire:model='flightNumber'
                     style="text-transform: uppercase"
                 />
 

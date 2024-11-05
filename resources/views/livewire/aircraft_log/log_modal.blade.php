@@ -23,7 +23,6 @@ new class extends Component
     public Collection $aircraft;
 
     public ?int $id = null;
-    public ?AircraftLog $aircraftLog = null;
 
     #[Validate('required')]
     public ?string $loggedAt = null;
@@ -33,6 +32,10 @@ new class extends Component
 
     #[Validate('required_if:status,1,2')]
     public ?string $departure_airport_id = null;
+    public ?string $arrivalAirportName = "";
+    public ?string $arrivalAirportCode = "";
+    public ?string $departureAirportName = "";
+    public ?string $departureAirportCode = "";
 
     #[Validate('required_if:status,2,3')]
     public ?string $arrival_airport_id = null;
@@ -43,6 +46,8 @@ new class extends Component
     #[Validate]
     public ?string $aircraft_id = null;
 
+    public ?string $aircraftName = "";
+
     #[Validate]
     public ?string $description = "";
 
@@ -52,13 +57,17 @@ new class extends Component
     #[Validate]
     public ?string $flightNumber = "";
 
+    public ?string $airlineName = "";
+
     public ?Media $media = null;
 
     public ?string $mediaUrl = "";
+    public ?string $realMediaUrl = "";
 
     public string $fileName = "";
 
     public bool $editing = false;
+    public bool $editingAllowed = false;
     public bool $modalOpened = false;
 
     #[On('open_aircraft_log')]
@@ -71,21 +80,30 @@ new class extends Component
 
     public function loadAircraftLog($id): void
     {
-        $this->aircraftLog = AircraftLog::with('user', 'media', 'departureAirport', 'arrivalAirport', 'airline', 'aircraft')->find($id);
+        $aircraftLog = AircraftLog::with('user', 'media', 'departureAirport', 'arrivalAirport', 'airline', 'aircraft')->find($id);
 
-        if ($this->aircraftLog) {
-            $this->loggedAt = $this->aircraftLog->logged_at;
-            $this->arrival_airport_id = $this->aircraftLog->arrivalAirport?->id;
-            $this->departure_airport_id = $this->aircraftLog->departureAirport?->id;
-            $this->status = $this->aircraftLog->status;
-            $this->description = $this->aircraftLog->description;
-            $this->airline_id = $this->aircraftLog->airline?->id;
-            $this->aircraft_id = $this->aircraftLog->aircraft?->id;
-            $this->registration = $this->aircraftLog->registration;
-            $this->flightNumber = $this->aircraftLog->flight_number;
-            $this->media = $this->aircraftLog->media;
+        if ($aircraftLog) {
+            $this->id = $id;
+            $this->loggedAt = $aircraftLog->logged_at;
+            $this->arrival_airport_id = $aircraftLog->arrivalAirport?->id;
+            $this->arrivalAirportName = $aircraftLog->arrivalAirport?->name;
+            $this->arrivalAirportCode = $aircraftLog->arrivalAirport?->code;
+            $this->departure_airport_id = $aircraftLog->departureAirport?->id;
+            $this->departureAirportName = $aircraftLog->departureAirport?->name;
+            $this->departureAirportCode = $aircraftLog->departureAirport?->code;
+            $this->status = $aircraftLog->status;
+            $this->description = $aircraftLog->description;
+            $this->airline_id = $aircraftLog->airline?->id;
+            $this->aircraft_id = $aircraftLog->aircraft?->id;
+            $this->registration = $aircraftLog->registration;
+            $this->flightNumber = $aircraftLog->flight_number;
+            $this->media = $aircraftLog->media;
             $this->mediaUrl = $this->getCachedMediaUrl($this->media->path);
+            $this->realMediaUrl = $aircraftLog->media->path;
             $this->fileName = $this->generateFileName();
+            $this->editingAllowed = $aircraftLog->user->is(auth()->user());
+            $this->aircraftName = $aircraftLog->aircraft?->getFormattedName();
+            $this->airlineName = $aircraftLog->airline?->name;
         }
     }
 
@@ -94,16 +112,16 @@ new class extends Component
         $name = "Plane-club-";
         $name .= (new \DateTime($this->loggedAt))->format("Y-m-d");
 
-        if($this->aircraftLog->departureAirport){
-            $name .= "-{$this->aircraftLog->departureAirport->code}";
+        if($this->departureAirportName){
+            $name .= "-{$this->departureAirportCode}";
         }
 
-        if($this->aircraftLog->arrivalAirport){
-            $name .= "-{$this->aircraftLog->arrivalAirport->code}";
+        if($this->arrivalAirportName){
+            $name .= "-{$this->arrivalAirportCode}";
         }
 
-        if($this->aircraftLog->aircraft){
-            $name .= "-{$this->aircraftLog->aircraft->model}-{$this->aircraftLog->aircraft->varient}";
+        if($this->aircraftName){
+            $name .= "-{$this->aaircraftName}";
         }
         return $name;
     }
@@ -131,13 +149,21 @@ new class extends Component
     }
 
     #[On('close_aircraft_log')]
-    #[On('aircraft_log-deleted')]
     public function closeLog()
     {
-        $this->id = null;
-        $this->aircraftLog = null;
         $this->editing = false;
         $this->modalOpened = false;
+    }
+
+    public function delete(): void
+    {
+        // Delete the media and the log first
+        Storage::disk(getenv('FILESYSTEM_DISK'))->delete($this->realMediaUrl);
+        AircraftLog::destroy($this->id);
+
+        // Dispatch events after deletion
+        $this->dispatch('aircraft_log-deleted', $this->id);
+        Toaster::info("Log deleted");
     }
 
     public function mount()
@@ -160,7 +186,9 @@ new class extends Component
     public function update()
     {
         $validated = $this->validate();
-        $this->aircraftLog->update([
+        $aircraftLog = AircraftLog::find($this->id);
+
+        $aircraftLog->update([
             "arrival_airport_id" => $this->arrival_airport_id,
             "departure_airport_id" => $this->departure_airport_id,
             "status" => $this->status,
@@ -173,7 +201,7 @@ new class extends Component
         ]);
 
         Toaster::info("Log updated");
-        $this->dispatch('aircraft_log-updated');
+        $this->dispatch('aircraft_log-updated', $this->id);
         $this->closeLog();
     }
 };
@@ -190,6 +218,34 @@ new class extends Component
         class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-75"
         @keydown.window.escape="modalClose"
     >
+    <!-- Confirmation Dialog -->
+    <div
+        x-show="confirmDelete"
+        x-transition
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-60"
+        @keydown.escape.window="confirmDelete = false"
+    >
+            <div class="max-w-sm p-6 mx-auto bg-white rounded-lg">
+                <h2 class="mb-4 text-lg font-semibold">Delete Log</h2>
+                <p class="mb-6">Are you sure you want to delete this log? This action cannot be undone.</p>
+                <div class="flex justify-end space-x-2">
+                    <button
+                        @click="confirmDelete = false"
+                        type="button"
+                        class="px-4 py-2 text-white bg-gray-500 rounded"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        @click="confirmDelete = false; modalClose(); @this.delete()"
+                        type="button"
+                        class="px-4 py-2 text-white bg-red-600 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
         <div
             class="relative w-full max-w-5xl mx-auto bg-white rounded-lg"
             style="max-height: 100vh; overflow-y: auto;"
@@ -255,11 +311,14 @@ new class extends Component
                 </div>
                 <div class="ml-2">
                     <!-- Display edit buttons if the user owns the log -->
-                    @if ($aircraftLog?->user->is(auth()->user()) && !$editing)
+                    @if ($editingAllowed && !$editing)
                         <div class="flex mb-4 first-letter:space-x-2">
                             <x-mini-button wire:click='startEdit' rounded icon="pencil" flat class="text-cyan-800 hover:cyan-200 hover:bg-cyan-800" interaction:solid />
                             <a href="{{ $mediaUrl }}" download="{{ $fileName }}"><x-mini-button rounded icon="arrow-down-tray" flat class="text-cyan-800 hover:cyan-200 hover:bg-cyan-800" interaction:solid /></a>
-                            <livewire:aircraft_log.delete lazy :aircraftLog="$aircraftLog">
+                            <x-mini-button @click="confirmDelete = true" rounded icon="trash" flat red interaction="negative" />
+                            {{-- Delete dialog --}}
+
+
                         </div>
                     @endif
 
@@ -287,6 +346,7 @@ new class extends Component
                                     <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::DEPARTING->name)) }}" />
                                     <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::ARRIVING->name)) }}" />
                                     <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ strtolower(ucfirst(FlyingStatus::IN_FLIGHT->name)) }}" />
+                                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ strtolower(ucfirst(FlyingStatus::ON_STAND->name)) }}" />
                                 </x-select>
                             </div>
                             <!-- Departure Airport Field -->
@@ -357,22 +417,22 @@ new class extends Component
                             />
                             <div class="flex mt-4 space-x-2">
                                 <button type="button" wire:click='stopEdit' class="px-2 py-1 text-white bg-gray-500 rounded">Cancel</button>
-                                <button type="submit" class="px-2 py-1 text-white bg-green-500 rounded">Save</button>
+                                <button type="submit" class="px-2 py-1 text-white rounded bg-cyan-800">Save</button>
                             </div>
                         </form>
                     @else
                         <div>
                             <div><span class="text-gray-800">
                                 <x-badge flat slate label="DEP" />
-                                {{ $aircraftLog?->departureAirport?->name }} ({{ $aircraftLog?->departureAirport?->code }})
+                                {{ $departureAirportName }} ({{ $departureAirportCode }})
                                 <x-icon name="arrow-right" class="inline-block w-5 h-3" />
                                 <x-badge flat slate label="ARV" />
-                                {{ $aircraftLog?->arrivalAirport?->name }} ({{ $aircraftLog?->arrivalAirport?->code }})
+                                {{ $arrivalAirportName }} ({{ $arrivalAirportCode }})
                                 </span></div>
                         </div>
                         <div class="grid grid-cols-3 mt-2">
                             <div class="col-span-1">
-                                <div><small class="text-xs text-gray-600">{{ (new DateTime($aircraftLog?->logged_at))->format("d/m/Y") }}</small></div>
+                                <div><small class="text-xs text-gray-600">{{ (new DateTime($loggedAt))->format("d/m/Y") }}</small></div>
                             </div>
                             <div class="col-span-2">
                                 <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
@@ -380,10 +440,9 @@ new class extends Component
                             <div></div>
                         </div>
                         <!-- Display Log Details -->
-                        <p class="mb-2 text-gray-700 text-md">Aircraft: {{ $aircraftLog?->aircraft?->manufacturer }} {{ $aircraftLog?->aircraft?->model }}-{{ $aircraftLog?->aircraft?->varient }}</p>
-                        <p class="mb-2 text-gray-700 text-md">Registration: {{ $aircraftLog?->registration }}</p>
-                        <p class="mb-2 text-gray-700 text-md">Airline: {{ $aircraftLog?->airline?->name }} {{ $aircraftLog->flight_number }}</p>
-                        <p class="text-gray-700 text-md">{{ $aircraftLog?->description }}</p>
+                        <p class="mb-2 text-gray-700 text-md">Aircraft: {{ $aircraftName }}</p>
+                        <p class="mb-2 text-gray-700 text-md">Registration: {{ $registration }}</p>
+                        <p class="mb-2 text-gray-700 text-md">Airline: {{ $airlineName }} {{ $flightNumber }}</p>
                     @endif
                 </div>
             </div>
@@ -399,6 +458,7 @@ new class extends Component
     document.addEventListener('alpine:init', () => {
         Alpine.data('modalComponent', () => ({
             modalOpened: @entangle('modalOpened'),
+            confirmDelete: false,
             init() {},
             modalClose() {
                 this.modalOpened = false;

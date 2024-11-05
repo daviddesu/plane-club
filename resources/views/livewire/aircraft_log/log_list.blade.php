@@ -64,9 +64,6 @@ new class extends Component
         $this->getAircraftLogs(true);
     }
 
-    #[On('aircraft_log-created')]
-    #[On('aircraft_log-updated')]
-    #[On('aircraft_log-deleted')]
     public function getAircraftLogs(bool $reset = false): void
     {
         if ($reset) {
@@ -102,6 +99,18 @@ new class extends Component
 
         $this->aircraftLogIds = $this->aircraftLogIds->concat($logs);
         $this->page++;
+    }
+
+    #[On('aircraft_log-created')]
+    public function aircraftLogCreated()
+    {
+        $this->getAircraftLogs(true);
+    }
+
+    #[On('aircraft_log-deleted')]
+    public function aircraftLogDeleted($id): void
+    {
+        $this->aircraftLogIds = $this->aircraftLogIds->diff([$id]);
     }
 
     public function updatedSelectedAircraftType($value): void
