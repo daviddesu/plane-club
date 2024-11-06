@@ -96,6 +96,7 @@
     [x] David
     [x] Privacy [alias -> David]
 [x] Monthly business costs and burndown
+[ ] Add supabase to fin calcs
 [ ] Compile list of airports
 [ ] Compile list of airlines
 [ ] Compile list of aircraft
@@ -237,21 +238,15 @@ php artisan queue:retry all
 php artisan queue:flush --failed
 ```
 
-### Deploy DB setup changes
+### DB access
 
-#### Get the version
+```flyctl ext supabase dashboard plane-club-db```
 
-```fly image show --app <pg-app-name>```
-
-#### Deplpy to the db machine
-
-```fly deploy . --app plane-club-db --image flyio/postgres:<major-version> --config fly-db.toml```
 
 
 ### Airports list
 
 https://github.com/lxndrblz/Airports/blob/main/airports.csv
 
-`fly pg import postgres://postgres:Theadvr1@localhos:5432/plane_club/airports --app plane-club-db/airports`
 
 

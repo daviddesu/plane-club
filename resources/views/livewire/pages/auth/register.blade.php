@@ -93,7 +93,7 @@ $register = function () {
         <div class="mt-4">
             <label for="marketing_preferences" class="inline-flex items-center">
                 <input id="marketing_preferences" type="checkbox" wire:model="marketing_preferences" class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" required>
-                <span class="ml-2 text-sm text-gray-600">I have read and understand the <a class="underline" href="/privacy-policy">privacy</a> and <a class="underline" href="/cookies-policy">cookies</a> policies and agree to receive marketing communications</span>
+                <span class="ml-2 text-sm text-gray-600">I have read and understand the <a class="underline" href="/privacy-policy" target="_blank">privacy</a> and <a class="underline" href="/cookie-policy" target="_blank">cookies</a> policies and agree to receive marketing communications</span>
             </label>
             <x-input-error :messages="$errors->get('marketing_preferences')" class="mt-2" />
         </div>
