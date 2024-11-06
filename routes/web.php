@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AircraftLogController;
+use App\Http\Controllers\AirportController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -40,5 +41,9 @@ Route::get('/checkout/success', [SalesController::class, 'checkoutSuccess'])
 Route::view('/checkout/cancel', [SalesController::class, 'checkoutCancel'])
     ->middleware(['auth'])
     ->name('checkout-cancel');
+
+Route::get('/airports', [AirportController::class, 'getAirportsSearch'])
+    ->middleware(['auth', 'verified'])
+    ->name('airports');
 
 require __DIR__ . '/auth.php';

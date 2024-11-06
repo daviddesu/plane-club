@@ -22,7 +22,7 @@ new class extends Component
 {
     use WithFileUploads;
 
-    public Collection $airports;
+    // public Collection $airports;
     public Collection $airlines;
     public Collection $aircraftCollection;
 
@@ -58,7 +58,7 @@ new class extends Component
 
     public function mount()
     {
-        $this->airports = Airport::all();
+        // $this->airports = Airport::all();
         $this->aircraftCollection = Aircraft::all();
         $this->airlines = Airline::all();
     }
@@ -399,28 +399,28 @@ new class extends Component
                 <x-select
                     class="pd-2"
                     label="Departure airport"
-                    placeholder="Please select"
+                    placeholder="Search airport or IATA code"
                     wire:model='departureAirport'
+                    :async-data="route('airports')"
+                    option-label="name"
+                    option-value="id"
                     searchable="true"
                     min-items-for-search="2"
-                >
-                    @foreach ($airports as $airport)
-                        <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
-                    @endforeach
-                </x-select>
+                />
+
 
                 <x-select
                     class="pd-2"
                     label="Arrival airport"
-                    placeholder="Please select"
+                    placeholder="Search airport or IATA code"
+                    :async-data="route('airports')"
+                    option-label="name"
+                    option-value="id"
                     wire:model='arrivalAirport'
                     searchable="true"
                     min-items-for-search="2"
-                >
-                    @foreach ($airports as $airport)
-                        <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
-                    @endforeach
-                </x-select>
+                />
+
 
                 <x-select
                     class="pd-2"

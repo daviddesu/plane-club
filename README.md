@@ -46,7 +46,7 @@
         [x] Data retnetion schedule
     [x] Terms and conditions
     [x] Marketing preferences on user profile page
-[ ] Perfection pass
+[x] Perfection pass
     [x] Sales page
         [x] Mobile
         [x] Desktop
@@ -95,6 +95,7 @@
     [x] Support
     [x] David
     [x] Privacy [alias -> David]
+[x] Monthly business costs and burndown
 [ ] Compile list of airports
 [ ] Compile list of airlines
 [ ] Compile list of aircraft
@@ -105,10 +106,14 @@
 [ ] register business
 [ ] Business bank account
 [ ] Update stripe account
+[ ] Check posthog is working
+[ ] Check sentry is working
+[ ] Launch
 
 
 ## Later
 
+[ ] Keep airports, airlines and aircraft lists up to date
 [ ] Staging env
 [ ] Send to facebook
 [ ] Allow next log to poputa efrom the last details
@@ -231,5 +236,9 @@ php artisan queue:retry all
 ```bash
 php artisan queue:flush --failed
 ```
+
+### Airports list
+
+https://github.com/lxndrblz/Airports/blob/main/airports.csv
 
 
