@@ -237,8 +237,21 @@ php artisan queue:retry all
 php artisan queue:flush --failed
 ```
 
+### Deploy DB setup changes
+
+#### Get the version
+
+```fly image show --app <pg-app-name>```
+
+#### Deplpy to the db machine
+
+```fly deploy . --app plane-club-db --image flyio/postgres:<major-version> --config fly-db.toml```
+
+
 ### Airports list
 
 https://github.com/lxndrblz/Airports/blob/main/airports.csv
+
+`fly pg import postgres://postgres:Theadvr1@localhos:5432/plane_club/airports --app plane-club-db/airports`
 
 

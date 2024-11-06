@@ -12,20 +12,20 @@ new class extends Component
 
 <x-app-layout>
     <!-- Hero Section -->
-<section class="h-screen bg-center bg-cover bg-grey-200">
-    <div class="flex items-center justify-center h-full bg-gray-400 bg-opacity-50">
-      <div class="text-center">
-        <img src="/logo.png" class="justify-center h-auto w-76" />
+    <section class="flex pb-20 bg-center bg-cover bg-grey-200">
+    <div class="items-center justify-center h-full bg-opacity-50">
+        <div class="text-center">
+            <img src="/logo.png" class="justify-center h-auto w-76" />
 
-        <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
-        <p class="mb-8 text-xl text-cyan-600">£24.99/month</p>
-        <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Join</a>
-    </div>
-    </div>
+            <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
+            <p class="mb-8 text-xl text-cyan-600">£24.99/month</p>
+            <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Join</a>
+        </div>
+        </div>
   </section>
 
   <!-- Features Section -->
-  <section class="py-20">
+  <section class="pb-5 py-30">
     <div class="container px-6 mx-auto">
         <h4 class="mb-12 text-3xl text-center text-cyan-800">Seamlessly upload and showcase your photos and videos. Tagging them with detailed information about the aircraft, airlines, and locations.</h4>
       <h2 class="mb-12 text-3xl font-bold text-center text-slate-700">Why Choose Plane Club?</h2>
@@ -56,7 +56,7 @@ new class extends Component
     <div class="container px-6 mx-auto text-center">
         <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
         <p class="mb-8 text-xl text-white">Get started with Plane Club for just £24.99 per month.</p>
-      <a href="/signup" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Join</a>
+      <a href="/register" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Join</a>
     </div>
   </section>
 
