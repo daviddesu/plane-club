@@ -422,28 +422,28 @@ new class extends Component
                 <x-select
                     class="pd-2"
                     label="Airline"
-                    placeholder="Please select"
+                    placeholder="Search airline"
+                    :async-data="route('airlines')"
+                    option-label="name"
+                    option-value="id"
                     wire:model='airline'
                     searchable="true"
                     min-items-for-search="2"
-                >
-                    @foreach ($airlines as $airline)
-                        <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
-                    @endforeach
-                </x-select>
+                />
+
 
                 <x-select
                     class="pd-2"
                     label="Aircraft"
-                    placeholder="Please select"
+                    placeholder="Search aircraft"
+                    :async-data="route('aircraft')"
+                    option-label="name"
+                    option-value="id"
                     wire:model='aircraft'
                     searchable="true"
                     min-items-for-search="2"
-                >
-                    @foreach ($aircraftCollection as $aircraftType)
-                        <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer}} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
-                    @endforeach
-                </x-select>
+                />
+
 
                 <x-input
                     label="Flight Number"

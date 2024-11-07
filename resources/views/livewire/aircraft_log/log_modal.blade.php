@@ -352,55 +352,52 @@ new class extends Component
                             <!-- Departure Airport Field -->
                             <x-select
                                 class="pd-2"
-                                label="Airport"
-                                placeholder="Please select"
+                                label="Arrival airport"
+                                placeholder="Search airport or IATA code"
+                                :async-data="route('airports')"
+                                option-label="name"
+                                option-value="id"
                                 wire:model='departure_airport_id'
                                 searchable="true"
                                 min-items-for-search="2"
-                            >
-                                @foreach ($airports as $airport)
-                                    <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
-                                @endforeach
-                            </x-select>
+                            />
+
                             <!-- Arrival Airport Field -->
                             <x-select
                                 class="pd-2"
-                                label="Airport"
-                                placeholder="Please select"
+                                label="Arrival airport"
+                                placeholder="Search airport or IATA code"
+                                :async-data="route('airports')"
+                                option-label="name"
+                                option-value="id"
                                 wire:model='arrival_airport_id'
                                 searchable="true"
                                 min-items-for-search="2"
-                            >
-                                @foreach ($airports as $airport)
-                                    <x-select.option value="{{ $airport->id }}" label="{{ $airport->name }} ({{ $airport->code }})" />
-                                @endforeach
-                            </x-select>
+                            />
                             <!-- Airline Field -->
                             <x-select
                                 class="pd-2"
                                 label="Airline"
-                                placeholder="Please select"
+                                placeholder="Search airline"
+                                :async-data="route('airlines')"
+                                option-label="name"
+                                option-value="id"
                                 wire:model='airline_id'
                                 searchable="true"
                                 min-items-for-search="2"
-                            >
-                                @foreach ($airlines as $airline)
-                                    <x-select.option value="{{ $airline->id }}" label="{{ $airline->name }}" />
-                                @endforeach
-                            </x-select>
+                            />
                             <!-- Aircraft Field -->
                             <x-select
                                 class="pd-2"
-                                label="Aircraft"
-                                placeholder="Please select"
+                                label="Airline"
+                                placeholder="Search airline"
+                                :async-data="route('aircraft')"
+                                option-label="name"
+                                option-value="id"
                                 wire:model='aircraft_id'
                                 searchable="true"
                                 min-items-for-search="2"
-                            >
-                                @foreach ($aircraft as $aircraftType)
-                                    <x-select.option value="{{ $aircraftType->id }}" label="{{ $aircraftType->manufacturer}} {{ $aircraftType->model }}-{{ $aircraftType->varient }}" />
-                                @endforeach
-                            </x-select>
+                            />
                             <!-- Flight number field -->
                             <x-input
                                 label="Flight Number"
