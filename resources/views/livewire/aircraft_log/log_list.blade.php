@@ -200,23 +200,23 @@ new class extends Component
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">
 
-            @if($this->aircraftLogIds)
-                    <div class="flex flex-col items-center justify-center">
-                        <x-icon name="arrow-up-tray" x-on:click="$openModal('logModal')"  class="w-auto text-center cursor-pointer h-50 text-cyan-800 dark:text-gray-200"  />
-                    </div>
-                @else
-                <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
+            @if(empty($this->aircraftLogIds))
+                <div class="flex flex-col items-center justify-center">
+                    <x-icon name="arrow-up-tray" x-on:click="$openModal('logModal')"  class="w-auto text-center cursor-pointer h-50 text-cyan-800 dark:text-gray-200"  />
+                </div>
+            @else
+            <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
 
-                    @foreach($this->aircraftLogIds as $aircraftLogId)
-                        <li>
-                            <livewire:aircraft_log.log_card
-                                wire:key="aircraftLog-{{ $aircraftLogId }}"
-                                :aircraftLogId="$aircraftLogId"
-                            />
-                        </li>
-                    @endforeach
-                </ul>
-                @endif
+                @foreach($this->aircraftLogIds as $aircraftLogId)
+                    <li>
+                        <livewire:aircraft_log.log_card
+                            wire:key="aircraftLog-{{ $aircraftLogId }}"
+                            :aircraftLogId="$aircraftLogId"
+                        />
+                    </li>
+                @endforeach
+            </ul>
+            @endif
 
 
             @if ($this->aircraftLogIds && $hasMorePages)
