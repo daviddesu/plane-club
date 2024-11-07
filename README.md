@@ -96,8 +96,8 @@
     [x] David
     [x] Privacy [alias -> David]
 [x] Monthly business costs and burndown
-[ ] Add supabase to fin calcs
-[ ] Compile list of airports
+[x] Add supabase to fin calcs
+[x] Compile list of airports
 [ ] Compile list of airlines
 [ ] Compile list of aircraft
 [ ] S3 look at cors to specifiyt he correct domain
