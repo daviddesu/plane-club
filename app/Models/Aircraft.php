@@ -20,7 +20,7 @@ class Aircraft extends Model
         $output = "";
         $output .= $this->manufacturer ?? "";
         $output .= $this->model ? " ".$this->model : "";
-        $output .= $this->varient ? "-".$this->varient : "";
+        $output .= $this->varient ? $this->varient : "";
         return $output;
     }
 }
