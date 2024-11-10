@@ -99,7 +99,7 @@
 [x] Add supabase to fin calcs
 [x] Compile list of airports
 [x] Compile list of airlines
-[ ] Compile list of aircraft
+[x] Compile list of aircraft
 [ ] Test updated selects work on edit
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Convert staging to prod

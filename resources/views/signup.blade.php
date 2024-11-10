@@ -15,7 +15,7 @@ new class extends Component
     <section class="flex pb-20 bg-center bg-cover bg-grey-200">
     <div class="items-center justify-center h-full bg-opacity-50">
         <div class="text-center">
-            <img src="/logo.png" class="justify-center h-auto w-76" />
+            {{-- <img src="/logo.png" class="justify-center h-auto w-76" /> --}}
 
             <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
             <p class="mb-8 text-xl text-cyan-600">£24.99/month</p>
