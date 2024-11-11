@@ -22,6 +22,12 @@ new class extends Component
     public Collection $airlines;
     public Collection $aircraft;
 
+    public $selectedDepartureAirport = null;
+    public $selectedArrivalAirport = null;
+    public $selectedAirline = null;
+    public $selectedAircraft = null;
+
+
     public ?int $id = null;
 
     #[Validate('required')]
@@ -104,6 +110,37 @@ new class extends Component
             $this->editingAllowed = $aircraftLog->user->is(auth()->user());
             $this->aircraftName = $aircraftLog->aircraft?->getFormattedName();
             $this->airlineName = $aircraftLog->airline?->name;
+
+            // Populate selected options for x-select components
+            if ($aircraftLog->departureAirport) {
+                $this->selectedDepartureAirport = [
+                    'id' => $aircraftLog->departureAirport->id,
+                    'name' => $aircraftLog->departureAirport->name . ' (' . $aircraftLog->departureAirport->iata_code . ')',
+                ];
+            }
+
+            if ($aircraftLog->arrivalAirport) {
+                $this->selectedArrivalAirport = [
+                    'id' => $aircraftLog->arrivalAirport->id,
+                    'name' => $aircraftLog->arrivalAirport->name . ' (' . $aircraftLog->arrivalAirport->iata_code . ')',
+                ];
+            }
+
+            if ($aircraftLog->airline) {
+                $this->selectedAirline = [
+                    'id' => $aircraftLog->airline->id,
+                    'name' => $aircraftLog->airline->name,
+                ];
+            }
+
+            if ($aircraftLog->aircraft) {
+                $this->selectedAircraft = [
+                    'id' => $aircraftLog->aircraft->id,
+                    'name' => $aircraftLog->aircraft->getFormattedName(),
+                ];
+        }
+
+
         }
     }
 
@@ -351,53 +388,53 @@ new class extends Component
                             </div>
                             <!-- Departure Airport Field -->
                             <x-select
-                                class="pd-2"
-                                label="Arrival airport"
+                                label="Departure airport"
                                 placeholder="Search airport or IATA code"
                                 :async-data="route('airports')"
                                 option-label="name"
                                 option-value="id"
                                 wire:model='departure_airport_id'
-                                searchable="true"
+                                :selected="$departure_airport_id"
+                                searchable
                                 min-items-for-search="2"
                             />
 
-                            <!-- Arrival Airport Field -->
                             <x-select
-                                class="pd-2"
                                 label="Arrival airport"
                                 placeholder="Search airport or IATA code"
                                 :async-data="route('airports')"
                                 option-label="name"
                                 option-value="id"
                                 wire:model='arrival_airport_id'
-                                searchable="true"
+                                :selected="$arrival_airport_id"
+                                searchable
                                 min-items-for-search="2"
                             />
-                            <!-- Airline Field -->
                             <x-select
-                                class="pd-2"
                                 label="Airline"
                                 placeholder="Search airline"
                                 :async-data="route('airlines')"
                                 option-label="name"
                                 option-value="id"
                                 wire:model='airline_id'
-                                searchable="true"
+                                :selected="$airline_id"
+                                searchable
                                 min-items-for-search="2"
                             />
+
                             <!-- Aircraft Field -->
                             <x-select
-                                class="pd-2"
-                                label="Airline"
-                                placeholder="Search airline"
+                                label="Aircraft"
+                                placeholder="Search aircraft"
                                 :async-data="route('aircraft')"
                                 option-label="name"
                                 option-value="id"
                                 wire:model='aircraft_id'
-                                searchable="true"
+                                :selected="$aircraft_id"
+                                searchable
                                 min-items-for-search="2"
                             />
+
                             <!-- Flight number field -->
                             <x-input
                                 label="Flight Number"

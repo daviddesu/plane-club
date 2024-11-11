@@ -53,15 +53,8 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file|mimetypes:video/mp4,video/quicktime|mimes:mp4,mov|max:153600')]
+    #[Validate('file|max:153600')]
     public $media; // 150 MB in kilobytes (150 MB * 1024 KB/MB)
-
-    public function mount()
-    {
-        // $this->airports = Airport::all();
-        $this->aircraftCollection = Aircraft::all();
-        $this->airlines = Airline::all();
-    }
 
     /**
      * Downloads the file from S3 to a local temporary path.
@@ -165,7 +158,12 @@ new class extends Component
 
     public function store()
     {
-        $validated = $this->validate();
+
+        try{
+            $validated = $this->validate();
+        }catch(\Exception $e){
+            dd($e);
+        }
 
         // Prepare the media file for local processing
         $mediaFilePath = $this->prepareMediaFile();
@@ -189,6 +187,7 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
             "flight_number" => $this->flightNumber,
         ]);
+
 
         if (str_contains($mimeType, 'image')) {
             // Process image synchronously (since it's quick)
@@ -274,7 +273,6 @@ new class extends Component
 
         $this->reset();
         $this->dispatch('aircraft_log-created');
-        $this->mount();
     }
 
     public function cacheMediaUrl(string $path): void

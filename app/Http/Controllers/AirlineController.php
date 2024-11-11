@@ -15,7 +15,7 @@ class AirlineController extends Controller
         $search = strtolower($request->get('search'));
 
         if(empty($search)){
-            return [];
+            return response()->json([]);
         }
 
         $searchTerms = explode(' ', strtolower($search));

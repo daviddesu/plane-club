@@ -13,9 +13,15 @@ class AirportController extends Controller
     public function getAirportsSearch(Request $request): JsonResponse
     {
         $search = strtolower($request->get('search'));
+        $selected = $request->get('selected');
+
+        if($selected){
+            $airport = Airport::find($selected)->first();
+            return response()->json(['id' => $airport->id, 'name' => "$airport->name ($airport->iata_code)"]);
+        }
 
         if(empty($search)){
-            return [];
+            return response()->json([]);
         }
 
         $searchTerms = explode(' ', strtolower($search));
