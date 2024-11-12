@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Airline;
 use App\Models\Airport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,13 @@ class AirlineController extends Controller
     public function getAirlinesSearch(Request $request): JsonResponse
     {
         $search = strtolower($request->get('search'));
+
+        $selected = $request->get('selected');
+
+        if($selected){
+            $airline = Airline::find($selected)->first();
+            return response()->json([['id' => $airline->id, 'name' => $airline->name]]);
+        }
 
         if(empty($search)){
             return response()->json([]);

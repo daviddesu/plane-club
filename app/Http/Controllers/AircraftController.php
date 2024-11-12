@@ -14,6 +14,12 @@ class AircraftController extends Controller
     public function getAircraftSearch(Request $request): JsonResponse
     {
         $search = strtolower($request->get('search'));
+        $selected = $request->get('selected');
+
+        if($selected){
+            $aircraft = Aircraft::find($selected)->first();
+            return response()->json([['id' => $aircraft->id, 'name' => $aircraft->getFormattedName()]]);
+        }
 
         if(empty($search)){
             return response()->json([]);

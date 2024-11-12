@@ -17,7 +17,7 @@ class AirportController extends Controller
 
         if($selected){
             $airport = Airport::find($selected)->first();
-            return response()->json(['id' => $airport->id, 'name' => "$airport->name ($airport->iata_code)"]);
+            return response()->json([['id' => $airport->id, 'name' => "$airport->name ($airport->iata_code)"]]);
         }
 
         if(empty($search)){

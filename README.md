@@ -100,7 +100,7 @@
 [x] Compile list of airports
 [x] Compile list of airlines
 [x] Compile list of aircraft
-[ ] Test updated selects work on edit
+[x] Test updated selects work on edit
 [ ] S3 look at cors to specifiyt he correct domain
 [ ] Convert staging to prod
 [x] S3 file backups
@@ -115,6 +115,7 @@
 
 ## Later
 
+[ ] Copy last log details button
 [ ] Keep airports, airlines and aircraft lists up to date
 [ ] Staging env
 [ ] Send to facebook

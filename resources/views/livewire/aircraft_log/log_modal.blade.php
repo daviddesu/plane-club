@@ -158,7 +158,7 @@ new class extends Component
         }
 
         if($this->aircraftName){
-            $name .= "-{$this->aaircraftName}";
+            $name .= "-{$this->aircraftName}";
         }
         return $name;
     }
@@ -380,10 +380,10 @@ new class extends Component
                                     placeholder="Please select"
                                     wire:model='status'
                                 >
-                                    <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::DEPARTING->name)) }}" />
-                                    <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ strtolower(ucfirst(FlyingStatus::ARRIVING->name)) }}" />
-                                    <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ strtolower(ucfirst(FlyingStatus::IN_FLIGHT->name)) }}" />
-                                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ strtolower(ucfirst(FlyingStatus::ON_STAND->name)) }}" />
+                                <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
+                                    <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
+                                    <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
+                                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
                                 </x-select>
                             </div>
                             <!-- Departure Airport Field -->

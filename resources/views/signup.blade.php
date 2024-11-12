@@ -38,7 +38,7 @@ new class extends Component
         <!-- Feature 2 -->
         <div class="w-full px-4 mb-8 text-center md:w-1/3">
             <h3 class="mb-2 text-xl font-semibold text-slate-700">Photo Gallery</h3>
-          <p class="text-slate-700">Leave the overbearing quality rules on the ramp. Instantly upload and showcase your aircraft photos and videos in a personalized gallery.Plane club is designed for hobbyists and professionals.</p>
+          <p class="text-slate-700">Leave the overbearing quality rules on the ramp. Instantly upload and showcase your aircraft photos and videos in a personalized gallery.</p>
         </div>
         <!-- Feature 3 -->
         <div class="w-full px-4 mb-8 text-center md:w-1/3">
@@ -46,8 +46,6 @@ new class extends Component
           <p class="text-slate-700">Maintain a detailed database of all your aircraft, all in one place. Filter down your history to see all photos and videos by aircraft type, route or airline.</p>
         </div>
       </div>
-      <p class="mt-8 text-xl text-center text-cyan-800">Experience all these features for £24.99/month</p>
-
     </div>
   </section>
 
