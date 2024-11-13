@@ -18,7 +18,7 @@ new class extends Component
             {{-- <img src="/logo.png" class="justify-center h-auto w-60" /> --}}
 
             <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
-            <p class="mb-8 text-xl text-cyan-600">£24.99/month</p>
+            <p class="mb-8 text-xl text-cyan-600">£25/month</p>
             <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Join</a>
         </div>
         </div>
@@ -53,7 +53,7 @@ new class extends Component
   <section class="py-20 bg-cyan-800">
     <div class="container px-6 mx-auto text-center">
         <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
-        <p class="mb-8 text-xl text-white">Get started with Plane Club for just £24.99 per month.</p>
+        <p class="mb-8 text-xl text-white">Get started with Plane Club for just £25 per month.</p>
       <a href="/register" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Join</a>
     </div>
   </section>
