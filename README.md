@@ -101,7 +101,8 @@
 [x] Compile list of airlines
 [x] Compile list of aircraft
 [x] Test updated selects work on edit
-[ ] S3 look at cors to specifiyt he correct domain
+[x] S3 look at cors to specifiyt he correct domain
+[ ] favicon
 [ ] Convert staging to prod
 [x] S3 file backups
 [ ] DB backups?
