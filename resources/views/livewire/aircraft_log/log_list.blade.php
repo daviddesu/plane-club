@@ -12,13 +12,6 @@ use Livewire\Attributes\On;
 new class extends Component
 {
     public Collection $aircraftLogIds;
-    public Collection $aircraftTypes;
-    public Collection $airlines;
-    public Collection $airports;
-
-    public array $aircraftOptions = [];
-    public array $airlineOptions = [];
-    public array $airportOptions = [];
 
     public $selectedAircraftType = null;
     public $selectedAirline = null;
@@ -33,34 +26,6 @@ new class extends Component
     public function mount(): void
     {
         $this->aircraftLogIds = collect();
-
-        // Load filter options
-        $this->aircraftTypes = Aircraft::all();
-        $this->airlines = Airline::all();
-        $this->airports = Airport::all();
-
-        $this->aircraftOptions = $this->aircraftTypes->map(function ($aircraft) {
-            return [
-                'id' => $aircraft->id,
-                'name' => $aircraft->manufacturer . ' ' . $aircraft->model . ($aircraft->variant ? '-' . $aircraft->variant : ''),
-            ];
-        })->toArray();
-
-        $this->airlineOptions = $this->airlines->map(function ($airline) {
-            return [
-                'id' => $airline->id,
-                'name' => $airline->name,
-            ];
-        })->toArray();
-
-        // Prepare airport options
-        $this->airportOptions = $this->airports->map(function ($airport) {
-            return [
-                'id' => $airport->id,
-                'name' => $airport->name . ' (' . $airport->code . ')',
-            ];
-        })->toArray();
-
         $this->getAircraftLogs(true);
     }
 
@@ -148,49 +113,48 @@ new class extends Component
     <div class="max-w-6xl mx-auto">
         <!-- Filters Dropdown -->
         <div class="flex justify-end mb-4">
-            <x-dropdown height="5xl" width="2xl" position="bottom-end" persistent="true">
+            <x-dropdown height="6xl" width="6xl" position="bottom-end" persistent="true">
                 <x-slot name="trigger">
                     <x-button class="bg-cyan-800" label="Filters" primary />
                 </x-slot>
 
                 <!-- Dropdown Content -->
                 <div class="p-4 space-y-4">
-                    <!-- Aircraft Type Filter -->
                     <div>
                         <x-select
-                            wire:model.live="selectedAircraftType"
-                            label="Aircraft Type"
-                            placeholder="All Aircraft Types"
-                            :options="$aircraftOptions"
-                            option-label="name"
-                            option-value="id"
-                            searchable
-                        />
-                    </div>
-
-                    <!-- Airline Filter -->
-                    <div>
-                        <x-select
-                            wire:model.live="selectedAirline"
                             label="Airline"
-                            placeholder="All Airlines"
-                            :options="$airlineOptions"
+                            placeholder="Search airline"
+                            :async-data="route('airlines')"
                             option-label="name"
                             option-value="id"
-                            searchable
+                            wire:model.live="selectedAirline"
+                            searchable="true"
+                            min-items-for-search="2"
                         />
                     </div>
 
-                    <!-- Airport Filter -->
                     <div>
                         <x-select
-                            wire:model.live="selectedAirport"
-                            label="Airport"
-                            placeholder="All Airports"
-                            :options="$airportOptions"
+                            label="Aircraft"
+                            placeholder="Search aircraft"
+                            :async-data="route('aircraft')"
                             option-label="name"
                             option-value="id"
-                            searchable
+                            wire:model.live="selectedAircraftType"
+                            searchable="true"
+                            min-items-for-search="2"
+                        />
+                    </div>
+                    <div>
+                        <x-select
+                            label="Airport"
+                            placeholder="Search airport or IATA code"
+                            wire:model.live="selectedAirport"
+                            :async-data="route('airports')"
+                            option-label="name"
+                            option-value="id"
+                            searchable="true"
+                            min-items-for-search="2"
                         />
                     </div>
                 </div>

@@ -40,7 +40,14 @@ $logout = function (Logout $logout) {
             @if(Auth::check())
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     @if(Auth::user()->subscribedStripe())
-                        <x-icon name="arrow-up-tray" class="w-5 h-5 text-gray-800 cursor-pointer dark:text-gray-200" x-on:click="$openModal('logModal')" />
+                        <x-mini-button
+                            x-on:click="$openModal('logModal')"
+                            class="w-5 h-5 cursor-pointer text-cyan-800 hover:text-white hover:bg-cyan-800 dark:text-gray-200"
+                            rounded
+                            icon="plus"
+                            flat
+                            interaction:solid
+                        />
                     @endif
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
