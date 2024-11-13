@@ -66,7 +66,7 @@ new class extends Component
         $this->page++;
     }
 
-    #[On('aircraft_log-created')]
+    /*#[On('aircraft_log-created')]
     public function aircraftLogCreated()
     {
         $this->getAircraftLogs(true);
@@ -77,7 +77,7 @@ new class extends Component
     {
         $this->aircraftLogIds = $this->aircraftLogIds->diff([$id]);
     }
-
+*/
     public function updatedSelectedAircraftType($value): void
     {
         $this->selectedAircraftType = $value ?: null;
