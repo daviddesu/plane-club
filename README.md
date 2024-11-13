@@ -108,8 +108,8 @@
 [x] DB backups?
 [x] Convert staging to prod
 [x] Setup prod stripe
-[x] prod snapshot issues
-[ ] Cards vary in size depending on details and mobile card size issues
+[ ] snapshot issues, also affecting filters. has it been since async added?
+[ ] Cards vary in size depending on details
 [ ] legal docs margins
 [ ] register business
 [ ] Business bank account
