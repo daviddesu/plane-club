@@ -108,6 +108,9 @@
 [x] DB backups?
 [x] Convert staging to prod
 [x] Setup prod stripe
+[ ] prod snapshot issues
+[ ] Cards vary in size depending on details
+[ ] legal docs margins
 [ ] register business
 [ ] Business bank account
 [ ] Update all payment methods and addresses for accounts
