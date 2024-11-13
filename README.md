@@ -103,10 +103,10 @@
 [x] Test updated selects work on edit
 [x] S3 look at cors to specifiyt he correct domain
 [x] check filters still work
-[ ] favicon
-[ ] Convert staging to prod
+[x] favicon
 [x] S3 file backups
-[ ] DB backups?
+[x] DB backups?
+[ ] Convert staging to prod
 [ ] register business
 [ ] Business bank account
 [ ] Update stripe account
@@ -117,6 +117,7 @@
 
 ## Later
 
+[ ] Upgrade DB and ensure backups
 [ ] Copy last log details button
 [ ] Keep airports, airlines and aircraft lists up to date
 [ ] Staging env
