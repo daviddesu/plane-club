@@ -169,7 +169,7 @@ new class extends Component
                     <x-icon name="arrow-up-tray" x-on:click="$openModal('logModal')"  class="w-auto text-center cursor-pointer h-50 text-cyan-800 dark:text-gray-200"  />
                 </div>
             @else
-            <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
+            <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:grid-cols-3">
 
                 @foreach($this->aircraftLogIds as $aircraftLogId)
                     <li>
