@@ -78,7 +78,14 @@ $logout = function (Logout $logout) {
             <div class="flex items-center -me-2 sm:hidden">
                 <div class="p-4">
                 @if(Auth::check())
-                    <x-icon name="arrow-up-tray" class="w-5 h-5 text-gray-800 cursor-pointer dark:text-gray-200" x-on:click="$openModal('logModal')" />
+                        <x-mini-button
+                            x-on:click="$openModal('logModal')"
+                            class="w-5 h-5 cursor-pointer text-cyan-800 hover:text-white hover:bg-cyan-800 dark:text-gray-200"
+                            rounded
+                            icon="plus"
+                            flat
+                            interaction:solid
+                        />
                 @endif
                 </div>
                 <button @click="open = ! open"
