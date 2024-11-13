@@ -18,9 +18,6 @@ use Masmerise\Toaster\Toaster;
 
 new class extends Component
 {
-    public Collection $airports;
-    public Collection $airlines;
-    public Collection $aircraft;
 
     public $selectedDepartureAirport = null;
     public $selectedArrivalAirport = null;
@@ -201,13 +198,6 @@ new class extends Component
         // Dispatch events after deletion
         $this->dispatch('aircraft_log-deleted', $this->id);
         Toaster::info("Log deleted");
-    }
-
-    public function mount()
-    {
-        $this->airports = Airport::all();
-        $this->aircraft = Aircraft::all();
-        $this->airlines = Airline::all();
     }
 
     public function startEdit()
