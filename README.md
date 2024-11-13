@@ -106,13 +106,16 @@
 [x] favicon
 [x] S3 file backups
 [x] DB backups?
-[ ] Convert staging to prod
+[x] Convert staging to prod
+[x] Setup prod stripe
 [ ] register business
 [ ] Business bank account
+[ ] Update all payment methods and addresses for accounts
 [ ] Update stripe account
 [ ] Check posthog is working
 [ ] Check sentry is working
 [ ] Launch
+[ ] Sign up email campaign
 
 
 ## Later
