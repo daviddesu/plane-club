@@ -23,7 +23,7 @@ class SalesController extends Controller
         return $request
             ->user()
             ->newSubscription(env("STRIPE_PRODUCT_ID"), env("STRIPE_PRICE_ID"))
-            ->trialDays(0)
+            // ->trialDays(0)
             ->allowPromotionCodes()
             ->checkout([
                 'success_url' => route('checkout-success'),
