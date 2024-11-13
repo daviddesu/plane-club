@@ -102,6 +102,7 @@
 [x] Compile list of aircraft
 [x] Test updated selects work on edit
 [x] S3 look at cors to specifiyt he correct domain
+[ ] check filters still work
 [ ] favicon
 [ ] Convert staging to prod
 [x] S3 file backups
