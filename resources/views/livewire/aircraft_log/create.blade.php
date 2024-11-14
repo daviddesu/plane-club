@@ -22,10 +22,6 @@ new class extends Component
 {
     use WithFileUploads;
 
-    // public Collection $airports;
-    public Collection $airlines;
-    public Collection $aircraftCollection;
-
     #[Validate('required')]
     public ?string $loggedAt;
 

@@ -60,6 +60,11 @@ WORKDIR /var/www/html
 RUN composer install --optimize-autoloader --no-dev \
     && mkdir -p storage/logs \
     && php artisan optimize:clear \
+    && php artisan config:cache \
+    && php artisan event:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && php artisan optimize \
     && chown -R www-data:www-data /var/www/html \
     && echo "MAILTO=\"\"\n* * * * * www-data /usr/bin/php /var/www/html/artisan schedule:run" > /etc/cron.d/laravel \
     && sed -i='' '/->withMiddleware(function (Middleware \$middleware) {/a\

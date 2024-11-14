@@ -41,10 +41,10 @@ new class extends Component
             $this->isProcessing = $aircraftLog->media?->isProcessing() ?? false;
             $this->thumbnailPath = $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path);
             $this->mediaPath = $this->getCachedMediaUrl($aircraftLog->media?->path);
-            $this->arrivalAirportName = $aircraftLog->arrivalAirport->name ?? '';
-            $this->departureAirportName = $aircraftLog->departureAirport->name ?? '';
-            $this->status = $aircraftLog->status;
-            $this->loggedAt = $aircraftLog->logged_at->format('d/m/Y');
+            $this->arrivalAirportName = $aircraftLog->arrivalAirport?->name ?? '';
+            $this->departureAirportName = $aircraftLog->departureAirport?->name ?? '';
+            $this->status = $aircraftLog->status ? (string)$aircraftLog->status : '';
+            $this->loggedAt = $aircraftLog->logged_at ? $aircraftLog->logged_at->format('d/m/Y') : '';
             $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
             $this->airlineName = $aircraftLog->airline?->name ?? '';
     }

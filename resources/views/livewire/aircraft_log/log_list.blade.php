@@ -13,9 +13,9 @@ new class extends Component
 {
     public Collection $aircraftLogIds;
 
-    public $selectedAircraftType = null;
-    public $selectedAirline = null;
-    public $selectedAirport = null;
+    public ?int $selectedAircraftType = null;
+    public ?int $selectedAirline = null;
+    public ?int $selectedAirport = null;
 
     // Pagination
     public int $perPage = 20;
@@ -48,7 +48,8 @@ new class extends Component
         }
 
         if ($this->selectedAirport) {
-            $query->where('airport_id', $this->selectedAirport);
+            $query->where('arrival_airport_id', $this->selectedAirport)
+            ->orWhere('departure_airport_id', $this->selectedAirport);
         }
 
         $logs = $query->skip($this->perPage * ($this->page - 1))
@@ -149,7 +150,7 @@ new class extends Component
                         <x-select
                             label="Airport"
                             placeholder="Search airport or IATA code"
-                            wire:model.live="selectedAirport"
+                            wire:model.live.="selectedAirport"
                             :async-data="route('airports')"
                             option-label="name"
                             option-value="id"
@@ -163,13 +164,8 @@ new class extends Component
 
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">
+            <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
 
-            @if(empty($this->aircraftLogIds))
-                <div class="flex flex-col items-center justify-center">
-                    <x-icon name="arrow-up-tray" x-on:click="$openModal('logModal')"  class="w-auto text-center cursor-pointer h-50 text-cyan-800 dark:text-gray-200"  />
-                </div>
-            @else
-            <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:grid-cols-3">
 
                 @foreach($this->aircraftLogIds as $aircraftLogId)
                     <li>
@@ -180,7 +176,6 @@ new class extends Component
                     </li>
                 @endforeach
             </ul>
-            @endif
 
 
             @if ($this->aircraftLogIds && $hasMorePages)
