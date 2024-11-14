@@ -164,11 +164,16 @@ new class extends Component
 
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">
-            <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ul
+                x-ref="gallery"
+                id="gallery"
+                class="grid grid-cols-1 gap-5 md:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5"
+                style="grid-auto-rows: 1fr;"
+            >
 
 
                 @foreach($this->aircraftLogIds as $aircraftLogId)
-                    <li wire:key="aircraftLog-item-{{ $aircraftLogId }}">
+                    <li class="flex h-full" wire:key="aircraftLog-item-{{ $aircraftLogId }}">
                         <livewire:aircraft_log.log_card
                             wire:key="aircraftLog-{{ $aircraftLogId }}"
                             :aircraftLogId="$aircraftLogId"

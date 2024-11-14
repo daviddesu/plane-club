@@ -89,7 +89,7 @@ new class extends Component
 
 ?>
 
-<x-card padding="none">
+<x-card padding="none" class="flex flex-col h-full">
     @if($aircraftLogId)
     {{-- Media Container with rectangular aspect ratio --}}
     <div
@@ -132,14 +132,23 @@ new class extends Component
     </div>
     <div class="grid grid-cols-3 mt-2">
         <div class="col-span-1">
-            <div><small class="text-xs text-gray-600">{{ $loggedAt }}</small></div>
-            <div><small class="text-xs text-gray-600">{{ $airlineName }}</small></div>
+            <div>
+                <small class="text-xs text-gray-600">{{ $loggedAt }}</small>
+            </div>
+            <div>
+                <small class="text-xs text-gray-600">{{ $airlineName ?? '&nbsp;' }}</small>
+            </div>
         </div>
         <div class="col-span-2">
-            <div><small class="text-xs text-gray-600">{{ FlyingStatus::getNameByStatus($status) }}</small></div>
-            <div><small class="text-xs text-gray-600">{{ $aircraftType }}</small></div>
+            <div>
+                <small class="text-xs text-gray-600">
+                    {{ \App\Enums\FlyingStatus::getNameByStatus($status) }}
+                </small>
+            </div>
+            <div>
+                <small class="text-xs text-gray-600">{{ $aircraftType ?? '&nbsp;' }}</small>
+            </div>
         </div>
-        <div></div>
     </div>
     </div>
     @endif

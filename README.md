@@ -108,7 +108,7 @@
 [x] DB backups?
 [x] Convert staging to prod
 [x] Setup prod stripe
-[ ] add taxiing to status
+[x] add taxiing to status
 [x] snapshot issues, also affecting filters. has it been since async added?
 [ ] Cards vary in size depending on details
 [ ] legal docs margins
