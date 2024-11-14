@@ -110,7 +110,7 @@
 [x] Setup prod stripe
 [x] add taxiing to status
 [x] snapshot issues, also affecting filters. has it been since async added?
-[ ] Cards vary in size depending on details
+[x] Cards vary in size depending on details
 [ ] legal docs margins
 [ ] register business
 [ ] Business bank account
