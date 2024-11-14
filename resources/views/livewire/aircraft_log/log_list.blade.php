@@ -164,7 +164,7 @@ new class extends Component
 
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">
-            <ul x-ref="gallery" id="gallery" class="grid grid-cols-2 gap-5 lg:grid-cols-3">
+            <ul x-ref="gallery" id="gallery" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
 
                 @foreach($this->aircraftLogIds as $aircraftLogId)

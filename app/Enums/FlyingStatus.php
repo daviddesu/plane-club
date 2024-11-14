@@ -8,6 +8,7 @@ enum FlyingStatus: int
     case IN_FLIGHT = 2;
     case ARRIVING = 3;
     case ON_STAND = 4;
+    case TAXIING = 5;
 
     public static function getNameByStatus($status)
     {
@@ -25,6 +26,10 @@ enum FlyingStatus: int
 
         if($status == self::ON_STAND->value){
             return "On Stand";
+        }
+
+        if($status == self::TAXIING->value){
+            return "Taxiing";
         }
     }
 }
