@@ -120,6 +120,7 @@
 [ ] Check posthog is working
 [ ] Check sentry is working
 [ ] marketing plan
+[ ] Seo
 [ ] Launch
 [ ] Sign up email campaign
 
@@ -128,6 +129,7 @@
 
 [ ] add send to face book option with coming soon?
 [ ] add storage space per media item
+[ ] blog?
 [ ] Upgrade DB and ensure backups
 [ ] Copy last log details button
 [ ] Keep airports, airlines and aircraft lists up to date
