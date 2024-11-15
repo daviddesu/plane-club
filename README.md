@@ -113,6 +113,7 @@
 [x] Cards vary in size depending on details
 [ ] legal docs margins
 [ ] register business
+[ ] Landing page
 [ ] Business bank account
 [ ] Update all payment methods and addresses for accounts
 [ ] Update stripe account
