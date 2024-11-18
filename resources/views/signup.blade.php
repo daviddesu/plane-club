@@ -12,14 +12,14 @@ new class extends Component
 
 <x-app-layout>
     <!-- Hero Section -->
-    <section class="relative pb-20 bg-gray-200 bg-center bg-cover" style="background-image: url('{{ asset('main-image.png') }}');">
+    <section class="relative h-screen pb-20 bg-gray-200 bg-center bg-cover"  style="background-image: url('{{ asset('main-image.png') }}');">
         <!-- Overlay -->
         <div class="absolute inset-0 bg-gray-900 opacity-80"></div>
 
         <!-- Content Container -->
         <div class="relative flex items-center justify-center h-full">
             <div class="pt-20 text-center">
-                <h1 class="mb-4 text-5xl font-bold text-white md:text-5xl">Capture, Organize, and Showcase your images and videos</h1>
+                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">Capture, Organize, and Showcase your images and videos</h1>
 
                 <p class="mb-8 text-xl text-white">£25/month</p>
                 <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Get Started Today</a>
