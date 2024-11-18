@@ -12,67 +12,89 @@ new class extends Component
 
 <x-app-layout>
     <!-- Hero Section -->
-    <section class="pb-20 bg-center bg-cover bg-grey-200">
-    <div class="items-center justify-center h-full bg-opacity-50">
-        <div class="pt-40 text-center">
-            {{-- <img src="/logo.png" class="justify-center h-auto w-60" /> --}}
+    <section class="relative pb-20 bg-gray-200 bg-center bg-cover" style="background-image: url('{{ asset('main-image.png') }}');">
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-gray-900 opacity-80"></div>
 
-            <h1 class="mb-4 text-3xl font-bold text-cyan-800 md:text-5xl">Capture Every Aircraft</h1>
-            <p class="mb-8 text-xl text-cyan-600">£25/month</p>
-            <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Join</a>
-        </div>
-        </div>
-  </section>
+        <!-- Content Container -->
+        <div class="relative flex items-center justify-center h-full">
+            <div class="pt-20 text-center">
+                <h1 class="mb-4 text-5xl font-bold text-white md:text-5xl">Capture, Organize, and Showcase your images and videos</h1>
 
-  <!-- Features Section -->
-  <section class="pb-5 py-30">
-    <div class="container px-6 mx-auto">
-        <h4 class="mb-12 text-3xl text-center text-cyan-800">Seamlessly upload and showcase your photos and videos. Tagging them with detailed information about the aircraft, airlines, and locations.</h4>
-      <h2 class="mb-12 text-3xl font-bold text-center text-slate-700">Why Choose Plane Club?</h2>
-      <div class="flex flex-wrap">
-        <!-- Feature 1 -->
-        <div class="w-full px-4 mb-8 text-center md:w-1/3">
-          <h3 class="mb-2 text-xl font-semibold text-slate-700">Comprehensive Logging</h3>
-          <p class="text-slate-700">Add images and videos alongside the routes, aircraft types, airlines, and aircraft registrations you've spotted or flown on.</p>
+                <p class="mb-8 text-xl text-white">£25/month</p>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Get Started Today</a>
+            </div>
         </div>
-        <!-- Feature 2 -->
-        <div class="w-full px-4 mb-8 text-center md:w-1/3">
-            <h3 class="mb-2 text-xl font-semibold text-slate-700">Photo Gallery</h3>
-          <p class="text-slate-700">Leave the overbearing quality rules on the ramp. Instantly upload and showcase your aircraft photos and videos in a personalized gallery.</p>
-        </div>
-        <!-- Feature 3 -->
-        <div class="w-full px-4 mb-8 text-center md:w-1/3">
-            <h3 class="mb-2 text-xl font-semibold text-slate-700">Personal Database</h3>
-          <p class="text-slate-700">Maintain a detailed database of all your aircraft, all in one place. Filter down your history to see all photos and videos by aircraft type, route or airline.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Call to Action -->
-  <section class="py-20 bg-cyan-800">
-    <div class="container px-6 mx-auto text-center">
-        <h2 class="mb-4 text-3xl font-bold text-white">Ready to Take Your Hobby to New Heights?</h2>
-        <p class="mb-8 text-xl text-white">Get started with Plane Club for just £25 per month.</p>
-      <a href="/register" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Join</a>
-    </div>
-  </section>
+    <!-- Features Section -->
+    <section class="py-20 bg-cyan-800">
+        <div class="container px-6 mx-auto">
+            <div class="text-center">
+                <h2 class="mb-12 text-3xl font-bold text-white">Why Choose Plane Club?</h2>
+            </div>
+            <div class="flex flex-wrap items-center justify-center">
+                <!-- Feature 1 -->
+                <div class="w-full px-4 mb-8 md:w-1/3">
+                    <div class="flex flex-col items-center p-6">
+                        <!-- Icon -->
+                        <div class="flex items-center justify-center mb-4">
+                            <x-icon name="tag" class="w-12 h-12 text-white" />
+                        </div>
+                        <!-- Feature Title -->
+                        <h3 class="mb-2 text-2xl font-bold text-white">Detailed Tagging</h3>
+                        <!-- Feature Description -->
+                        <p class="text-xl text-center text-white">Tag aircraft, airlines, and locations with ease.</p>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="w-full px-4 mb-8 md:w-1/3">
+                    <div class="flex flex-col items-center p-6">
+                        <!-- Icon -->
+                        <div class="flex items-center justify-center mb-4">
+                            <x-icon name="photo" class="w-12 h-12 text-white" />
+                        </div>
+                        <!-- Feature Title -->
+                        <h3 class="mb-2 text-2xl font-bold text-white">Personalized Gallery</h3>
+                        <!-- Feature Description -->
+                        <p class="text-xl text-center text-white">Create your own gallery and database.</p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
+                {{-- <div class="w-full px-4 mb-8 md:w-1/3">
+                    <div class="flex flex-col items-center p-6">
+                        <!-- Icon -->
+                        <div class="flex items-center justify-center mb-4">
+                            <!-- Replace with your icon or SVG -->
+                            <x-icon name="share" class="w-12 h-12 text-white" />
+                        </div>
+                        <!-- Feature Title -->
+                        <h3 class="mb-2 text-2xl font-bold text-white">Community Sharing</h3>
+                        <!-- Feature Description -->
+                        <p class="text-xl text-center text-white">Share with the plane spotting community.</p>
+                    </div>
+                </div> --}}
+            </div>
+            <!-- Call to Action Button -->
+            <div class="mt-8 text-center">
+                <a href="/register" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Get Started Today</a>
+            </div>
+        </div>
+    </section>
+
+
 
   <!-- Footer -->
   <footer class="py-6 bg-gray-800">
     <div class="container grid grid-cols-2 px-10 text-center">
         <div>
-            <a class="text-white" href="/privacy-policy">Privacy Policy</a><br>
-            <a class="text-white" href="/terms-conditions">Terms of Service</a><br>
-            <a class="text-white" href="/cookie-policy">Cookie Policy</a><br>
-            <a class="text-white" href="#" class="termly-display-preferences">Consent Preferences</a>
+            <a class="text-xs text-white" href="/privacy-policy">Privacy Policy</a><br>
+            <a class="text-xs text-white" href="/terms-conditions">Terms of Service</a><br>
+            <a class="text-xs text-white" href="/cookie-policy">Cookie Policy</a><br>
+            <a class="text-xs text-white" href="#" class="termly-display-preferences">Consent Preferences</a>
         </div>
         <div>
-            <p class="text-white">Contact: <a href="mailto:support@planeclub.app">support@planeclub.app</a></p><br>
-            <p class="text-white underline" >Address</p>
-            <p class="text-white" >Third Floor, 3 Hill Street</p>
-            <p class="text-white" >Edinburgh</p>
-            <p class="text-white" >EH2 3JP</p>
+            <p class="text-xs text-white ">Contact: <a href="mailto:support@planeclub.app">support@planeclub.app</a></p><br>
         </div>
     </div>
     <div class="container px-6 pt-4 mx-auto text-center">

@@ -111,9 +111,9 @@
 [x] add taxiing to status
 [x] snapshot issues, also affecting filters. has it been since async added?
 [x] Cards vary in size depending on details
-[ ] legal docs margins
-[ ] register business
-[ ] Landing page
+[x] legal docs margins
+[x] register business
+[x] Landing page
 [ ] Business bank account
 [ ] Update all payment methods and addresses for accounts
 [ ] Update stripe account
