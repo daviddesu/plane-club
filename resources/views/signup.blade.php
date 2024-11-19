@@ -98,7 +98,7 @@ new class extends Component
         </div>
     </div>
     <div class="container px-6 pt-4 mx-auto text-center">
-      <p class="text-white">&copy; 2024 Plane Club LTD All rights reserved.</p>
+      <p class="text-white">&copy; {{ date('Y') }} Plane Club LTD All rights reserved.</p>
     </div>
   </footer>
 </x-app-layout>
