@@ -29,6 +29,7 @@
             ></script>
         @endif
 
+        <meta name="facebook-domain-verification" content="d2sb2vyimzau938j2ut1o2ytfam5ak" />
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16786194088">
         </script>
