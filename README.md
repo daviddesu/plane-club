@@ -114,41 +114,13 @@
 [x] legal docs margins
 [x] register business
 [x] Landing page
-[ ] Business bank account
-[ ] Update all payment methods and addresses for accounts
-[ ] Update stripe account
-[ ] Check posthog is working
-[ ] Check sentry is working
-[ ] marketing plan
-[ ] Seo
+[x] Business bank account
+[x] Update all payment methods and addresses for accounts
+[x] Update stripe account
+[x] Check posthog is working
+[x] Check sentry is working
 [ ] Launch
-[ ] Sign up email campaign
 
-
-## Later
-
-[ ] add send to face book option with coming soon?
-[ ] add storage space per media item
-[ ] blog?
-[ ] Upgrade DB and ensure backups
-[ ] Copy last log details button
-[ ] Keep airports, airlines and aircraft lists up to date
-[ ] Staging env
-[ ] Send to facebook
-[ ] Allow next log to poputa efrom the last details
-[ ] Upload and show avatar to nav bar
-[ ] Show avatar on log
-[ ] Like other people logs
-[ ] Google and facebook auth (clerk maybe?)
-[ ] Comment on other peoples logs
-[ ] Host videos and safety
-[ ] share to social media with a watermark
-[ ] Allow logs to be made public
-[ ] Show all public logs
-[ ] Comment on public logs
-[ ] Scale down image safety checks as the user proves trustworthy. e,g, 100% for first month, reduced to a % probbaility that   decreases over time, probably to a minumum of 10% of uploads checked?
-[ ] AWS backup recovery process
-[ ] DB backup recovery process
 
 ## Local env
 - PHP
