@@ -155,14 +155,25 @@ new class extends Component
     public function store()
     {
 
-        try{
-            $validated = $this->validate();
-        }catch(\Exception $e){
-            dd($e);
-        }
+
+        $validated = $this->validate();
+
 
         // Prepare the media file for local processing
         $mediaFilePath = $this->prepareMediaFile();
+
+        // Get the file size
+        $fileSizeInBytes = filesize($mediaFilePath);
+
+        // Calculate new total storage if the file is uploaded
+        $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
+        $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
+
+        if ($newTotalStorageInGB > $user->getStorageLimitInGBAttribute()) {
+            // Exceeded storage limit
+            Toaster::warning('You have reached your storage limit. Please upgrade your subscription.');
+            return redirect()->back();
+        }
 
         // Get the MIME type from the local file
         $mimeType = $this->getMimeType($mediaFilePath);
@@ -219,6 +230,7 @@ new class extends Component
                 "thumbnail_path" => null,
                 'status' => 'processed',
                 'raw_video_path' => null,
+                'size' => $fileSizeInBytes,
             ]);
 
             // Cache the media URL
@@ -249,6 +261,8 @@ new class extends Component
                 "thumbnail_path" => null,
                 'status' => 'processing',
                 'raw_video_path' => $rawVideoPath, // Store the path to the raw video
+                'size' => $fileSizeInBytes,
+
             ]);
 
             // Dispatch job to process video
@@ -266,6 +280,10 @@ new class extends Component
             Toaster::warning('Unsupported media type uploaded.');
             throw new \RuntimeException("Unsupported media type uploaded.");
         }
+
+        // Update user's used_disk
+        $user->used_disk = $newTotalStorageInBytes;
+        $user->save();
 
         $this->reset();
         $this->dispatch('aircraft_log-created');

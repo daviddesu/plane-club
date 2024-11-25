@@ -191,8 +191,38 @@ new class extends Component
 
     public function delete(): void
     {
-        // Delete the media and the log first
-        Storage::disk(getenv('FILESYSTEM_DISK'))->delete($this->realMediaUrl);
+        // Retrieve the aircraft log and associated media
+        $aircraftLog = AircraftLog::with('media')->find($this->id);
+
+        if (!$aircraftLog) {
+            Toaster::warning("Aircraft log not found.");
+            return;
+        }
+
+        $mediaItem = $aircraftLog->media;
+
+        if ($mediaItem) {
+            // Get the size of the media item
+            $fileSize = $mediaItem->size;
+
+            // Delete the media file from storage
+            Storage::disk(env('FILESYSTEM_DISK'))->delete($mediaItem->path);
+
+            // Delete the media item record
+            $mediaItem->delete();
+
+            // Update the user's used_disk field
+            $user = auth()->user();
+            $user->used_disk = max(0, $user->used_disk - $fileSize);
+            $user->save();
+
+            // Delete thumbnail if exists
+            if ($mediaItem->thumbnail_path) {
+                Storage::disk(env('FILESYSTEM_DISK'))->delete($mediaItem->thumbnail_path);
+            }
+        }
+
+        // Delete the log first
         AircraftLog::destroy($this->id);
 
         // Dispatch events after deletion
