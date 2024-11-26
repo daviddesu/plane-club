@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Events\Registered;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +55,13 @@ class SalesController extends Controller
 
     public function checkoutSuccess(Request $request)
     {
-        session()->flash('success-message', 'Welcome to Plane Club. It\'s great to have you on board!');
+        $user = Auth::user();
+
+        // Dispatch the Registered event to send the email verification notification
+        event(new Registered($user));
+
+        session()->flash('success-message', 'Welcome to Plane Club. It\'s great to have you on board! Please verify your email address.');
+
         return redirect()->route('verification.notice');
     }
 
