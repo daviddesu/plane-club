@@ -51,8 +51,8 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file|max:153600')]
-    public $media; // 150 MB in kilobytes (150 MB * 1024 KB/MB)
+    #[Validate('file|max:1024000')]
+    public $media; // 1 GB in kilobytes (1000 MB * 1024 KB/MB)
 
     public function mount()
     {
