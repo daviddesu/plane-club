@@ -32,7 +32,7 @@ new class extends Component {
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
             ],
             [
-                'name' => 'Captain',
+                'name' => 'Pro',
                 'price' => '£75/month',
                 'storage' => '2 TB',
                 'storage_limit' => 2000,

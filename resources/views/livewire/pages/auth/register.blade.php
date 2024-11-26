@@ -18,7 +18,28 @@ state([
     'email' => '',
     'password' => '',
     'password_confirmation' => '',
-    'marketing_preferences' => false
+    'marketing_preferences' => false,
+    'selectedPlan' => '',
+    'availablePlans' => [
+        [
+            'name' => 'Hobby',
+            'price' => '£15/month',
+            'storage' => '200 GB',
+            'stripe_price_id' => 'tier1',
+        ],
+        [
+            'name' => 'Aviator',
+            'price' => '£25/month',
+            'storage' => '500 GB',
+            'stripe_price_id' => 'tier2',
+        ],
+        [
+            'name' => 'Pro',
+            'price' => '£75/month',
+            'storage' => '2 TB',
+            'stripe_price_id' => 'tier3',
+        ],
+    ],
 ]);
 
 rules([
@@ -27,6 +48,7 @@ rules([
     'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
     'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
     'marketing_preferences' => ['accepted'],
+    'selectedPlan' => ['required', 'string'],
 ]);
 
 $register = function () {
@@ -34,11 +56,20 @@ $register = function () {
 
     $validated['password'] = Hash::make($validated['password']);
 
-    event(new Registered($user = User::create($validated)));
+    // Cast 'marketing_preferences' to boolean
+    $validated['marketing_preferences'] = !empty($validated['marketing_preferences']) ? 'true' : 'false';
+
+    // Remove 'selectedPlan' from $validated if it's not a column in your users table
+    $userData = $validated;
+    $userData['used_disk'] = 0;
+    unset($userData['selectedPlan']);
+
+    event(new Registered($user = User::create($userData)));
 
     Auth::login($user);
 
-    $this->redirectRoute('checkout');
+
+    $this->redirectRoute('checkout', ['plan' => $this->selectedPlan]);
 };
 
 ?>
@@ -87,6 +118,21 @@ $register = function () {
                             name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+         <!-- Plan Selection -->
+         <div class="mt-4">
+            <x-input-label for="selectedPlan" :value="__('Select Plan')" />
+            <select wire:model="selectedPlan" id="selectedPlan" class="block w-full mt-1" required>
+                <option value="" disabled selected>Select a plan</option>
+                @foreach ($availablePlans as $plan)
+                    <option value="{{ $plan['stripe_price_id'] }}">
+                        {{ $plan['name'] }} - {{ $plan['price'] }} - {{ $plan['storage'] }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('selectedPlan')" class="mt-2" />
+            <p class="mt-2 text-sm text-gray-600">You are starting a 7-day free trial.</p>
         </div>
 
         <!-- Marketing Preferences Checkbox -->

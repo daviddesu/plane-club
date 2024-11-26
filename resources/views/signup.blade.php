@@ -21,8 +21,8 @@ new class extends Component
             <div class="pt-20 text-center">
                 <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">Capture, Organize, and Showcase your images and videos</h1>
 
-                <p class="mb-8 text-xl text-white">£25/month</p>
-                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Get Started Today</a>
+                <p class="mb-8 text-xl text-white">From £15/month</p>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Start your 7 day free trial</a>
             </div>
         </div>
     </section>
@@ -75,9 +75,42 @@ new class extends Component
                     </div>
                 </div> --}}
             </div>
+        </div>
+    </section>
+
+    <!-- Subscription Tiers Section -->
+    <section class="py-20 bg-white">
+        <div class="container px-6 mx-auto">
+            <div class="mb-12 text-center">
+                <h2 class="text-3xl font-bold text-gray-800">Plans</h2>
+                <p class="text-gray-600">Choose the plan that best fits your needs.</p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center">
+                    <div class="w-full p-4 mb-8 md:w-1/3">
+                        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+                            <h3 class="mb-4 text-2xl font-bold text-gray-800">Hobby</h3>
+                            <p class="mb-4 text-4xl font-bold text-gray-800">£15/month</p>
+                            <p class="mb-6 text-gray-600">Storage: 200 GB</p>
+                        </div>
+                    </div>
+                    <div class="w-full p-4 mb-8 md:w-1/3">
+                        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+                            <h3 class="mb-4 text-2xl font-bold text-gray-800">Aviator</h3>
+                            <p class="mb-4 text-4xl font-bold text-gray-800">£25/month</p>
+                            <p class="mb-6 text-gray-600">Storage: 500 GB</p>
+                        </div>
+                    </div>
+                    <div class="w-full p-4 mb-8 md:w-1/3">
+                        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+                            <h3 class="mb-4 text-2xl font-bold text-gray-800">Pro</h3>
+                            <p class="mb-4 text-4xl font-bold text-gray-800">£75/month</p>
+                            <p class="mb-6 text-gray-600">Storage: 2 TB</p>
+                        </div>
+                    </div>
+            </div>
             <!-- Call to Action Button -->
             <div class="mt-8 text-center">
-                <a href="/register" class="px-8 py-3 text-lg bg-white rounded-full text-cyan-800">Get Started Today</a>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Start your 7-day free trial</a>
             </div>
         </div>
     </section>
