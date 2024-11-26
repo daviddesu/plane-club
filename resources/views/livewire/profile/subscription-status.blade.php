@@ -21,18 +21,21 @@ new class extends Component {
                 'name' => 'Hobby',
                 'price' => '£15/month',
                 'storage' => '200 GB',
+                'storage_limit' => 200,
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER1'),
             ],
             [
                 'name' => 'Aviator',
                 'price' => '£25/month',
                 'storage' => 'up to 500 GB',
+                'storage_limit' => 500,
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
             ],
             [
                 'name' => 'Captain',
                 'price' => '£75/month',
                 'storage' => '2 TB',
+                'storage_limit' => 2000,
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
             ],
         ];
@@ -74,6 +77,27 @@ new class extends Component {
 
         if ($this->newPlanId === $this->currentPlanId) {
             Toaster::info('You are already on this plan.');
+            return;
+        }
+
+        // Find the new plan details
+        $newPlan = collect($this->availablePlans)->firstWhere('stripe_price_id', $this->newPlanId);
+
+        if (!$newPlan) {
+            Toaster::error('Selected plan not found.');
+            return;
+        }
+
+        // Get the storage limit of the new plan
+        $newPlanStorageLimitGB = $newPlan['storage_limit'];
+
+        // Get the user's current used disk space in GB
+        $usedDiskBytes = $user->used_disk;
+        $usedDiskGB = $usedDiskBytes / (1024 * 1024 * 1024); // Convert bytes to GB
+
+        // Check if user's used disk exceeds the new plan's storage limit
+        if ($usedDiskGB > $newPlanStorageLimitGB) {
+            Toaster::warning('You cannot downgrade to this plan because your current storage usage exceeds the plan\'s limit. Please reduce your storage usage or choose a higher-tier plan.');
             return;
         }
 
@@ -128,7 +152,17 @@ new class extends Component {
                         <label for="plan">Select a new plan:</label>
                         <select wire:model="newPlanId" id="plan" class="block w-full mt-1">
                             @foreach ($availablePlans as $plan)
-                                <option value="{{ $plan['stripe_price_id'] }}">{{ $plan['name'] }} - {{ $plan['price'] }} - up to {{ $plan['storage'] }}</option>
+                                @php
+                                    $planStorageLimitGB = $plan['storage_limit'];
+                                    $usedDiskGB = auth()->user()->used_disk / (1024 * 1024 * 1024); // Convert bytes to GB
+                                    $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
+                                @endphp
+                                <option value="{{ $plan['stripe_price_id'] }}" @if($disabled) disabled @endif>
+                                    {{ $plan['name'] }} - {{ $plan['price'] }} - up to {{ $plan['storage'] }}
+                                    @if($disabled)
+                                        (Not available - exceeds storage limit)
+                                    @endif
+                                </option>
                             @endforeach
                         </select>
                     </div>

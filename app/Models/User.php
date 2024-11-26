@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'marketing_preferences',
+        'disk_used'
     ];
 
     /**
@@ -91,6 +92,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasExceededStorageLimit()
     {
-        return $this->total_storage_in_gb > $this->storage_limit_in_gb;
+        return $this->getTotalStorageInGB() > $this->getStorageLimitInGBAttribute();
     }
 }
