@@ -171,11 +171,15 @@ new class extends Component {
 
                 <x-danger-button wire:click="cancelSubscription" class="mt-4">Cancel Subscription</x-danger-button>
             </div>
-        @else
+        @elseif($subscription)
             <div class="mt-6 space-y-6">
                 <p>Your subscription is inactive. Your account and data will be deleted on {{ optional($subscription->ends_at)->addMonth()->format('Y-m-d') ?? 'N/A' }}.</p>
-                <x-primary-button wire:click="navigateToCheckout">Subscribe Now</x-primary-button>
+                <p>To reactivate your subscription, please contact support@planeclub.app</p>
             </div>
+        @else
+        <div class="mt-6 space-y-6">
+            <p>Please finalise your subscription. If you completed the signup process and you are still having issues, please contact support@planeclub.app</p>
+        </div>
         @endif
     </div>
 </section>

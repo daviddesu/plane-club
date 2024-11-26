@@ -55,13 +55,7 @@ class SalesController extends Controller
 
     public function checkoutSuccess(Request $request)
     {
-        $user = Auth::user();
-
-        // Dispatch the Registered event to send the email verification notification
-        event(new Registered($user));
-
-        session()->flash('success-message', 'Welcome to Plane Club. It\'s great to have you on board! Please verify your email address.');
-
+        session()->flash('success-message', 'Welcome to Plane Club. It\'s great to have you on board!');
         return redirect()->route('verification.notice');
     }
 

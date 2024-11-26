@@ -64,7 +64,7 @@ $register = function () {
     $userData['used_disk'] = 0;
     unset($userData['selectedPlan']);
 
-    $user = User::create($userData);
+    event(new Registered($user = User::create($userData)));
 
     Auth::login($user);
 
