@@ -88,6 +88,9 @@ class ProcessVideoUpload implements ShouldQueue
 
             Log::info('Files uploaded to storage for Media Item ID: ' . $this->mediaItemId);
 
+            $storageDisk->delete($mediaItem->raw_video_path);
+            Log::info('Deleted raw video from storage for Media Item ID: ' . $this->mediaItemId);
+
             // Update MediaItem with paths
             $mediaItem->update([
                 'path' => $storedFilePath,
@@ -103,9 +106,7 @@ class ProcessVideoUpload implements ShouldQueue
 
             Log::info('ProcessVideoUpload job completed for Media Item ID: ' . $this->mediaItemId);
 
-            // Optionally, delete the raw video from the storage
-            $storageDisk->delete($mediaItem->raw_video_path);
-            Log::info('Deleted raw video from storage for Media Item ID: ' . $this->mediaItemId);
+
 
         } catch (\Exception $e) {
             Log::error('ProcessVideoUpload job failed for Media Item ID: ' . $this->mediaItemId . '. Error: ' . $e->getMessage());
