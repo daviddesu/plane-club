@@ -17,6 +17,7 @@ class Media extends Model
         'thumbnail_path',
         'status',
         'raw_video_path',
+        'size',
     ];
 
     public function user(): BelongsTo

@@ -22,6 +22,8 @@ new class extends Component
 {
     use WithFileUploads;
 
+    public bool $storageLimitExceeded = false;
+
     #[Validate('required')]
     public ?string $loggedAt;
 
@@ -51,6 +53,13 @@ new class extends Component
 
     #[Validate('file|max:153600')]
     public $media; // 150 MB in kilobytes (150 MB * 1024 KB/MB)
+
+    public function mount()
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+        $this->storageLimitExceeded = $user->hasExceededStorageLimit();
+    }
 
     /**
      * Downloads the file from S3 to a local temporary path.
@@ -155,14 +164,27 @@ new class extends Component
     public function store()
     {
 
-        try{
-            $validated = $this->validate();
-        }catch(\Exception $e){
-            dd($e);
-        }
+
+        $validated = $this->validate();
+
+        // Get the authenticated user
+        $user = auth()->user();
 
         // Prepare the media file for local processing
         $mediaFilePath = $this->prepareMediaFile();
+
+        // Get the file size
+        $fileSizeInBytes = filesize($mediaFilePath);
+
+        // Calculate new total storage if the file is uploaded
+        $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
+        $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
+
+        if ($newTotalStorageInGB > $user->getStorageLimitInGBAttribute()) {
+            // Exceeded storage limit
+            Toaster::warning('You have reached your storage limit. Please upgrade your subscription.');
+            return redirect()->back();
+        }
 
         // Get the MIME type from the local file
         $mimeType = $this->getMimeType($mediaFilePath);
@@ -219,6 +241,7 @@ new class extends Component
                 "thumbnail_path" => null,
                 'status' => 'processed',
                 'raw_video_path' => null,
+                'size' => $fileSizeInBytes,
             ]);
 
             // Cache the media URL
@@ -249,6 +272,8 @@ new class extends Component
                 "thumbnail_path" => null,
                 'status' => 'processing',
                 'raw_video_path' => $rawVideoPath, // Store the path to the raw video
+                'size' => $fileSizeInBytes,
+
             ]);
 
             // Dispatch job to process video
@@ -266,6 +291,10 @@ new class extends Component
             Toaster::warning('Unsupported media type uploaded.');
             throw new \RuntimeException("Unsupported media type uploaded.");
         }
+
+        // Update user's used_disk
+        $user->used_disk = $newTotalStorageInBytes;
+        $user->save();
 
         $this->reset();
         $this->dispatch('aircraft_log-created');
@@ -304,6 +333,7 @@ new class extends Component
         $this->aircraft = null;
         $this->description = "";
         $this->removeUploadedMedia();
+        $this->storageLimitExceeded = false;
     }
 
     public function removeUploadedMedia()
@@ -323,150 +353,157 @@ new class extends Component
 
 <div>
 <x-modal-card title="Add a log" name="logModal">
-    <form wire:submit='store()'>
-        <div class="grid grid-cols-1 gap-4">
-            {{-- File upload for images and videos --}}
-            @if (!$media)
-            <div
-                x-data="{ isUploading: false, progress: 0 }"
-                x-on:livewire-upload-start="isUploading = true"
-                x-on:livewire-upload-finish="isUploading = false"
-                x-on:livewire-upload-error="isUploading = false"
-                x-on:livewire-upload-progress="progress = $event.detail.progress"
-            >
-                <label for="media">
-                    <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
-                        <div class="flex flex-col items-center justify-center">
-                            <x-icon name="cloud-arrow-up" class="w-8 h-8 text-cyan-800 dark:text-cyan-200" />
-                            <p class="text-cyan-800 dark:text-cyan-200">
-                                Click to add an image or video
-                            </p>
-                            <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
+    @if($storageLimitExceeded)
+        <div class="text-center">
+            You have reached your storage limit. Please <a href="/profile" class="text-blue-500 underline">upgrade your subscription</a>
+        </div>
+
+    @else
+        <form wire:submit='store()'>
+            <div class="grid grid-cols-1 gap-4">
+                {{-- File upload for images and videos --}}
+                @if (!$media)
+                <div
+                    x-data="{ isUploading: false, progress: 0 }"
+                    x-on:livewire-upload-start="isUploading = true"
+                    x-on:livewire-upload-finish="isUploading = false"
+                    x-on:livewire-upload-error="isUploading = false"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress"
+                >
+                    <label for="media">
+                        <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
+                            <div class="flex flex-col items-center justify-center">
+                                <x-icon name="cloud-arrow-up" class="w-8 h-8 text-cyan-800 dark:text-cyan-200" />
+                                <p class="text-cyan-800 dark:text-cyan-200">
+                                    Click to add an image or video
+                                </p>
+                                <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
+                            </div>
                         </div>
+                    </label>
+                    <input type="file" id="media" wire:model="media" hidden />
+
+                    @error('media.*')
+                        <span class="error">{{ $message }}</span>
+                    @enderror
+
+                    <!-- Progress Bar -->
+                    <div x-show="isUploading" class="mt-4">
+                        <progress max="100" x-bind:value="progress" class="w-full h-4 progress-bar"></progress>
+                        <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
                     </div>
-                </label>
-                <input type="file" id="media" wire:model="media" hidden />
+                </div>
+                @endif
 
-                @error('media.*')
-                    <span class="error">{{ $message }}</span>
-                @enderror
+                {{-- Media Preview --}}
+                @if ($media)
+                <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
+                    <p>File: {{ $media->getClientOriginalName() }}</p>
+                </div>
+                @endif
+                <!-- Existing Form Inputs -->
+                <div class="grid-cols-1 gap-4 sm:grid-cols-2">
+                    <x-datetime-picker
+                        class="pd-2"
+                        wire:model="loggedAt"
+                        label="Date"
+                        placeholder="Date"
+                        without-time
+                    />
 
-                <!-- Progress Bar -->
-                <div x-show="isUploading" class="mt-4">
-                    <progress max="100" x-bind:value="progress" class="w-full h-4 progress-bar"></progress>
-                    <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
+                    <x-select
+                        class="pd-2"
+                        label="Status"
+                        placeholder="Please select"
+                        wire:model='status'
+                    >
+                        <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
+                        <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
+                        <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
+                        <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
+                        <x-select.option value="{{ FlyingStatus::TAXIING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::TAXIING->value) }}" />
+                    </x-select>
+
+                    <x-select
+                        class="pd-2"
+                        label="Departure airport"
+                        placeholder="Search airport or IATA code"
+                        wire:model='departureAirport'
+                        :async-data="route('airports')"
+                        option-label="name"
+                        option-value="id"
+                        searchable="true"
+                        min-items-for-search="2"
+                    />
+
+
+                    <x-select
+                        class="pd-2"
+                        label="Arrival airport"
+                        placeholder="Search airport or IATA code"
+                        :async-data="route('airports')"
+                        option-label="name"
+                        option-value="id"
+                        wire:model='arrivalAirport'
+                        searchable="true"
+                        min-items-for-search="2"
+                    />
+
+
+                    <x-select
+                        class="pd-2"
+                        label="Airline"
+                        placeholder="Search airline"
+                        :async-data="route('airlines')"
+                        option-label="name"
+                        option-value="id"
+                        wire:model='airline'
+                        searchable="true"
+                        min-items-for-search="2"
+                    />
+
+
+                    <x-select
+                        class="pd-2"
+                        label="Aircraft"
+                        placeholder="Search aircraft"
+                        :async-data="route('aircraft')"
+                        option-label="name"
+                        option-value="id"
+                        wire:model='aircraft'
+                        searchable="true"
+                        min-items-for-search="2"
+                    />
+
+
+                    <x-input
+                        label="Flight Number"
+                        placeholder="BA1234"
+                        wire:model='flightNumber'
+                        style="text-transform: uppercase"
+                    />
+
+                    <x-input
+                        label="Registration"
+                        placeholder="G-PNCB"
+                        wire:model='registration'
+                        style="text-transform: uppercase"
+                    />
                 </div>
             </div>
-            @endif
 
-            {{-- Media Preview --}}
-            @if ($media)
-            <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                <p>File: {{ $media->getClientOriginalName() }}</p>
+            <div class="pt-2 border-b-2"></div>
+            <div name="footer" class="flex justify-between gap-x-4">
+                @if($media)
+                    <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
+                @endif
+                <div class="flex gap-x-4">
+                    <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
+                    <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
+                </div>
             </div>
-            @endif
-            <!-- Existing Form Inputs -->
-            <div class="grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-datetime-picker
-                    class="pd-2"
-                    wire:model="loggedAt"
-                    label="Date"
-                    placeholder="Date"
-                    without-time
-                />
-
-                <x-select
-                    class="pd-2"
-                    label="Status"
-                    placeholder="Please select"
-                    wire:model='status'
-                >
-                    <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
-                    <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
-                    <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
-                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
-                    <x-select.option value="{{ FlyingStatus::TAXIING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::TAXIING->value) }}" />
-                </x-select>
-
-                <x-select
-                    class="pd-2"
-                    label="Departure airport"
-                    placeholder="Search airport or IATA code"
-                    wire:model='departureAirport'
-                    :async-data="route('airports')"
-                    option-label="name"
-                    option-value="id"
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-
-
-                <x-select
-                    class="pd-2"
-                    label="Arrival airport"
-                    placeholder="Search airport or IATA code"
-                    :async-data="route('airports')"
-                    option-label="name"
-                    option-value="id"
-                    wire:model='arrivalAirport'
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-
-
-                <x-select
-                    class="pd-2"
-                    label="Airline"
-                    placeholder="Search airline"
-                    :async-data="route('airlines')"
-                    option-label="name"
-                    option-value="id"
-                    wire:model='airline'
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-
-
-                <x-select
-                    class="pd-2"
-                    label="Aircraft"
-                    placeholder="Search aircraft"
-                    :async-data="route('aircraft')"
-                    option-label="name"
-                    option-value="id"
-                    wire:model='aircraft'
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-
-
-                <x-input
-                    label="Flight Number"
-                    placeholder="BA1234"
-                    wire:model='flightNumber'
-                    style="text-transform: uppercase"
-                />
-
-                <x-input
-                    label="Registration"
-                    placeholder="G-PNCB"
-                    wire:model='registration'
-                    style="text-transform: uppercase"
-                />
-            </div>
-        </div>
-
-        <div class="pt-2 border-b-2"></div>
-        <div name="footer" class="flex justify-between gap-x-4">
-            @if($media)
-                <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
-            @endif
-            <div class="flex gap-x-4">
-                <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
-                <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
-            </div>
-        </div>
-    </form>
+        </form>
+    @endif
 </x-model-card>
 
 <style>

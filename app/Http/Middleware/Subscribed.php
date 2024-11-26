@@ -8,15 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Subscribed
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (! $user->subscribedStripe()) {
+
+        if (!$user || !$user->subscribed(env('STRIPE_PRODUCT_ID'))) {
             // Redirect user to billing page and ask them to subscribe...
-            return redirect('/profile');
+            return redirect('/profile')->with('error', 'You need to subscribe to access this page.');
         }
 
         return $next($request);

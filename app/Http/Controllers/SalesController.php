@@ -20,10 +20,17 @@ class SalesController extends Controller
 
     public function checkout(Request $request)
     {
-        return $request
-            ->user()
-            ->newSubscription(env("STRIPE_PRODUCT_ID"), env("STRIPE_PRICE_ID"))
-            // ->trialDays(0)
+        $plan = $request->input('plan');
+
+        $priceId = $this->getPriceIdForPlan($plan);
+
+        if (!$priceId) {
+            return redirect()->back()->withErrors('Invalid subscription plan selected.');
+        }
+
+        return $request->user()
+            ->newSubscription(env("STRIPE_PRODUCT_ID"), $priceId)
+            ->trialDays(8)
             ->allowPromotionCodes()
             ->checkout([
                 'success_url' => route('checkout-success'),
@@ -31,13 +38,24 @@ class SalesController extends Controller
             ]);
     }
 
+    protected function getPriceIdForPlan($plan)
+    {
+        switch ($plan) {
+            case 'tier1':
+                return env('STRIPE_PRICE_ID_TIER1');
+            case 'tier2':
+                return env('STRIPE_PRICE_ID_TIER2');
+            case 'tier3':
+                return env('STRIPE_PRICE_ID_TIER3');
+            default:
+                return null;
+        }
+    }
 
     public function checkoutSuccess(Request $request)
     {
-        session()->flash('success-message', 'Welcome to Plane Club. Its great to have you on board!');
-
+        session()->flash('success-message', 'Welcome to Plane Club. It\'s great to have you on board!');
         return redirect()->route('verification.notice');
-
     }
 
     public function checkoutCancel()

@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'marketing_preferences',
+        'used_disk'
     ];
 
     /**
@@ -62,5 +63,35 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscribedStripe()
     {
         return $this->subscribed(env('STRIPE_PRODUCT_ID'));
+    }
+
+    public function getTotalStorageInGB()
+    {
+        return $this->used_disk / (1024 * 1024 * 1024);
+    }
+
+    public function getStorageLimitInGBAttribute()
+    {
+        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
+
+        if ($subscription && $subscription->valid()) {
+            switch ($subscription->stripe_price) {
+                case env('STRIPE_PRICE_ID_TIER1'):
+                    return 200;
+                case env('STRIPE_PRICE_ID_TIER2'):
+                    return 500;
+                case env('STRIPE_PRICE_ID_TIER3'):
+                    return 2000; // 2TB
+                default:
+                    return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    public function hasExceededStorageLimit()
+    {
+        return $this->getTotalStorageInGB() > $this->getStorageLimitInGBAttribute();
     }
 }
