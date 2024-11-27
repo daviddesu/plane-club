@@ -19,7 +19,7 @@ new class extends Component
         <!-- Content Container -->
         <div class="relative flex items-center justify-center h-full">
             <div class="pt-20 text-center">
-                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">Capture, Organize, and Showcase your images and videos</h1>
+                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">High-quality photo and video storage tailored for aircraft enthusiasts</h1>
 
                 <p class="mb-8 text-xl text-white">From £15/month</p>
                 <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Start your 7 day free trial</a>
@@ -39,12 +39,12 @@ new class extends Component
                     <div class="flex flex-col items-center p-6">
                         <!-- Icon -->
                         <div class="flex items-center justify-center mb-4">
-                            <x-icon name="tag" class="w-12 h-12 text-white" />
+                            <x-icon name="photo" class="w-12 h-12 text-white" />
                         </div>
                         <!-- Feature Title -->
-                        <h3 class="mb-2 text-2xl font-bold text-white">Detailed Tagging</h3>
+                        <h3 class="mb-2 text-2xl font-bold text-white">Personalized Gallery</h3>
                         <!-- Feature Description -->
-                        <p class="text-xl text-center text-white">Tag aircraft, airlines, and locations with ease.</p>
+                        <p class="text-xl text-center text-white">Upload photos and videos to create your own gallery and database.</p>
                     </div>
                 </div>
                 <!-- Feature 2 -->
@@ -52,12 +52,12 @@ new class extends Component
                     <div class="flex flex-col items-center p-6">
                         <!-- Icon -->
                         <div class="flex items-center justify-center mb-4">
-                            <x-icon name="photo" class="w-12 h-12 text-white" />
+                            <x-icon name="tag" class="w-12 h-12 text-white" />
                         </div>
                         <!-- Feature Title -->
-                        <h3 class="mb-2 text-2xl font-bold text-white">Personalized Gallery</h3>
+                        <h3 class="mb-2 text-2xl font-bold text-white">Detailed Tagging</h3>
                         <!-- Feature Description -->
-                        <p class="text-xl text-center text-white">Create your own gallery and database.</p>
+                        <p class="text-xl text-center text-white">Tag aircraft, airlines, and locations with ease.</p>
                     </div>
                 </div>
                 <!-- Feature 3 -->
@@ -110,7 +110,7 @@ new class extends Component
             </div>
             <!-- Call to Action Button -->
             <div class="mt-8 text-center">
-                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Start your 7-day free trial</a>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Start your 7 day free trial</a>
             </div>
         </div>
     </section>
