@@ -10,9 +10,10 @@ new class extends Component
 
 ?>
 
+
 <x-app-layout>
     <!-- Hero Section -->
-    <section class="relative h-screen pb-20 bg-gray-200 bg-center bg-cover"  style="background-image: url('{{ asset('main-image.png') }}');">
+    <section class="relative h-screen pb-20 bg-gray-200 bg-center bg-cover"  style="background-image: url('{{ asset('desktop-image.png') }}');">
         <!-- Overlay -->
         <div class="absolute inset-0 bg-gray-900 opacity-80"></div>
 
