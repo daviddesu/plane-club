@@ -22,8 +22,9 @@ new class extends Component
             <div class="pt-20 text-center">
                 <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">High-quality photo and video storage tailored for aircraft enthusiasts</h1>
 
-                <p class="mb-8 text-xl text-white">From £15/month</p>
-                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800">Start your 7 day free trial</a>
+                {{-- <p class="mb-8 text-xl text-white">From £15/month</p> --}}
+                <br>
+                <a href="/register" class="px-8 py-4 text-lg text-white rounded-full bg-cyan-800">Start your 7 day free trial</a>
             </div>
         </div>
     </section>
