@@ -28,7 +28,6 @@
             ></script>
         @endif
 
-        <meta name="facebook-domain-verification" content="d2sb2vyimzau938j2ut1o2ytfam5ak" />
         <!-- Meta Pixel Code -->
 <script>
     !function(f,b,e,v,n,t,s)
