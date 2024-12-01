@@ -40,7 +40,7 @@ Route::get('/checkout/success', [SalesController::class, 'checkoutSuccess'])
     ->middleware(['auth', Subscribed::class])
     ->name('checkout-success');
 
-Route::view('/checkout/cancel', [SalesController::class, 'checkoutCancel'])
+Route::get('/checkout/cancel', [SalesController::class, 'checkoutCancel'])
     ->middleware(['auth'])
     ->name('checkout-cancel');
 
