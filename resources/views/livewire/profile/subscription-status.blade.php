@@ -9,11 +9,13 @@ new class extends Component {
     public $availablePlans = [];
     public $currentPlanId;
     public $newPlanId;
+    public $completeSubPlanId;
 
     public function mount()
     {
         $user = auth()->user();
         $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
+        $this->completeSubPlanId = "tier1";
 
         // Define your available plans
         $this->availablePlans = [
@@ -22,6 +24,7 @@ new class extends Component {
                 'price' => '£15/month',
                 'storage' => '200 GB',
                 'storage_limit' => 200,
+                'plan_checkout_name' => 'tier1',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER1'),
             ],
             [
@@ -29,6 +32,7 @@ new class extends Component {
                 'price' => '£25/month',
                 'storage' => 'up to 500 GB',
                 'storage_limit' => 500,
+                'plan_checkout_name' => 'tier2',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
             ],
             [
@@ -36,6 +40,7 @@ new class extends Component {
                 'price' => '£75/month',
                 'storage' => '2 TB',
                 'storage_limit' => 2000,
+                'plan_checkout_name' => 'tier3',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
             ],
         ];
@@ -43,6 +48,7 @@ new class extends Component {
         // Get the current plan ID
         if ($this->subscription && $this->subscription->valid()) {
             $this->currentPlanId = $this->subscription->stripe_price;
+            $this->completeSubPlanId = null;
         }
 
         // Initialize newPlanId with the current plan
@@ -115,6 +121,11 @@ new class extends Component {
         }
     }
 
+    public function completeSubscription()
+    {
+        $this->redirectRoute('checkout', ['plan' => $this->completeSubPlanId]);
+    }
+
     public function navigateToCheckout()
     {
         $this->redirectRoute('checkout');
@@ -178,7 +189,25 @@ new class extends Component {
             </div>
         @else
         <div class="mt-6 space-y-6">
-            <p>Please finalise your subscription. If you completed the signup process and you are still having issues, please contact support@planeclub.app</p>
+            <p>Please finalise your subscription.</p>
+            <form wire:submit.prevent="completeSubscription">
+                <div class="mt-4">
+                    <label for="plan">Select a plan:</label>
+                    <select wire:model="completeSubPlanId" id="plan_complete" class="block w-full mt-1">
+                        @foreach ($availablePlans as $plan)
+                            @php
+                                $planStorageLimitGB = $plan['storage_limit'];
+                                $usedDiskGB = auth()->user()->used_disk / (1024 * 1024 * 1024); // Convert bytes to GB
+                                $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
+                            @endphp
+                            <option value="{{ $plan['plan_checkout_name'] }}">
+                                {{ $plan['name'] }} - {{ $plan['price'] }} - up to {{ $plan['storage'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <x-primary-button type="submit" class="mt-4">Complete subscription</x-primary-button>
+            </form>
         </div>
         @endif
     </div>
