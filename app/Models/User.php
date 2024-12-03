@@ -24,7 +24,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'marketing_preferences',
-        'used_disk'
+        'used_disk',
+        'adobe_access_token',
+        'adobe_refresh_token',
+        'adobe_token_expires_in',
     ];
 
     /**
@@ -35,6 +38,10 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $dates = [
+        'adobe_token_expires_in',
     ];
 
     /**
@@ -60,9 +67,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Media::class);
     }
 
+    public function lightroomAssets()
+    {
+        return $this->hasMany(LightroomAsset::class);
+    }
+
+
     public function subscribedStripe()
     {
         return $this->subscribed(env('STRIPE_PRODUCT_ID'));
+    }
+
+    public function hasAdobeAccessToken() : bool
+    {
+        return !empty($this->adobe_access_token);
     }
 
     public function getTotalStorageInGB()

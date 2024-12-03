@@ -49,6 +49,25 @@ new class extends Component
             $this->airlineName = $aircraftLog->airline?->name ?? '';
     }
 
+    public function getAssetUrl($user, $assetId)
+    {
+        // Refresh access token if needed
+        if (now()->greaterThanOrEqualTo($user->adobe_token_expires_in)) {
+            AdobeService::refreshAccessToken($user);
+        }
+
+        // Get rendition (temporary URL)
+        $response = Http::withToken($user->adobe_access_token)
+            ->get("https://lr.adobe.io/v2/assets/{$assetId}/renditions");
+
+        $renditions = $response->json();
+
+        // Choose appropriate rendition
+        $assetUrl = $renditions['resources'][0]['links']['self']['href'];
+
+        return $assetUrl;
+    }
+
 
     public function mount(int $aircraftLogId): void
     {
@@ -96,6 +115,19 @@ new class extends Component
         x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLogId }}});"
         class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
     >
+        @if($log->lightroomAssets->first())
+            @php
+                $assetUrl = $this->getAssetUrl(auth()->user(), $log->lightroomAssets->first()->asset_id);
+            @endphp
+            @if($log->lightroomAssets->first()->media_type === 'image')
+                <img src="{{ $assetUrl }}" alt="Asset">
+            @elseif($log->lightroomAssets->first()->media_type === 'video')
+                <video controls>
+                    <source src="{{ $assetUrl }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            @endif
+        @endif
         @if($isVideo && $isProcessing)
         <p class="text-center text-cyan-800">Processing</p>
         @elseif ($isVideo)

@@ -33,6 +33,11 @@ class AircraftLog extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function lightroomAssets()
+    {
+        return $this->hasMany(LightroomAsset::class);
+    }
+
     public function media(): HasOne
     {
         return $this->hasOne(Media::class);

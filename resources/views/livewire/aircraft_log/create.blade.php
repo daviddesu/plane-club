@@ -16,7 +16,7 @@ use Google\Cloud\VideoIntelligence\V1\Feature as VideoFeature;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use App\Enums\Media;
+use App\Services\AdobeLightroomService;
 
 new class extends Component
 {
@@ -51,20 +51,39 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
+    public $albums = [];
+    public $selectedAlbum = null;
+    public $assets = [];
+
+    #[Validate('required')]
+    public $selectedAsset = null;
+
     #[Validate('file|max:1024000')]
     public $media; // 1 GB in kilobytes (1000 MB * 1024 KB/MB)
+
 
     public function mount()
     {
         // Get the authenticated user
         $user = auth()->user();
         $this->storageLimitExceeded = $user->hasExceededStorageLimit();
+
+        // Fetch albums from Lightroom
+        $this->albums = AdobeLightroomService::getAlbums($user);
+    }
+
+    public function updatedSelectedAlbum($albumId)
+    {
+        $user = auth()->user();
+
+        // Fetch assets in the selected album
+        $this->assets = AdobeLightroomService::getAlbumAssets($user, $albumId);
     }
 
     /**
      * Downloads the file from S3 to a local temporary path.
      */
-    private function downloadFromS3($path)
+     private function downloadFromS3($path)
     {
         $tempPath = sys_get_temp_dir() . '/' . basename($path);
         $s3 = Storage::disk('s3');
@@ -163,8 +182,6 @@ new class extends Component
 
     public function store()
     {
-
-
         $validated = $this->validate();
 
         // Get the authenticated user
@@ -205,7 +222,6 @@ new class extends Component
             "aircraft_id" => $this->aircraft,
             "flight_number" => $this->flightNumber,
         ]);
-
 
         if (str_contains($mimeType, 'image')) {
             // Process image synchronously (since it's quick)
@@ -296,6 +312,17 @@ new class extends Component
         $user->used_disk = $newTotalStorageInBytes;
         $user->save();
 
+        // Save the asset reference
+        $user->lightroomAssets()->create([
+            'aircraft_log_id' => $newAircraftLog->id,
+            'asset_id' => $this->selectedAsset,
+            'album_id' => $this->selectedAlbum,
+            'file_name' => $this->getAssetFileName($user, $this->selectedAsset),
+            'media_type' => $this->getAssetMediaType($user, $this->selectedAsset),
+        ]);
+
+        Toaster::info('Log created successfully with selected Lightroom asset.');
+
         $this->reset();
         $this->dispatch('aircraft_log-created');
     }
@@ -317,6 +344,29 @@ new class extends Component
 
     Cache::put($cacheKey, $url, now()->addDays(7));
 }
+
+    public function getAssetFileName($user, $assetId)
+{
+    try {
+        $assetMetadata = AdobeLightroomService::getAssetMetadata($user, $assetId);
+        return $assetMetadata['payload']['fileName'] ?? null;
+    } catch (\Exception $e) {
+        \Log::error('Error retrieving asset file name: ' . $e->getMessage());
+        return null;
+    }
+}
+
+public function getAssetMediaType($user, $assetId)
+{
+    try {
+        $assetMetadata = AdobeLightroomService::getAssetMetadata($user, $assetId);
+        return $assetMetadata['payload']['mediaType'] ?? null;
+    } catch (\Exception $e) {
+        \Log::error('Error retrieving asset media type: ' . $e->getMessage());
+        return null;
+    }
+}
+
 
     public function close()
     {
@@ -361,45 +411,65 @@ new class extends Component
     @else
         <form wire:submit='store()'>
             <div class="grid grid-cols-1 gap-4">
-                {{-- File upload for images and videos --}}
-                @if (!$media)
-                <div
-                    x-data="{ isUploading: false, progress: 0 }"
-                    x-on:livewire-upload-start="isUploading = true"
-                    x-on:livewire-upload-finish="isUploading = false"
-                    x-on:livewire-upload-error="isUploading = false"
-                    x-on:livewire-upload-progress="progress = $event.detail.progress"
-                >
-                    <label for="media">
-                        <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
-                            <div class="flex flex-col items-center justify-center">
-                                <x-icon name="cloud-arrow-up" class="w-8 h-8 text-cyan-800 dark:text-cyan-200" />
-                                <p class="text-cyan-800 dark:text-cyan-200">
-                                    Click to add an image or video
-                                </p>
-                                <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
-                            </div>
-                        </div>
-                    </label>
-                    <input type="file" id="media" wire:model="media" hidden />
+                <!-- Album Selection -->
+                <div>
+                    <label for="album">Select an Album:</label>
+                    <select wire:model="selectedAlbum" id="album" class="block w-full mt-1">
+                        <option value="">-- Select Album --</option>
+                        @foreach ($albums['albums'] as $album)
+                            <option value="{{ $album['id'] }}">{{ $album['payload']['name'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+{{-- File upload for images and videos --}}
+@if (!$media)
+<div
+    x-data="{ isUploading: false, progress: 0 }"
+    x-on:livewire-upload-start="isUploading = true"
+    x-on:livewire-upload-finish="isUploading = false"
+    x-on:livewire-upload-error="isUploading = false"
+    x-on:livewire-upload-progress="progress = $event.detail.progress"
+>
+    <label for="media">
+        <div class="flex items-center justify-center h-20 col-span-1 bg-gray-100 shadow-md cursor-pointer sm:col-span-2 dark:bg-secondary-700 rounded-xl">
+            <div class="flex flex-col items-center justify-center">
+                <x-icon name="cloud-arrow-up" class="w-8 h-8 text-cyan-800 dark:text-cyan-200" />
+                <p class="text-cyan-800 dark:text-cyan-200">
+                    Click to add an image or video
+                </p>
+                <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
+            </div>
+        </div>
+    </label>
+    <input type="file" id="media" wire:model="media" hidden />
 
-                    @error('media.*')
-                        <span class="error">{{ $message }}</span>
-                    @enderror
+    @error('media.*')
+        <span class="error">{{ $message }}</span>
+    @enderror
 
-                    <!-- Progress Bar -->
-                    <div x-show="isUploading" class="mt-4">
-                        <progress max="100" x-bind:value="progress" class="w-full h-4 progress-bar"></progress>
-                        <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
+    <!-- Progress Bar -->
+    <div x-show="isUploading" class="mt-4">
+        <progress max="100" x-bind:value="progress" class="w-full h-4 progress-bar"></progress>
+        <p class="text-center">Uploading: <span x-text="progress"></span>%</p>
+    </div>
+</div>
+@endif
+ {{-- Media Preview --}}
+ @if ($media)
+ <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
+     <p>File: {{ $media->getClientOriginalName() }}</p>
+ </div>
+ @endif                <!-- Asset Selection -->
+                @if ($assets)
+                    <div>
+                        <label for="asset">Select an Asset:</label>
+                        <select wire:model="selectedAsset" id="asset" class="block w-full mt-1">
+                            <option value="">-- Select Asset --</option>
+                            @foreach ($assets['resources'] as $asset)
+                                <option value="{{ $asset['id'] }}">{{ $asset['payload']['fileName'] }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                </div>
-                @endif
-
-                {{-- Media Preview --}}
-                @if ($media)
-                <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                    <p>File: {{ $media->getClientOriginalName() }}</p>
-                </div>
                 @endif
                 <!-- Existing Form Inputs -->
                 <div class="grid-cols-1 gap-4 sm:grid-cols-2">
