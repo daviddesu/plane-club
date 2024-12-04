@@ -51,6 +51,8 @@ class ProcessVideoUpload implements ShouldQueue
 
             // Fetch the file content
             $rawVideoStream = $storageDisk->get($mediaItem->raw_video_path);
+            Log::info('Length of raw video stream: ' . strlen($rawVideoStream));
+
             file_put_contents($rawVideoLocalPath, $rawVideoStream);
 
             Log::info('Raw video downloaded to: ' . $rawVideoLocalPath);
@@ -73,6 +75,7 @@ class ProcessVideoUpload implements ShouldQueue
                     new \Illuminate\Http\File($compressedPath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 
@@ -83,6 +86,7 @@ class ProcessVideoUpload implements ShouldQueue
                     new \Illuminate\Http\File($thumbnailPath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 

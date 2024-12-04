@@ -50,8 +50,8 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file')]
-    public $media;
+    #[Validate('file|max:1048576')]
+    public $media; // 1 GB in kilobytes
 
     public function mount()
     {
@@ -210,6 +210,7 @@ new class extends Component
                     new \Illuminate\Http\File($filePath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 
@@ -242,6 +243,7 @@ new class extends Component
                     new \Illuminate\Http\File($mediaFilePath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
             );
 
@@ -332,6 +334,7 @@ new class extends Component
                                 <p class="text-cyan-800 dark:text-cyan-200">
                                     Click to add an image or video
                                 </p>
+                                <p class="text-xs text-cyan-800 dark:text-cyan-200">(Max individual file upload size 1GB)</p>
                             </div>
                         </div>
                     </label>
@@ -453,7 +456,7 @@ new class extends Component
                 @endif
                 <div class="flex gap-x-4">
                     <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
-                    <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
+                    <x-primary-button wire:loading.attr="disabled" flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
                 </div>
             </div>
         </form>
