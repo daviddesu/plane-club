@@ -53,6 +53,15 @@ return [
             'endpoint' => env('AWS_ENDPOINT'), // Optional: for S3-compatible services
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
+        'b2' => [
+            'driver' => 's3',
+            'key' => env('B2_KEY_ID'),
+            'secret' => env('B2_APPLICATION_KEY'),
+            'region' => env('B2_REGION', 'eu-central-003'),
+            'bucket' => env('B2_BUCKET'),
+            'endpoint' => env('B2_ENDPOINT', 'https://s3.eu-central-003.backblazeb2.com'),
+            'use_path_style_endpoint' => true, // Important for Backblaze B2
+        ],
     ],
 
     /*

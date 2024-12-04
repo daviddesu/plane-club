@@ -13,7 +13,6 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
 use Masmerise\Toaster\Toaster;
 
 new class extends Component
@@ -135,9 +134,7 @@ new class extends Component
                     'id' => $aircraftLog->aircraft->id,
                     'name' => $aircraftLog->aircraft->getFormattedName(),
                 ];
-        }
-
-
+            }
         }
     }
 
@@ -160,26 +157,21 @@ new class extends Component
         return $name;
     }
 
-    public function getCachedMediaUrl($mediaPath)
+    public function getCachedMediaUrl($mediaPath): ?string
     {
         if (!$mediaPath) {
             return null;
         }
 
-        $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
-        $cacheKey = "media_url_" . md5($mediaPath);
+        $driverName = getenv('FILESYSTEM_DISK');
 
-        return Cache::remember($cacheKey, now()->addDays(7), function () use ($mediaPath, $storageDisk) {
-            $driverName = getenv('FILESYSTEM_DISK');
-
-            if ($driverName === 's3') {
-                // For S3, generate a temporary URL
-                return $storageDisk->temporaryUrl($mediaPath, now()->addDays(7));
-            } else {
-                // For local, generate a URL using asset() or url()
-                return asset('storage/' . $mediaPath);
-            }
-        });
+        if ($driverName === 'b2') {
+            // Construct the URL directly
+            return rtrim(env('CDN_HOST'), '/') . '/' . ltrim($mediaPath, '/');
+        } else {
+            // For local, generate a URL using asset() or url()
+            return asset('storage/' . $mediaPath);
+        }
     }
 
     #[On('close_aircraft_log')]

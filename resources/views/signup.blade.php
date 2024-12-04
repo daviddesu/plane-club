@@ -63,6 +63,20 @@ new class extends Component
                     </div>
                 </div>
                 <!-- Feature 3 -->
+                <div class="w-full px-4 mb-8 md:w-1/3">
+                    <div class="flex flex-col items-center p-6">
+                        <!-- Icon -->
+                        <div class="flex items-center justify-center mb-4">
+                            <!-- Replace with your icon or SVG -->
+                            <x-icon name="cloud-arrow-up" class="w-12 h-12 text-white" />
+                        </div>
+                        <!-- Feature Title -->
+                        <h3 class="mb-2 text-2xl font-bold text-white">Cloud storage</h3>
+                        <!-- Feature Description -->
+                        <p class="text-xl text-center text-white">Your images and videos available everywhere with our cloud storage solution.</p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
                 {{-- <div class="w-full px-4 mb-8 md:w-1/3">
                     <div class="flex flex-col items-center p-6">
                         <!-- Icon -->
@@ -91,22 +105,28 @@ new class extends Component
                     <div class="w-full p-4 mb-8 md:w-1/3">
                         <div class="p-6 bg-gray-100 rounded-lg shadow-md">
                             <h3 class="mb-4 text-2xl font-bold text-gray-800">Hobby</h3>
-                            <p class="mb-4 text-4xl font-bold text-gray-800">£15/month</p>
-                            <p class="mb-6 text-gray-600">Storage: 200 GB</p>
+                            <p class="mb-4 text-xl font-bold text-gray-800">£15/month</p>
+                            <p class="mb-6 text-gray-600">1 TB cloud storage</p>
+                            <p class="mb-6 text-gray-600">Personalised gallery filters</p>
+                            <p class="mb-6 text-gray-600">Detailed image and video tagging</p>
                         </div>
                     </div>
                     <div class="w-full p-4 mb-8 md:w-1/3">
                         <div class="p-6 bg-gray-100 rounded-lg shadow-md">
                             <h3 class="mb-4 text-2xl font-bold text-gray-800">Aviator</h3>
-                            <p class="mb-4 text-4xl font-bold text-gray-800">£25/month</p>
-                            <p class="mb-6 text-gray-600">Storage: 500 GB</p>
+                            <p class="mb-4 text-xl font-bold text-gray-800">£30/month</p>
+                            <p class="mb-6 text-gray-600">3 TB cloud storage</p>
+                            <p class="mb-6 text-gray-600">Personalised gallery filters</p>
+                            <p class="mb-6 text-gray-600">Detailed image and video tagging</p>
                         </div>
                     </div>
                     <div class="w-full p-4 mb-8 md:w-1/3">
                         <div class="p-6 bg-gray-100 rounded-lg shadow-md">
                             <h3 class="mb-4 text-2xl font-bold text-gray-800">Pro</h3>
-                            <p class="mb-4 text-4xl font-bold text-gray-800">£75/month</p>
-                            <p class="mb-6 text-gray-600">Storage: 2 TB</p>
+                            <p class="mb-4 text-xl font-bold text-gray-800">£60/month</p>
+                            <p class="mb-6 text-gray-600">8 TB cloud storage</p>
+                            <p class="mb-6 text-gray-600">Personalised gallery filters</p>
+                            <p class="mb-6 text-gray-600">Detailed image and video tagging</p>
                         </div>
                     </div>
             </div>
