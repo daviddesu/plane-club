@@ -130,9 +130,6 @@ RUN echo "upload_max_filesize = 1024M" > /etc/php/${PHP_VERSION}/fpm/conf.d/99-u
 # Update Nginx client_max_body_size
 RUN echo "client_max_body_size 1024M;" > /etc/nginx/conf.d/upload.conf
 
-# Clear caches again after changes
-RUN php artisan optimize:clear
-
 # 5. Setup Entrypoint
 EXPOSE 8080
 
