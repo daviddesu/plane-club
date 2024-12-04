@@ -14,7 +14,6 @@ use Google\Cloud\VideoIntelligence\V1\VideoIntelligenceServiceClient;
 use Google\Cloud\Vision\V1\Likelihood;
 use Google\Cloud\VideoIntelligence\V1\Feature as VideoFeature;
 use Masmerise\Toaster\Toaster;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use App\Enums\Media;
 
@@ -51,8 +50,8 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file|max:1024000')]
-    public $media; // 1 GB in kilobytes (1000 MB * 1024 KB/MB)
+    #[Validate('file|max:1048576')]
+    public $media; // 1 GB in kilobytes
 
     public function mount()
     {
@@ -62,28 +61,28 @@ new class extends Component
     }
 
     /**
-     * Downloads the file from S3 to a local temporary path.
+     * Downloads the file from b2 to a local temporary path.
      */
-    private function downloadFromS3($path)
+    private function downloadFromB2($path)
     {
         $tempPath = sys_get_temp_dir() . '/' . basename($path);
-        $s3 = Storage::disk('s3');
-        if (!$s3->exists($path)) {
-            throw new \Exception("File not found on S3: $path");
+        $b2 = Storage::disk('b2');
+        if (!$b2->exists($path)) {
+            throw new \Exception("File not found on b2: $path");
         }
-        $content = $s3->get($path);
+        $content = $b2->get($path);
         file_put_contents($tempPath, $content);
         return $tempPath;
     }
 
     /**
-     * Deletes a file from S3.
+     * Deletes a file from B2.
      */
-    private function deleteFromS3($path)
+    private function deleteFromB2($path)
     {
-        $s3 = Storage::disk('s3');
-        if ($s3->exists($path)) {
-            $s3->delete($path);
+        $b2 = Storage::disk('b2');
+        if ($b2->exists($path)) {
+            $b2->delete($path);
         }
     }
 
@@ -92,19 +91,8 @@ new class extends Component
      */
     private function prepareMediaFile()
     {
-        if (env('FILESYSTEM_DISK') === 's3') {
-            // Livewire temporary uploads are stored on S3
-            $originalS3Path = $this->media->getRealPath(); // S3 path
-            $localPath = $this->downloadFromS3($originalS3Path);
-
-            // Delete the temporary file from S3 after downloading
-            $this->deleteFromS3($originalS3Path);
-
-            return $localPath;
-        } else {
-            // Livewire temporary uploads are stored locally
-            return $this->media->getRealPath();
-        }
+        // Livewire temporary uploads are stored locally
+        return $this->media->getRealPath();
     }
 
     public function convertImagetoJPEG($imagePath)
@@ -215,13 +203,14 @@ new class extends Component
                 throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
             }
 
-            // Upload processed file to S3
+            // Upload processed file to b2
             $storedFilePath = Storage::disk(getenv('FILESYSTEM_DISK'))
                 ->putFile(
                     'aircraft',
                     new \Illuminate\Http\File($filePath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 
@@ -229,6 +218,7 @@ new class extends Component
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
+
             if ($filePath !== $mediaFilePath && file_exists($mediaFilePath)) {
                 unlink($mediaFilePath);
             }
@@ -244,20 +234,18 @@ new class extends Component
                 'size' => $fileSizeInBytes,
             ]);
 
-            // Cache the media URL
-            $this->cacheMediaUrl($storedFilePath);
-
             Toaster::info('Log created successfully.');
         } elseif (str_contains($mimeType, 'video')) {
             // Upload raw video file to S3
             $rawVideoPath = Storage::disk(getenv('FILESYSTEM_DISK'))
                 ->putFile(
-                    'aircraft/raw_videos',
+                'aircraft/raw_videos',
                     new \Illuminate\Http\File($mediaFilePath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
-                );
+            );
 
             // Clean up the local temporary file
             if (file_exists($mediaFilePath)) {
@@ -273,7 +261,6 @@ new class extends Component
                 'status' => 'processing',
                 'raw_video_path' => $rawVideoPath, // Store the path to the raw video
                 'size' => $fileSizeInBytes,
-
             ]);
 
             // Dispatch job to process video
@@ -300,24 +287,6 @@ new class extends Component
         $this->dispatch('aircraft_log-created');
     }
 
-    public function cacheMediaUrl(string $path): void
-{
-    $storageDisk = Storage::disk(getenv('FILESYSTEM_DISK'));
-    $cacheKey = "media_url_" . md5($path);
-
-    $driverName = getenv('FILESYSTEM_DISK');
-
-    if ($driverName === 's3') {
-        // For S3, generate a temporary URL
-        $url = $storageDisk->temporaryUrl($path, now()->addDays(7));
-    } else {
-        // For local, generate a URL using asset() or url()
-        $url = asset('storage/' . $path);
-    }
-
-    Cache::put($cacheKey, $url, now()->addDays(7));
-}
-
     public function close()
     {
         $this->resetProperties();
@@ -332,19 +301,7 @@ new class extends Component
         $this->airline = null;
         $this->aircraft = null;
         $this->description = "";
-        $this->removeUploadedMedia();
         $this->storageLimitExceeded = false;
-    }
-
-    public function removeUploadedMedia()
-    {
-        // Livewire handles local temporary file cleanup automatically
-        if ($this->media) {
-            if (env('FILESYSTEM_DISK') == 's3') {
-                // Delete the temporary file from S3
-                $this->deleteFromS3($this->media->getRealPath());
-            }
-        }
         $this->media = null;
     }
 }
@@ -377,7 +334,7 @@ new class extends Component
                                 <p class="text-cyan-800 dark:text-cyan-200">
                                     Click to add an image or video
                                 </p>
-                                <p class="text-xs text-cyan-800 dark:text-cyan-200">Max 150 MB - equivalent to a 3 min 1080p video</p>
+                                <p class="text-xs text-cyan-800 dark:text-cyan-200">(Max individual file upload size 1GB)</p>
                             </div>
                         </div>
                     </label>
@@ -499,7 +456,7 @@ new class extends Component
                 @endif
                 <div class="flex gap-x-4">
                     <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
-                    <x-primary-button flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
+                    <x-primary-button wire:loading.attr="disabled" flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
                 </div>
             </div>
         </form>

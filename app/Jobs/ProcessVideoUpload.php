@@ -51,6 +51,8 @@ class ProcessVideoUpload implements ShouldQueue
 
             // Fetch the file content
             $rawVideoStream = $storageDisk->get($mediaItem->raw_video_path);
+            Log::info('Length of raw video stream: ' . strlen($rawVideoStream));
+
             file_put_contents($rawVideoLocalPath, $rawVideoStream);
 
             Log::info('Raw video downloaded to: ' . $rawVideoLocalPath);
@@ -73,6 +75,7 @@ class ProcessVideoUpload implements ShouldQueue
                     new \Illuminate\Http\File($compressedPath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 
@@ -83,6 +86,7 @@ class ProcessVideoUpload implements ShouldQueue
                     new \Illuminate\Http\File($thumbnailPath),
                     [
                         'CacheControl' => 'public, max-age=31536000, immutable',
+                        'ACL' => 'public-read',
                     ]
                 );
 
@@ -137,9 +141,8 @@ class ProcessVideoUpload implements ShouldQueue
 
         // Compress video using FFmpeg
         try {
-            $filterChain = "scale=1280:-2,setsar=1/1";
 
-            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -b:v 1000k -c:a aac -vf " . escapeshellarg($filterChain) . " " . escapeshellarg($compressedPath) . " 2>&1";
+            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -crf 0 -preset ultrafast -c:a copy " . escapeshellarg($compressedPath) . " 2>&1";
 
             // Initialize output and return variables
             $output = [];
