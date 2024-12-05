@@ -20,7 +20,7 @@ new class extends Component
         <!-- Content Container -->
         <div class="relative flex items-center justify-center h-full">
             <div class="pt-20 text-center">
-                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">High-quality photo and video storage tailored for aircraft enthusiasts</h1>
+                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">Capture, organize, and showcase your aircraft images and videos</h1>
 
                 {{-- <p class="mb-8 text-xl text-white">From £15/month</p> --}}
                 <br>
