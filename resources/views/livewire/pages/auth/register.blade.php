@@ -23,20 +23,17 @@ state([
     'availablePlans' => [
         [
             'name' => 'Hobby',
-            'price' => '£15/month',
-            'storage' => '1 TB',
+            'price' => '£4.99(€5.99)/month',
             'stripe_price_id' => 'tier1',
         ],
         [
             'name' => 'Aviator',
-            'price' => '£30/month',
-            'storage' => '3 TB',
+            'price' => '£19.99(€24.99)/month',
             'stripe_price_id' => 'tier2',
         ],
         [
             'name' => 'Pro',
-            'price' => '£60/month',
-            'storage' => '8 TB',
+            'price' => '£49.99(€59.99)/month',
             'stripe_price_id' => 'tier3',
         ],
     ],
@@ -127,12 +124,12 @@ $register = function () {
                 <option value="" disabled selected>Select a plan</option>
                 @foreach ($availablePlans as $plan)
                     <option value="{{ $plan['stripe_price_id'] }}">
-                        {{ $plan['name'] }} - {{ $plan['price'] }} - {{ $plan['storage'] }}
+                        {{ $plan['name'] }} - {{ $plan['price'] }}
                     </option>
                 @endforeach
             </select>
             <x-input-error :messages="$errors->get('selectedPlan')" class="mt-2" />
-            <p class="mt-2 text-sm text-gray-600">You are starting a 7-day free trial.</p>
+            <p class="mt-2 text-sm text-gray-600">The first 15 days of your subscription are free.</p>
         </div>
 
         <!-- Marketing Preferences Checkbox -->

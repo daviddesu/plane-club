@@ -164,6 +164,27 @@ new class extends Component
         // Get the file size
         $fileSizeInBytes = filesize($mediaFilePath);
 
+        // Get the MIME type from the local file
+        $mimeType = $this->getMimeType($mediaFilePath);
+
+        // Plan-Specific Rules:
+        if (str_contains($mimeType, 'video')) {
+            // If hobby: no video allowed
+            if ($user->isHobby()) {
+                Toaster::warning('Your current plan does not allow video uploads. Please upgrade.');
+                return redirect()->back();
+            }
+
+            // If aviator: max 500MB for video
+            if ($plan === 'aviator') {
+                $maxAviatorVideoBytes = 500 * 1024 * 1024; // 500MB
+                if ($fileSizeInBytes > $maxAviatorVideoBytes) {
+                    Toaster::warning('Video exceeds the 500MB limit for your plan. Please upgrade to the Pro plan or choose a smaller video.');
+                    return redirect()->back();
+                }
+            }
+        }
+
         // Calculate new total storage if the file is uploaded
         $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
         $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
@@ -174,8 +195,6 @@ new class extends Component
             return redirect()->back();
         }
 
-        // Get the MIME type from the local file
-        $mimeType = $this->getMimeType($mediaFilePath);
 
         if (!$mimeType) {
             Toaster::warning('Unable to determine the MIME type of the uploaded file.');
@@ -304,12 +323,17 @@ new class extends Component
         $this->storageLimitExceeded = false;
         $this->media = null;
     }
+
+    public function removeUploadedMedia()
+    {
+        $this->media = nulll;
+    }
 }
 ?>
 
 
 <div>
-<x-modal-card title="Add a log" name="logModal">
+<x-modal-card title="Add sighting" name="logModal">
     @if($storageLimitExceeded)
         <div class="text-center">
             You have reached your storage limit. Please <a href="/profile" class="text-blue-500 underline">upgrade your subscription</a>
@@ -334,7 +358,6 @@ new class extends Component
                                 <p class="text-cyan-800 dark:text-cyan-200">
                                     Click to add an image or video
                                 </p>
-                                <p class="text-xs text-cyan-800 dark:text-cyan-200">(Max individual file upload size 1GB)</p>
                             </div>
                         </div>
                     </label>

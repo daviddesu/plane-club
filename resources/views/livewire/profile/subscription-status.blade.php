@@ -21,25 +21,22 @@ new class extends Component {
         $this->availablePlans = [
             [
                 'name' => 'Hobby',
-                'price' => '£15/month',
-                'storage' => '1 TB',
-                'storage_limit' => 1000,
+                'price' => '£4.99(€5.99)/month',
+                'storage_limit' => 500,
                 'plan_checkout_name' => 'tier1',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER1'),
             ],
             [
                 'name' => 'Aviator',
-                'price' => '£30/month',
-                'storage' => '3 TB',
-                'storage_limit' => 3000,
+                'price' => '£19.99(€24.99)/month',
+                'storage_limit' => 2000,
                 'plan_checkout_name' => 'tier2',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
             ],
             [
                 'name' => 'Pro',
-                'price' => '£60/month',
-                'storage' => '8 TB',
-                'storage_limit' => 8000,
+                'price' => '£49.99(€59.99)/month',
+                'storage_limit' => 5000,
                 'plan_checkout_name' => 'tier3',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
             ],
@@ -169,7 +166,7 @@ new class extends Component {
                                     $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
                                 @endphp
                                 <option value="{{ $plan['stripe_price_id'] }}" @if($disabled) disabled @endif>
-                                    {{ $plan['name'] }} - {{ $plan['price'] }} - up to {{ $plan['storage'] }}
+                                    {{ $plan['name'] }} - {{ $plan['price'] }}
                                     @if($disabled)
                                         (Not available - exceeds storage limit)
                                     @endif
@@ -201,7 +198,7 @@ new class extends Component {
                                 $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
                             @endphp
                             <option value="{{ $plan['plan_checkout_name'] }}">
-                                {{ $plan['name'] }} - {{ $plan['price'] }} - up to {{ $plan['storage'] }}
+                                {{ $plan['name'] }} - {{ $plan['price'] }}
                             </option>
                         @endforeach
                     </select>

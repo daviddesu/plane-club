@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'marketing_preferences',
-        'used_disk'
+        'used_disk',
     ];
 
     /**
@@ -77,17 +77,35 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($subscription && $subscription->valid()) {
             switch ($subscription->stripe_price) {
                 case env('STRIPE_PRICE_ID_TIER1'):
-                    return 1000; // 1TB
+                    return 500; // 500GB
                 case env('STRIPE_PRICE_ID_TIER2'):
-                    return 3000; // 3TB
+                    return 2000; // 2TB
                 case env('STRIPE_PRICE_ID_TIER3'):
-                    return 8000; // 8TB
+                    return 5000; // 5TB
                 default:
                     return 0;
             }
         }
 
         return 0;
+    }
+
+    public function isHobby()
+    {
+        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
+        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER1');
+    }
+
+    public function isAviator()
+    {
+        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
+        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER2');
+    }
+
+    public function isPro()
+    {
+        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
+        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER3');
     }
 
     public function hasExceededStorageLimit()
