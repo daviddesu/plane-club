@@ -142,7 +142,7 @@ class ProcessVideoUpload implements ShouldQueue
         // Compress video using FFmpeg
         try {
 
-            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -crf 0 -preset ultrafast -c:a copy " . escapeshellarg($compressedPath) . " 2>&1";
+            $cmd = "ffmpeg -i " . escapeshellarg($videoPath) . " -c:v libx264 -crf 0 -preset medium -c:a copy " . escapeshellarg($compressedPath) . " 2>&1";
 
             // Initialize output and return variables
             $output = [];

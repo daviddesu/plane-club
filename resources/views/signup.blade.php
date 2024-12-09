@@ -8,7 +8,7 @@
         <div class="relative flex items-center justify-center h-full">
             <div class="pt-20 text-center">
                 <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">
-                    Capture, organize, and showcase your aircraft images and videos
+                    Log, organize, and showcase your aircraft images and videos
                 </h1>
                 <br>
                 <a href="/register" class="px-8 py-4 text-lg text-white rounded-full bg-cyan-800">Get your first 15 days for free</a>
@@ -121,7 +121,6 @@
                         <p class="mb-6 text-gray-600">Upload videos to sightings - 1GB limit per video</p>
                         <p class="mb-6 text-gray-600">5TB of image and video uploads</p>
                         <p class="mb-6 text-gray-600">Personalised logbook</p>
-                        <p class="mb-6 text-gray-600">No image or video compression</p>
                     </div>
                 </div>
             </div>
