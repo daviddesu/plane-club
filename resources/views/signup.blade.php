@@ -11,7 +11,9 @@
                     Log, organize, and showcase your aircraft images and videos
                 </h1>
                 <br>
-                <a href="/register" class="px-8 py-4 text-lg text-white rounded-full bg-cyan-800">Get your first 15 days for free</a>
+                <p class="p-8 py-3 text-lg text-white">Get your first 15 days free</p>
+                <br>
+                <a href="/register" class="px-8 py-4 text-lg text-white rounded-full bg-cyan-800">Click here to get started</a>
             </div>
         </div>
     </section>
@@ -127,7 +129,8 @@
 
             <!-- Call to Action Button -->
             <div class="mt-8 text-center">
-                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Get your first 15 days for free</a>
+                <p class="p-8 py-3 text-lg text-cyan-800">Get your first 15 days free</p>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Click here to get started</a>
             </div>
         </div>
     </section>
