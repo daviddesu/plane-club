@@ -1,78 +1,92 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
-<!-- Ensure Alpine.js is included, for example by adding in app.js or a separate script -->
-<!-- <script src="//unpkg.com/alpinejs" defer></script> if not using Vite -->
 
 <x-app-layout>
-    <section class="relative h-screen pb-20 bg-gray-200 bg-center bg-cover" style="background-image: url('{{ asset('desktop-image.png') }}');">
-        <div class="absolute inset-0 bg-gray-900 opacity-80"></div>
+    <!-- Hero Section -->
+    <section class="relative h-screen pb-20 bg-gray-200 bg-center bg-cover">
+        <div class="absolute inset-0 bg-white opacity-80"></div>
         <div class="relative flex items-center justify-center h-full">
-            <div class="pt-20 text-center">
-                <h1 class="m-4 text-5xl font-bold text-white md:text-5xl">
-                    Log, organize, and showcase your aircraft images and videos
+            <div class="max-w-2xl pt-10 mx-auto text-center">
+                <!-- New Headline focusing on the USP -->
+                <h1 class="m-4 text-5xl font-bold text-gray-800 md:text-5xl">
+                    Your Personal Aviation Logbook in the Cloud
                 </h1>
                 <br>
-                <p class="p-8 py-3 text-lg text-white">Get your first 15 days free</p>
+
+                <!-- Subheadline that highlights convenience and uniqueness -->
+                <p class="mt-4 mb-6 text-xl text-gray-800">
+                    Capture, store, and instantly search all your aircraft sightings.
+                </p>
                 <br>
-                <a href="/register" class="px-8 py-4 text-lg text-white rounded-full bg-cyan-800">Click here to get started</a>
+
+                <!-- Trust signals and offer -->
+                <p class="mb-2 text-lg text-gray-600">Try all features free for 15 days Cancel anytime.</p>
+                <p class="mb-4 text-lg text-gray-600">Plus, enjoy a 30-day money-back guarantee when you subscribe.</p>
+
+                <!-- Strong CTA -->
+                <a href="/register" class="inline-block px-8 py-4 text-lg font-semibold text-white rounded-full bg-cyan-800 hover:bg-cyan-700">
+                    Start Your 15-Day Free Trial Now
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="py-20 bg-cyan-800">
-        <div class="container px-6 mx-auto text-center">
-            <h2 class="mb-12 text-3xl font-bold text-white">Why Choose Plane Club?</h2>
-            <div class="flex flex-wrap items-center justify-center">
+    <!-- Why Choose Plane Club Section -->
+    <section class="py-16 bg-cyan-800">
+        <div class="container max-w-4xl px-6 mx-auto text-center">
+            <h2 class="mb-8 text-3xl font-bold text-white">Why Plane Club?</h2>
+            <p class="mb-12 text-xl text-white">
+                Unlike generic photo storage, Plane Club is built for plane spotters. Tag aircraft models, airlines, and locations effortlessly. Soon, share your logbook socially with just a click.
+            </p>
+            <div class="flex flex-wrap items-start justify-center">
                 <!-- Feature 1 -->
                 <div class="w-full px-4 mb-8 md:w-1/3">
-                    <div class="p-6">
+                    <div class="p-6 text-white">
                         <div class="flex items-center justify-center mb-4">
                             <x-icon name="photo" class="w-12 h-12 text-white" />
                         </div>
                         <h3 class="mb-2 text-2xl font-bold text-white">Personalized Gallery</h3>
-                        <p class="text-xl text-center text-white">Upload photos and videos to create your own gallery and database.</p>
+                        <p class="text-xl text-center text-white">Organize images & videos of all your sightings. Filter by aircraft type, airline, or location with ease.</p>
                     </div>
                 </div>
                 <!-- Feature 2 -->
                 <div class="w-full px-4 mb-8 md:w-1/3">
-                    <div class="p-6">
+                    <div class="p-6 text-white">
                         <div class="flex items-center justify-center mb-4">
                             <x-icon name="tag" class="w-12 h-12 text-white" />
                         </div>
                         <h3 class="mb-2 text-2xl font-bold text-white">Detailed Tagging</h3>
-                        <p class="text-xl text-center text-white">Tag aircraft, airlines, and locations with ease.</p>
+                        <p class="text-xl text-center text-white">Quickly search your library by registration, airline, or airports visited. Never lose a rare sighting again.</p>
                     </div>
                 </div>
                 <!-- Feature 3 -->
                 <div class="w-full px-4 mb-8 md:w-1/3">
-                    <div class="p-6">
+                    <div class="p-6 text-white">
                         <div class="flex items-center justify-center mb-4">
                             <x-icon name="cloud-arrow-up" class="w-12 h-12 text-white" />
                         </div>
-                        <h3 class="mb-2 text-2xl font-bold text-white">Cloud storage</h3>
-                        <p class="text-xl text-center text-white">Your images and videos available everywhere with our cloud storage solution.</p>
+                        <h3 class="mb-2 text-2xl font-bold text-white">Cloud Storage</h3>
+                        <p class="text-xl text-center text-white">Access your entire logbook from anywhere. Coming soon: share your log directly to Plane Club's community and Facebook.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Subscription Tiers Section -->
-    <!-- Initialize Alpine here -->
+    <!-- Plans Section -->
     <section class="py-20 bg-white" x-data="{ showGBP: true }">
-        <div class="container px-6 mx-auto">
+        <div class="container max-w-4xl px-6 mx-auto">
             <div class="mb-12 text-center">
-                <h2 class="text-3xl font-bold text-gray-800">Plans</h2>
-                <p class="text-gray-600">Choose the plan that best fits your needs.</p>
+                <h2 class="text-3xl font-bold text-gray-800">Flexible Plans</h2>
+                <p class="text-gray-600">Start free. Upgrade anytime. All paid plans come with a 30-day money-back guarantee.</p>
             </div>
 
-            <!-- Toggle Button -->
+            <!-- Currency Toggle -->
             <div class="mb-8 text-center">
                 <button
                     @click="showGBP = !showGBP"
                     class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-                    <span x-show="showGBP">Show Euros (€)</span>
-                    <span x-show="!showGBP">Show Pounds (£)</span>
+                    <template x-if="showGBP"><span>Show Prices in Euros (€)</span></template>
+                    <template x-if="!showGBP"><span>Show Prices in Pounds (£)</span></template>
                 </button>
             </div>
 
@@ -81,32 +95,38 @@
                 <div class="w-full p-4 mb-8 md:w-1/3">
                     <div class="p-6 text-center bg-gray-100 rounded-lg shadow-md">
                         <h3 class="mb-4 text-2xl font-bold text-gray-800">Hobby</h3>
-                        <!-- Prices -->
                         <p class="mb-4 text-xl font-bold text-gray-800">
-                            <!-- Show GBP if showGBP is true, otherwise show EUR -->
                             <span x-show="showGBP">£4.99/month</span>
                             <span x-show="!showGBP" style="display:none;">€5.99/month</span>
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
-                        <p class="mb-6 text-gray-600">Upload images to sightings</p>
-                        <p class="mb-6 text-gray-600">500GB of image uploads</p>
+                        <p class="mb-6 text-gray-600">Image uploads</p>
+                        <p class="mb-6 text-gray-600">500GB storage</p>
                         <p class="mb-6 text-gray-600">Personalised logbook</p>
+                        <p class="mb-6 font-semibold text-gray-600">Coming Soon: Social Sharing to Plane Club & Facebook</p>
+                        <a href="/register" class="inline-block px-6 py-2 mx-2 font-semibold text-white rounded-full text-md bg-cyan-800 hover:bg-cyan-700">
+                            Select
+                        </a>
                     </div>
                 </div>
 
                 <!-- Aviator Plan -->
                 <div class="w-full p-4 mb-8 md:w-1/3">
-                    <div class="p-6 text-center bg-gray-100 rounded-lg shadow-md">
+                    <div class="p-6 text-center bg-gray-100 border-2 rounded-lg shadow-md border-cyan-800">
                         <h3 class="mb-4 text-2xl font-bold text-gray-800">Aviator</h3>
                         <p class="mb-4 text-xl font-bold text-gray-800">
                             <span x-show="showGBP">£19.99/month</span>
                             <span x-show="!showGBP" style="display:none;">€24.99/month</span>
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
-                        <p class="mb-6 text-gray-600">Upload images to sightings</p>
-                        <p class="mb-6 text-gray-600">Upload videos to sightings - 500MB limit per video</p>
-                        <p class="mb-6 text-gray-600">2TB of image and video uploads</p>
+                        <p class="mb-6 text-gray-600">Images & videos (500MB per video)</p>
+                        <p class="mb-6 text-gray-600">2TB storage</p>
                         <p class="mb-6 text-gray-600">Personalised logbook</p>
+                        <p class="mb-6 font-semibold text-gray-600">Coming Soon: Social Sharing to Plane Club & Facebook</p>
+                        <p class="mb-6 font-semibold text-gray-600">Coming Soon: Sighting autocomplete</p>
+                        <a href="/register" class="inline-block px-6 py-2 mx-2 font-semibold text-white rounded-full text-md bg-cyan-800 hover:bg-cyan-700">
+                            Select
+                        </a>
                     </div>
                 </div>
 
@@ -119,18 +139,25 @@
                             <span x-show="!showGBP" style="display:none;">€59.99/month</span>
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
-                        <p class="mb-6 text-gray-600">Upload images to sightings</p>
-                        <p class="mb-6 text-gray-600">Upload videos to sightings - 1GB limit per video</p>
-                        <p class="mb-6 text-gray-600">5TB of image and video uploads</p>
+                        <p class="mb-6 text-gray-600">Images & videos (1GB per video)</p>
+                        <p class="mb-6 text-gray-600">5TB storage</p>
                         <p class="mb-6 text-gray-600">Personalised logbook</p>
+                        <p class="mb-6 font-semibold text-gray-600">Coming Soon: Social Sharing to Plane Club & Facebook</p>
+                        <p class="mb-6 font-semibold text-gray-600">Coming Soon: Sighting autocomplete</p>
+                        <a href="/register" class="inline-block px-6 py-2 mx-2 font-semibold text-white rounded-full text-md bg-cyan-800 hover:bg-cyan-700">
+                            Select
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Call to Action Button -->
+            <!-- Another Call to Action -->
             <div class="mt-8 text-center">
-                <p class="p-8 py-3 text-lg text-cyan-800">Get your first 15 days free</p>
-                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">Click here to get started</a>
+                <p class="mb-3 text-lg text-cyan-800">Start now and explore all features for free</p>
+                <a href="/register" class="px-8 py-3 text-lg text-white rounded-full bg-cyan-800 hover:bg-cyan-700">
+                    Begin Your 15-Day Free Trial
+                </a>
+                <p class="mt-2 text-sm text-gray-500">Cancel anytime</p>
             </div>
         </div>
     </section>
@@ -145,12 +172,11 @@
                 <a class="text-xs text-white" href="#" class="termly-display-preferences">Consent Preferences</a>
             </div>
             <div>
-                <p class="text-xs text-white ">Contact: <a href="mailto:support@planeclub.app">support@planeclub.app</a></p><br>
+                <p class="text-xs text-white">Contact: <a href="mailto:support@planeclub.app" class="underline">support@planeclub.app</a></p><br>
             </div>
         </div>
         <div class="container px-6 pt-4 mx-auto text-center">
-            <p class="text-white">&copy; {{ date('Y') }} Plane Club LTD All rights reserved.</p>
+            <p class="text-xs text-white">&copy; {{ date('Y') }} Plane Club LTD. All rights reserved.</p>
         </div>
     </footer>
 </x-app-layout>
-
