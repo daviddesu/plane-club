@@ -257,7 +257,7 @@ new class extends Component
 
 ?>
 
-<div x-data="modalComponent" class="w-full h-full select-none">
+<div x-data="modalComponent()" class="w-full h-full select-none">
     @if($id)
 
     <!-- Modal -->
