@@ -116,7 +116,7 @@
                             <span x-show="!showGBP" style="display:none;">€24.99/month</span>
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
-                        <p class="mb-6 text-gray-600">Images & videos (500MB/video)</p>
+                        <p class="mb-6 text-gray-600">Images & videos</p>
                         {{-- <p class="mb-6 text-gray-600">2TB storage</p> --}}
                         <p class="mb-6 text-gray-600">Private logbook</p>
                         <p class="mb-6 font-semibold text-gray-600">Coming Soon: Social Sharing to Plane Club & Facebook</p>
