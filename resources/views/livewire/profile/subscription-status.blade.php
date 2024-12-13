@@ -22,24 +22,24 @@ new class extends Component {
             [
                 'name' => 'Hobby',
                 'price' => '£4.99(€5.99)/month',
-                'storage_limit' => 500,
+                'storage_limit' => 1000,
                 'plan_checkout_name' => 'tier1',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER1'),
             ],
             [
                 'name' => 'Aviator',
                 'price' => '£19.99(€24.99)/month',
-                'storage_limit' => 2000,
+                'storage_limit' => 3000,
                 'plan_checkout_name' => 'tier2',
                 'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
             ],
-            [
-                'name' => 'Pro',
-                'price' => '£49.99(€59.99)/month',
-                'storage_limit' => 5000,
-                'plan_checkout_name' => 'tier3',
-                'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
-            ],
+            // [
+            //     'name' => 'Pro',
+            //     'price' => '£49.99(€59.99)/month',
+            //     'storage_limit' => 5000,
+            //     'plan_checkout_name' => 'tier3',
+            //     'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
+            // ],
         ];
 
         // Get the current plan ID

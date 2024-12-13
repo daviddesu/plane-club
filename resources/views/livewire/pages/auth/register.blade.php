@@ -31,11 +31,11 @@ state([
             'price' => '£19.99(€24.99)/month',
             'stripe_price_id' => 'tier2',
         ],
-        [
-            'name' => 'Pro',
-            'price' => '£49.99(€59.99)/month',
-            'stripe_price_id' => 'tier3',
-        ],
+        // [
+        //     'name' => 'Pro',
+        //     'price' => '£49.99(€59.99)/month',
+        //     'stripe_price_id' => 'tier3',
+        // ],
     ],
 ]);
 

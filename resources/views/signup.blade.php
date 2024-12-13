@@ -98,7 +98,7 @@
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
                         <p class="mb-6 text-gray-600">Image uploads</p>
-                        <p class="mb-6 text-gray-600">500GB storage</p>
+                        {{-- <p class="mb-6 text-gray-600">500GB storage</p> --}}
                         <p class="mb-6 text-gray-600">Private logbook</p>
                         <p class="mb-6 font-semibold text-gray-600">Future: Selective social sharing</p>
                         <a href="/register" class="inline-block px-6 py-2 mx-2 font-semibold text-white rounded-full text-md bg-cyan-800 hover:bg-cyan-700">
@@ -117,7 +117,7 @@
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
                         <p class="mb-6 text-gray-600">Images & videos (500MB/video)</p>
-                        <p class="mb-6 text-gray-600">2TB storage</p>
+                        {{-- <p class="mb-6 text-gray-600">2TB storage</p> --}}
                         <p class="mb-6 text-gray-600">Private logbook</p>
                         <p class="mb-6 font-semibold text-gray-600">Coming Soon: Social Sharing to Plane Club & Facebook</p>
                         <p class="mb-6 font-semibold text-gray-600">Coming Soon: Sighting autocomplete</p>
@@ -127,7 +127,7 @@
                     </div>
                 </div>
 
-                <!-- Pro Plan -->
+                {{-- <!-- Pro Plan -->
                 <div class="w-full p-4 mb-8 md:w-1/3">
                     <div class="p-6 text-center bg-gray-100 rounded-lg shadow-md">
                         <h3 class="mb-4 text-2xl font-bold text-gray-800">Pro</h3>
@@ -145,7 +145,7 @@
                             Start Free Trial
                         </a>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Another Call to Action -->
