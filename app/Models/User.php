@@ -77,9 +77,9 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($subscription && $subscription->valid()) {
             switch ($subscription->stripe_price) {
                 case env('STRIPE_PRICE_ID_TIER1'):
-                    return 500; // 500GB
+                    return 1000; // 1TB
                 case env('STRIPE_PRICE_ID_TIER2'):
-                    return 2000; // 2TB
+                    return 3000; // 3TB
                 case env('STRIPE_PRICE_ID_TIER3'):
                     return 5000; // 5TB
                 default:
