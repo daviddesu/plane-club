@@ -93,8 +93,8 @@
                     <div class="p-6 text-center bg-gray-100 rounded-lg shadow-md">
                         <h3 class="mb-4 text-2xl font-bold text-gray-800">Hobby</h3>
                         <p class="mb-4 text-xl font-bold text-gray-800">
-                            <span x-show="showGBP">£4.99/month</span>
-                            <span x-show="!showGBP" style="display:none;">€5.99/month</span>
+                            <span x-show="showGBP"> <span class="line-through">£9.99</span> £4.99/month</span>
+                            <span x-show="!showGBP" style="display:none;"><span class="line-through">€11.99</span> €5.99/month</span>
                         </p>
                         <p class="mb-6 text-gray-600">Unlimited sightings</p>
                         <p class="mb-6 text-gray-600">Image uploads</p>
