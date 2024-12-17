@@ -8,7 +8,7 @@
             <div class="max-w-2xl pt-10 mx-auto text-center">
                 <!-- Headline focusing on Personal Logbook USP -->
                 <h1 class="m-4 text-5xl font-bold text-gray-800 md:text-5xl">
-                    Your Personal, Private Aviation Logbook
+                    Your Personal Aircraft Sighting Logbook
                 </h1>
                 <br>
 
@@ -22,7 +22,6 @@
                     Start Your 15-Day Free Trial Now
                 </a>
                 <p class="mb-2 text-gray-600 text-md">30-day money-back guarantee after trial.</p>
-
             </div>
         </div>
     </section>
