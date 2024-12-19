@@ -21,22 +21,23 @@ class AirportController extends Controller
         }
 
         if(empty($search)){
-            return response()->json([]);
+
+            $airports = Airport::where('featured', 1)->get();
+        }else{
+            $searchTerms = explode(' ', strtolower($search));
+
+            $airports = DB::table('airports')
+                ->where(function($query) use ($searchTerms) {
+                    foreach ($searchTerms as $term) {
+                        $query->where(function($q) use ($term) {
+                            $q->whereRaw("LOWER(name) LIKE ?", ["% {$term}%"])
+                            ->orWhereRaw("LOWER(name) LIKE ?", ["{$term}%"])
+                            ->orWhereRaw("LOWER(iata_code) LIKE ?", ["{$term}%"]);
+                        });
+                    }
+                })
+                ->get();
         }
-
-        $searchTerms = explode(' ', strtolower($search));
-
-        $airports = DB::table('airports')
-            ->where(function($query) use ($searchTerms) {
-                foreach ($searchTerms as $term) {
-                    $query->where(function($q) use ($term) {
-                        $q->whereRaw("LOWER(name) LIKE ?", ["% {$term}%"])
-                        ->orWhereRaw("LOWER(name) LIKE ?", ["{$term}%"])
-                        ->orWhereRaw("LOWER(iata_code) LIKE ?", ["{$term}%"]);
-                    });
-                }
-            })
-            ->get();
 
         return response()->json(
             array_map(function ($airport) {

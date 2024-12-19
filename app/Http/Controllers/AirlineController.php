@@ -23,21 +23,23 @@ class AirlineController extends Controller
         }
 
         if(empty($search)){
-            return response()->json([]);
+            $airlines = Airline::where('featured', 1)->get();
+        }else{
+            $searchTerms = explode(' ', strtolower($search));
+
+            $airlines = DB::table('airlines')
+                ->where(function($query) use ($searchTerms) {
+                    foreach ($searchTerms as $term) {
+                        $query->where(function($q) use ($term) {
+                            $q->whereRaw("LOWER(name) LIKE ?", ["% {$term}%"])
+                            ->orWhereRaw("LOWER(name) LIKE ?", ["{$term}%"]);
+                        });
+                    }
+                })
+                ->get();
         }
 
-        $searchTerms = explode(' ', strtolower($search));
 
-        $airlines = DB::table('airlines')
-            ->where(function($query) use ($searchTerms) {
-                foreach ($searchTerms as $term) {
-                    $query->where(function($q) use ($term) {
-                        $q->whereRaw("LOWER(name) LIKE ?", ["% {$term}%"])
-                        ->orWhereRaw("LOWER(name) LIKE ?", ["{$term}%"]);
-                    });
-                }
-            })
-            ->get();
 
         return response()->json(
             array_map(function ($airline) {
