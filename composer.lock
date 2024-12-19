@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99b7e35992cff0c6db5b87cbe23a8dd0",
+    "content-hash": "73a5954d84fff63bbe8bba23deadddd8",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -8235,16 +8235,16 @@
         },
         {
             "name": "wireui/wireui",
-            "version": "v2.0.5",
+            "version": "v2.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wireui/wireui.git",
-                "reference": "8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63"
+                "reference": "b90a317e73d831204abfc4663a50c7ecdef44173"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wireui/wireui/zipball/8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63",
-                "reference": "8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63",
+                "url": "https://api.github.com/repos/wireui/wireui/zipball/b90a317e73d831204abfc4663a50c7ecdef44173",
+                "reference": "b90a317e73d831204abfc4663a50c7ecdef44173",
                 "shasum": ""
             },
             "require": {
@@ -8267,10 +8267,10 @@
             "type": "library",
             "extra": {
                 "laravel": {
+                    "aliases": [],
                     "providers": [
                         "WireUi\\ServiceProvider"
-                    ],
-                    "aliases": []
+                    ]
                 }
             },
             "autoload": {
@@ -8298,9 +8298,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wireui/wireui/issues",
-                "source": "https://github.com/wireui/wireui/tree/v2.0.5"
+                "source": "https://github.com/wireui/wireui/tree/v2.2.1"
             },
-            "time": "2024-07-03T05:29:41+00:00"
+            "time": "2024-10-20T04:05:55+00:00"
         }
     ],
     "packages-dev": [

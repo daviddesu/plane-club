@@ -257,7 +257,15 @@ new class extends Component
 
 ?>
 
-<div x-data="modalComponent()" class="w-full h-full select-none">
+<div x-data="{
+        modalOpened: @entangle('modalOpened'),
+        confirmDelete: false,
+        modalClose() {
+            this.modalOpened = false;
+            @this.call('closeLog');
+        },
+    }"
+    class="w-full h-full select-none">
     @if($id)
 
     <!-- Modal -->
@@ -310,7 +318,21 @@ new class extends Component
             <div class="grid grid-cols-1 p-4 md:grid-cols-2">
                 <div class="pt-4 ">
                     <div class="p-4">
-                        <div x-data='mediaGallery(@json($mediaUrl))' x-bind:key="$id" class="relative">
+                        <div x-data='{
+                                isOpen: false,
+                                mediaUrl: @json($mediaUrl) || "",
+                                openModal() {
+                                    this.isOpen = true;
+                                    document.body.classList.add("overflow-hidden");
+                                },
+                                closeModal() {
+                                    this.isOpen = false;
+                                    document.body.classList.remove("overflow-hidden");
+                                }
+                            }'
+                            x-bind:key="$id"
+                            class="relative"
+                        >
                             <div>
                                 <div class="w-full h-80">
                                     @if($media->isVideo())
@@ -500,30 +522,3 @@ new class extends Component
     </div>
     @endif
 </div>
-
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('modalComponent', () => ({
-            modalOpened: @entangle('modalOpened'),
-            confirmDelete: false,
-            init() {},
-            modalClose() {
-                this.modalOpened = false;
-                @this.call('closeLog');
-            },
-        }));
-
-        Alpine.data('mediaGallery', (mediaUrl) => ({
-            isOpen: false,
-            mediaUrl: mediaUrl || "",
-            openModal() {
-                this.isOpen = true;
-                document.body.classList.add('overflow-hidden');
-            },
-            closeModal() {
-                this.isOpen = false;
-                document.body.classList.remove('overflow-hidden');
-            },
-        }));
-    });
-</script>

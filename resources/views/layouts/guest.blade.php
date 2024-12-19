@@ -47,5 +47,7 @@
                 {{ $slot }}
             </div>
         </div>
+        @livewireScripts
+        <wireui:scripts />
     </body>
 </html>

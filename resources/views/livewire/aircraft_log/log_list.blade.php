@@ -150,7 +150,7 @@ new class extends Component
                         <x-select
                             label="Airport"
                             placeholder="Search airport or IATA code"
-                            wire:model.live.="selectedAirport"
+                            wire:model.live="selectedAirport"
                             :async-data="route('airports')"
                             option-label="name"
                             option-value="id"
