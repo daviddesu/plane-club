@@ -170,7 +170,7 @@
             </div>
         </div>
         <div class="container px-6 pt-4 mx-auto text-center">
-            <p class="text-xs text-white">&copy; {{ date('Y') }} Plane Club LTD. All rights reserved.</p>
+            <p class="text-xs text-white">&copy; {{ date('Y') }} Wayfinder Technologies LTD. All rights reserved.</p>
         </div>
     </footer>
 </x-app-layout>
