@@ -15,7 +15,6 @@ console_command = 'php /var/www/html/artisan tinker'
 [processes]
   app = ""
   queue = "php artisan queue:work --sleep=3 --tries=3 --timeout=3600"
-  scheduler = "php artisan schedule:work"
 
 [env]
   LOG_CHANNEL = 'stderr'

@@ -16,7 +16,7 @@
 [x] Analytics (Look at posthog)
 [x] Implement the toast lib for all action confirmations
 [x] Home page and pricing page
-[x] Registration page and implement stripe or other payment provider
+[x] Registration page and implement stripe or other payment provide
 [x] Can see other users logs
 [x] Change log addition to not add multiple logs per image
 [x] Chnage log view to show images view
