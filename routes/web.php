@@ -6,14 +6,15 @@ use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\AirportController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use App\Http\Middleware\Subscribed;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
-use Masmerise\Toaster\Toaster;
+use Livewire\Volt\Volt;
+
 
 Route::get('/', [SalesController::class, 'index'])
     ->name('signup');
+
+Volt::route('/sighting/create', 'aircraft_log.create');
+
 
 Route::get('/logs', [AircraftLogController::class, 'index'])
     ->middleware(['auth', 'verified'])
