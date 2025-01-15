@@ -1,15 +1,14 @@
 <?php
 
 use Livewire\Volt\Component;
-use Masmerise\Toaster\Toaster;
-
+use Mary\Traits\Toast;
 
 new class extends Component {
+
+    use Toast;
+
     public $subscription;
-    public $availablePlans = [];
-    public $currentPlanId;
-    public $newPlanId;
-    public $completeSubPlanId;
+    protected bool $pro = false;
 
     public function mount()
     {
@@ -17,51 +16,24 @@ new class extends Component {
         $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
         $this->completeSubPlanId = "tier1";
 
-        // Define your available plans
-        $this->availablePlans = [
-            [
-                'name' => 'Hobby',
-                'price' => '£4.99(€5.99)/month',
-                'storage_limit' => 1000,
-                'plan_checkout_name' => 'tier1',
-                'stripe_price_id' => env('STRIPE_PRICE_ID_TIER1'),
-            ],
-            [
-                'name' => 'Aviator',
-                'price' => '£19.99(€24.99)/month',
-                'storage_limit' => 3000,
-                'plan_checkout_name' => 'tier2',
-                'stripe_price_id' => env('STRIPE_PRICE_ID_TIER2'),
-            ],
-            // [
-            //     'name' => 'Pro',
-            //     'price' => '£49.99(€59.99)/month',
-            //     'storage_limit' => 5000,
-            //     'plan_checkout_name' => 'tier3',
-            //     'stripe_price_id' => env('STRIPE_PRICE_ID_TIER3'),
-            // ],
-        ];
-
         // Get the current plan ID
         if ($this->subscription && $this->subscription->valid()) {
-            $this->currentPlanId = $this->subscription->stripe_price;
-            $this->completeSubPlanId = null;
+            $this->pro = false;
         }
-
-        // Initialize newPlanId with the current plan
-        $this->newPlanId = $this->currentPlanId;
     }
 
     public function cancelSubscription()
     {
         $user = auth()->user();
         $user->subscription(env('STRIPE_PRODUCT_ID'))->cancel();
-
-        // Refresh the subscription property
-        $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
-
-        Toaster::warning('Your subscription has been canceled and will end on ' . $this->subscription->ends_at?->format('Y-m-d') . '.');
+        $this->pro = false;
+        $this->toast(
+            type: 'warning',
+            title: 'Subscription Cancelled',
+            description: 'Your subscription will end on ' . $this->subscription->ends_at?->format('Y-m-d') . '.',
+        );
     }
+
 
     public function resumeSubscription()
     {
@@ -70,29 +42,21 @@ new class extends Component {
 
         // Refresh the subscription property
         $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
-
-        Toaster::success('Your subscription has been resumed.');
+        $this->toast(
+            type: 'Success',
+            title: 'Your subscription has been resumed'
+        );
     }
 
-    public function changePlan()
+    public function upgradePro()
+    {
+        $this->redirectRoute('checkout');
+    }
+
+    public function downgradeFree()
     {
         $user = auth()->user();
-
-        if ($this->newPlanId === $this->currentPlanId) {
-            Toaster::info('You are already on this plan.');
-            return;
-        }
-
-        // Find the new plan details
-        $newPlan = collect($this->availablePlans)->firstWhere('stripe_price_id', $this->newPlanId);
-
-        if (!$newPlan) {
-            Toaster::error('Selected plan not found.');
-            return;
-        }
-
-        // Get the storage limit of the new plan
-        $newPlanStorageLimitGB = $newPlan['storage_limit'];
+        $freePlanStorageLimitGB = 10;
 
         // Get the user's current used disk space in GB
         $usedDiskBytes = $user->used_disk;
@@ -100,112 +64,47 @@ new class extends Component {
 
         // Check if user's used disk exceeds the new plan's storage limit
         if ($usedDiskGB > $newPlanStorageLimitGB) {
-            Toaster::warning('You cannot downgrade to this plan because your current storage usage exceeds the plan\'s limit. Please reduce your storage usage or choose a higher-tier plan.');
+            $this->toast(
+                type: 'error',
+                title: 'Failed todowngrade to free',
+                description: 'Your current storage usage exceeds the plan\'s limit. Please reduce your storage usage before downgrading',
+            );
             return;
         }
 
-        try {
-            // Swap the subscription to the new plan
-            $user->subscription(env('STRIPE_PRODUCT_ID'))->swap($this->newPlanId);
-
-            // Refresh the subscription and current plan ID
-            $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
-            $this->currentPlanId = $this->subscription->stripe_price;
-
-            Toaster::success('Your subscription has been updated to the new plan.');
-        } catch (\Exception $e) {
-            Toaster::error('An error occurred while updating your subscription: ' . $e->getMessage());
-        }
+        $user->subscription(env('STRIPE_PRODUCT_ID'))->cancel();
+        $this->pro = false;
+        $this->toast(
+            type: 'warning',
+            title: 'Subscription downgraded to free tier',
+            description: 'You will have pro access until ' . $this->subscription->ends_at?->format('Y-m-d') . '.',
+        );
     }
-
-    public function completeSubscription()
-    {
-        $this->redirectRoute('checkout', ['plan' => $this->completeSubPlanId]);
-    }
-
-    public function navigateToCheckout()
-    {
-        $this->redirectRoute('checkout');
-    }
-
 };
 
 ?>
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Subscription</h2>
+        <h2 class="text-lg font-medium">Subscription</h2>
     </header>
     <div>
         @if ($subscription && $subscription->onGracePeriod())
             <div class="mt-6 space-y-6">
                 <p>Your subscription has been canceled and will end on {{ $subscription->ends_at->format('Y-m-d') }}. After this date, your account and data will be deleted.</p>
-                <x-primary-button wire:click="resumeSubscription">Resume Subscription</x-primary-button>
+                <x-mary-button wire:click="resumeSubscription" class="btn-primary" label="Resume Subscription" />
             </div>
         @elseif ($subscription && $subscription->valid())
             <div class="mt-6 space-y-6">
-                <p>Your subscription is <x-badge positive label="active" />.</p>
-                <p>
-                    Current Plan:
-                    @php
-                        $currentPlan = collect($availablePlans)->firstWhere('stripe_price_id', $currentPlanId);
-                    @endphp
-                    {{ $currentPlan['name'] ?? 'Unknown Plan' }}
-                </p>
+                <p>Your Pro subscription is <x-mary-badge positive label="active" /></p>
                 <p>Next Billing Date: {{ date('Y-m-d', $subscription->asStripeSubscription()->current_period_end) }}</p>
-
-                <!-- Plan Selection Form -->
-                <form wire:submit.prevent="changePlan">
-                    <div class="mt-4">
-                        <label for="plan">Select a new plan:</label>
-                        <select wire:model="newPlanId" id="plan" class="block w-full mt-1">
-                            @foreach ($availablePlans as $plan)
-                                @php
-                                    $planStorageLimitGB = $plan['storage_limit'];
-                                    $usedDiskGB = auth()->user()->used_disk / (1024 * 1024 * 1024); // Convert bytes to GB
-                                    $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
-                                @endphp
-                                <option value="{{ $plan['stripe_price_id'] }}" @if($disabled) disabled @endif>
-                                    {{ $plan['name'] }} - {{ $plan['price'] }}
-                                    @if($disabled)
-                                        (Not available - exceeds storage limit)
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <x-primary-button type="submit" class="mt-4">Update Plan</x-primary-button>
-                </form>
-
-                <x-danger-button wire:click="cancelSubscription" class="mt-4">Cancel Subscription</x-danger-button>
-            </div>
-        @elseif($subscription)
-            <div class="mt-6 space-y-6">
-                <p>Your subscription is inactive. Your account and data will be deleted on {{ optional($subscription->ends_at)->addMonth()->format('Y-m-d') ?? 'N/A' }}.</p>
-                <p>To reactivate your subscription, please contact support@planeclub.app</p>
+                <x-mary-button wire:click="cancelSubscription" class="mt-4 btn-error" label="Cancel Subscription" />
             </div>
         @else
-        <div class="mt-6 space-y-6">
-            <p>Please finalise your subscription.</p>
-            <form wire:submit.prevent="completeSubscription">
-                <div class="mt-4">
-                    <label for="plan">Select a plan:</label>
-                    <select wire:model="completeSubPlanId" id="plan_complete" class="block w-full mt-1">
-                        @foreach ($availablePlans as $plan)
-                            @php
-                                $planStorageLimitGB = $plan['storage_limit'];
-                                $usedDiskGB = auth()->user()->used_disk / (1024 * 1024 * 1024); // Convert bytes to GB
-                                $disabled = $usedDiskGB > $planStorageLimitGB ? true : false;
-                            @endphp
-                            <option value="{{ $plan['plan_checkout_name'] }}">
-                                {{ $plan['name'] }} - {{ $plan['price'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <x-primary-button type="submit" class="mt-4">Complete subscription</x-primary-button>
-            </form>
-        </div>
+            <div class="mt-6 space-y-6">
+                <p>Your Free subscription is <x-mary-badge positive label="active" /></p>
+                <x-mary-button wire:click="upgradePro" class="btn-primary" label="Upgrade to Pro" />
+            </div>
         @endif
     </div>
 </section>

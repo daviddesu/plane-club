@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html data-theme="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,19 +35,19 @@
                 })
         </script>
     </head>
-    <body class="font-sans antialiased text-gray-900">
-        <div class="flex flex-col items-center min-h-screen pt-6 bg-white sm:justify-center sm:pt-0 dark:bg-gray-900">
+    <body class="font-sans antialiased">
+        <div class="flex flex-col items-center min-h-screen pt-6 sm:justify-center sm:pt-0">
             <div>
                 <a href="/" wire:navigate>
-                    <img src="/logo.png" class="block w-auto h-20 text-gray-800 fill-current dark:text-gray-200" />
+                    <img alt="Light Mode Logo" class="block w-auto h-20 fill-current [[data-theme=dark]_&]:hidden" src="/logo.png" />
+                    <img alt="Dark Mode Logo" class="block w-auto h-20 fill-current dark:block [[data-theme=light]_&]:hidden" src="/logo-white.png" />
                 </a>
             </div>
 
-            <div class="w-full px-6 py-4 mt-6 overflow-hidden bg-white shadow-md sm:max-w-md dark:bg-gray-800 sm:rounded-lg">
+            <div class="w-full px-6 py-4 mt-6 overflow-hidden shadow-md sm:max-w-md sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>
         @livewireScripts
-        <wireui:scripts />
     </body>
 </html>

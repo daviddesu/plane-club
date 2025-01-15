@@ -16,7 +16,7 @@ Route::get('/', [SalesController::class, 'index'])
     ->name('signup');
 
 Route::get('/logs', [AircraftLogController::class, 'index'])
-    ->middleware(['auth', 'verified', Subscribed::class])
+    ->middleware(['auth', 'verified'])
     ->name('aircraft_logs');
 
 Route::view('profile', 'profile')

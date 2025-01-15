@@ -10,7 +10,7 @@ $logout = function (Logout $logout) {
 
 ?>
 
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+<nav x-data="{ open: false }" class="border-b">
     <!-- Primary Navigation Menu -->
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -18,7 +18,8 @@ $logout = function (Logout $logout) {
                 <!-- Logo -->
                 <div class="flex items-center shrink-0">
                     <a href="{{ route('aircraft_logs') }}" wire:navigate>
-                        <img src="/logo.png" class="block w-auto h-16 text-gray-800 fill-current dark:text-gray-200" />
+                        <img alt="Light Mode Logo" class="block w-auto h-16 fill-current [[data-theme=dark]_&]:hidden" src="/logo.png" />
+                        <img alt="Dark Mode Logo" class="block w-auto h-16 fill-current dark:block [[data-theme=light]_&]:hidden" src="/logo-white.png" />
                     </a>
                 </div>
             </div>
@@ -33,6 +34,7 @@ $logout = function (Logout $logout) {
                         {{ __('Log In') }}
                     </x-nav-link>
                 @endif
+                <x-mary-theme-toggle class="pt-6" darkTheme="dark" lightTheme="light" />
             </div>
 
 
@@ -40,18 +42,18 @@ $logout = function (Logout $logout) {
             @if(Auth::check())
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     @if(Auth::user()->subscribedStripe())
-                        <x-mini-button
+                        <x-mary-button
                             x-on:click="$openModal('logModal')"
                             class="w-5 h-5 cursor-pointer text-cyan-800 hover:text-white hover:bg-cyan-800 dark:text-gray-200"
                             rounded
-                            icon="plus"
+                            icon="o-plus"
                             flat
                             interaction:solid
                         />
                     @endif
-                    <x-dropdown align="right" width="48">
+                    <x-mary-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button
+                            <x-mary-button
                                 class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
                                 @if(Auth::check())
                                     <div x-data="{{ json_encode(['name' => auth()->user()->username]) }}" x-text="name"
@@ -65,11 +67,11 @@ $logout = function (Logout $logout) {
                                             clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                            </button>
+                            </x-mary-button>
                         </x-slot>
-                        <x-dropdown.item label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
-                        <x-dropdown.item label="Logout" wire:click="logout" class="w-full text-start" />
-                    </x-dropdown>
+                        <x-mary-menu-item label="My Profile" class="text-sm" :href="route('profile')" wire:navigate />
+                        <x-mary-menu-item label="Logout" wire:click="logout" class="w-full text-start" />
+                    </x-mary-dropdown>
                 </div>
             @endif
 
@@ -78,17 +80,17 @@ $logout = function (Logout $logout) {
             <div class="flex items-center -me-2 sm:hidden">
                 <div class="p-4">
                 @if(Auth::check())
-                        <x-mini-button
+                        <x-mary-button
                             x-on:click="$openModal('logModal')"
                             class="w-5 h-5 cursor-pointer text-cyan-800 hover:text-white hover:bg-cyan-800 dark:text-gray-200"
                             rounded
-                            icon="plus"
+                            icon="o-plus"
                             flat
                             interaction:solid
                         />
                 @endif
                 </div>
-                <button @click="open = ! open"
+                <x-mary-button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400">
                     <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
@@ -97,7 +99,7 @@ $logout = function (Logout $logout) {
                         <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
                             stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </x-mary-button>
             </div>
         </div>
     </div>
@@ -126,11 +128,11 @@ $logout = function (Logout $logout) {
                     </x-responsive-nav-link>
 
                     <!-- Authentication -->
-                    <button wire:click="logout" class="w-full text-start">
+                    <x-mary-button wire:click="logout" class="w-full text-start">
                         <x-responsive-nav-link>
                             {{ __('Log Out') }}
                         </x-responsive-nav-link>
-                    </button>
+                    </x-mary-button>
                 </div>
             @else
                 <div class="mt-3 space-y-1">
@@ -142,6 +144,7 @@ $logout = function (Logout $logout) {
                     </x-responsive-nav-link>
                 </div>
             @endif
+            <x-mary-theme-toggle class="pt-2 pl-4" darkTheme="dark" lightTheme="light" />
         </div>
     </div>
 </nav>

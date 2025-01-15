@@ -23,13 +23,16 @@ new class extends Component {
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Marketing Preferences</h2>
+        <h2 class="text-lg font-medium">Marketing Preferences</h2>
     </header>
     <div>
-        <input id="marketing_preferences" type="checkbox" wire:model="preference" wire:click='updatePreference' class="border-gray-300 rounded shadow-sm text-cyan-800 focus:ring-cyan-500" required>
-        <span class="ml-2 text-sm text-gray-600">Recieve marketing emails</span>
-
-        {{-- <x-toggle  wire:model='preference' color="bg-cyan-800" name="toggle" label="Recieve marketing emails" xl /> --}}
+        <div class="mt-4">
+            <x-mary-checkbox wire:model="preference" class="self-start" wire:click='updatePreference'>
+                <x-slot:label>
+                    Recieve marketing emails
+                </x-slot:label>
+            </x-mary-checkbox>
+        </div>
     </div>
 </section>
 

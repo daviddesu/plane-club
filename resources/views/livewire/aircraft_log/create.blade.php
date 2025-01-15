@@ -383,13 +383,13 @@ new class extends Component
                 @endif
                 <!-- Existing Form Inputs -->
                 <div class="grid-cols-1 gap-4 sm:grid-cols-2">
-                    <x-datetime-picker
-                        class="pd-2"
-                        wire:model="loggedAt"
+
+                    <x-mary-datetime
                         label="Date"
-                        placeholder="Date"
-                        without-time
+                        wire:model="loggedAt"
+                        icon="o-calendar"
                     />
+
 
                     <x-select
                         class="pd-2"
@@ -475,11 +475,11 @@ new class extends Component
             <div class="pt-2 border-b-2"></div>
             <div name="footer" class="flex justify-between gap-x-4">
                 @if($media)
-                    <x-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
+                    <x-mary-button class="mt-4" flat negative label="Clear media" wire:click='removeUploadedMedia' />
                 @endif
                 <div class="flex gap-x-4">
-                    <x-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
-                    <x-primary-button wire:loading.attr="disabled" flat class="justify-center mt-4">{{ __('Save') }}</x-primary-button>
+                    <x-mary-button flat class="justify-center mt-4 text-cyan-800" label="Cancel" x-on:click="close" wire:click='close' />
+                    <x-mary-button label="Save" wire:loading.attr="disabled" flat class="justify-center mt-4 btn-primary" spinner />
                 </div>
             </div>
         </form>

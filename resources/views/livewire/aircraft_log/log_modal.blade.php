@@ -286,20 +286,20 @@ new class extends Component
                 <h2 class="mb-4 text-lg font-semibold">Delete Log</h2>
                 <p class="mb-6">Are you sure you want to delete this log? This action cannot be undone.</p>
                 <div class="flex justify-end space-x-2">
-                    <button
+                    <x-mary-button
                         @click="confirmDelete = false"
                         type="button"
                         class="px-4 py-2 text-white bg-gray-500 rounded"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </x-mary-button>
+                    <x-mary-button
                         @click="confirmDelete = false; modalClose(); @this.delete()"
                         type="button"
                         class="px-4 py-2 text-white bg-red-600 rounded"
                     >
                         Delete
-                    </button>
+                    </x-mary-button>
                 </div>
             </div>
         </div>
@@ -308,11 +308,11 @@ new class extends Component
             style="max-height: 100vh; overflow-y: auto;"
         >
             <!-- Close Button -->
-            <button @click="modalClose" class="absolute text-gray-600 top-2 right-2 hover:text-gray-800">
+            <x-mary-button @click="modalClose" class="absolute text-gray-600 top-2 right-2 hover:text-gray-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-            </button>
+            </x-mary-button>
 
             <!-- Log Details -->
             <div class="grid grid-cols-1 p-4 md:grid-cols-2">
@@ -369,12 +369,12 @@ new class extends Component
                                 >
 
                                 <!-- Close Button -->
-                                <button
+                                <x-mary-button
                                     @click="closeModal()"
                                     class="absolute top-0 right-0 p-2 text-2xl text-white focus:outline-none"
                                 >
                                     &times;
-                                </button>
+                                </x-mary-button>
                             </div>
                             </div>
                         </div>
@@ -485,8 +485,8 @@ new class extends Component
                                 style="text-transform: uppercase"
                             />
                             <div class="flex mt-4 space-x-2">
-                                <button type="button" wire:click='stopEdit' class="px-2 py-1 text-white bg-gray-500 rounded">Cancel</button>
-                                <button type="submit" class="px-2 py-1 text-white rounded bg-cyan-800">Save</button>
+                                <x-mary-button type="button" wire:click='stopEdit' class="px-2 py-1 text-white bg-gray-500 rounded">Cancel</x-mary-button>
+                                <x-mary-button type="submit" class="px-2 py-1 text-white rounded bg-cyan-800">Save</x-mary-button>
                             </div>
                         </form>
                     @else

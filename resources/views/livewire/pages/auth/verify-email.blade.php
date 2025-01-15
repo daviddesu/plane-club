@@ -29,23 +29,23 @@ $logout = function (Logout $logout) {
 ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+    <div class="mb-4 text-sm">
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
+        <div class="mb-4 text-sm font-medium">
             {{ __('A new verification link has been sent to the email address you provided during registration.') }}
         </div>
     @endif
 
     <div class="flex items-center justify-between mt-4">
-        <x-primary-button wire:click="sendVerification">
+        <x-mary-button class="btn-primary" wire:click="sendVerification">
             {{ __('Resend Verification Email') }}
-        </x-primary-button>
+        </x-mary-button>
 
-        <button wire:click="logout" type="submit" class="text-sm text-gray-600 underline rounded-md dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+        <x-mary-button wire:click="logout" type="submit" class="rounded -md text-smunderline focus:outline-none focus:ring-2 focus:ring-offset-2">
             {{ __('Log Out') }}
-        </button>
+        </x-mary-button>
     </div>
 </div>
