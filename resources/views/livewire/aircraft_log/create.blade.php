@@ -343,7 +343,7 @@ new class extends Component
             <div class="grid grid-cols-1 gap-4">
                 {{-- File upload for images and videos --}}
                 @if (!$media)
-                    <x-mary-file wire:model="media" label="Choose an image or video" hint="Upload video on the Pro plan" spinner />
+                    <x-mary-file wire:model="media" label="Choose an image or video" hint="Video uploads available on the Pro plan" spinner />
 
 
                     @error('media.*')
