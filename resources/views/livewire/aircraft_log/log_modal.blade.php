@@ -384,45 +384,38 @@ new class extends Component
                     <!-- Display edit buttons if the user owns the log -->
                     @if ($editingAllowed && !$editing)
                         <div class="flex mb-4 first-letter:space-x-2">
-                            <x-mini-button wire:click='startEdit' rounded icon="pencil" flat class="text-cyan-800 hover:cyan-200 hover:bg-cyan-800" interaction:solid />
-                            <a href="{{ $mediaUrl }}" download="{{ $fileName }}"><x-mini-button rounded icon="arrow-down-tray" flat class="text-cyan-800 hover:cyan-200 hover:bg-cyan-800" interaction:solid /></a>
-                            <x-mini-button @click="confirmDelete = true" rounded icon="trash" flat red interaction="negative" />
-                            {{-- Delete dialog --}}
-
-
+                            <x-mary-button wire:click='startEdit' rounded icon="0-pencil" />
+                            <a href="{{ $mediaUrl }}" download="{{ $fileName }}">
+                                <x-mary-button rounded icon="0-arrow-down-tray" />
+                            </a>
+                            <x-mary-button @click="confirmDelete = true" rounded icon="o-trash" />
                         </div>
                     @endif
 
                     @if($editing)
                         <!-- Edit Form -->
-                        <form wire:submit.prevent='update'>
+                        <x-mary-form wire:submit.prevent='update'>
                             <!-- Date Field -->
                             <div class="mb-2">
-                                <x-datetime-picker
-                                    class="pd-2"
-                                    wire:model="loggedAt"
-                                    label="Date"
-                                    placeholder="Date"
-                                    without-time
-                                />
+                                <x-mary-datetime label="Date" wire:model="loggedAt" icon="o-calendar" />
                             </div>
                             <!-- Status Field -->
                             <div class="mb-2">
-                                <x-select
+                                <x-wire-select
                                     class="pd-2"
                                     label="Status"
                                     placeholder="Please select"
                                     wire:model='status'
                                 >
-                                <x-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
-                                    <x-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
-                                    <x-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
-                                    <x-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
-                                    <x-select.option value="{{ FlyingStatus::TAXIING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::TAXIING->value) }}" />
-                                </x-select>
+                                    <x-wire-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
+                                    <x-wire-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
+                                    <x-wire-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
+                                    <x-wire-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
+                                    <x-wire-select.option value="{{ FlyingStatus::TAXIING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::TAXIING->value) }}" />
+                                </x-wire-select>
                             </div>
                             <!-- Departure Airport Field -->
-                            <x-select
+                            {{-- <x-wire-select
                                 label="Departure airport"
                                 placeholder="Search airport or IATA code"
                                 :async-data="route('airports')"
@@ -434,7 +427,7 @@ new class extends Component
                                 min-items-for-search="2"
                             />
 
-                            <x-select
+                            <x-wire-select
                                 label="Arrival airport"
                                 placeholder="Search airport or IATA code"
                                 :async-data="route('airports')"
@@ -444,8 +437,8 @@ new class extends Component
                                 :selected="$arrival_airport_id"
                                 searchable
                                 min-items-for-search="2"
-                            />
-                            <x-select
+                            /> --}}
+                            <x-wire-select
                                 label="Airline"
                                 placeholder="Search airline"
                                 :async-data="route('airlines')"
@@ -458,7 +451,7 @@ new class extends Component
                             />
 
                             <!-- Aircraft Field -->
-                            <x-select
+                            <x-wire-select
                                 label="Aircraft"
                                 placeholder="Search aircraft"
                                 :async-data="route('aircraft')"
@@ -471,33 +464,33 @@ new class extends Component
                             />
 
                             <!-- Flight number field -->
-                            <x-input
+                            <x-mary-input
                                 label="Flight Number"
                                 placeholder="BA1234"
                                 wire:model='flightNumber'
                                 style="text-transform: uppercase"
                             />
                             <!-- Registration Field -->
-                            <x-input
+                            <x-mary-input
                                 label="Registration"
                                 placeholder="G-PNCB"
                                 wire:model='registration'
                                 style="text-transform: uppercase"
                             />
                             <div class="flex mt-4 space-x-2">
-                                <x-mary-button type="button" wire:click='stopEdit' class="px-2 py-1 text-white bg-gray-500 rounded">Cancel</x-mary-button>
-                                <x-mary-button type="submit" class="px-2 py-1 text-white rounded bg-cyan-800">Save</x-mary-button>
+                                <x-mary-button wire:click='stopEdit' class="px-2 py-1 rounded" label="Cancel" />
+                                <x-mary-button type="submit" class="px-2 py-1 rounded bg-cya btn-primary" spinner />
                             </div>
-                        </form>
+                        </x-mary-form>
                     @else
                         <div>
-                            <div><span class="text-gray-800">
-                                <x-badge flat slate label="DEP" />
+                            <div>
+                                <x-mary-badgelabel="DEP" />
                                 {{ $departureAirportName }} ({{ $departureAirportCode }})
-                                <x-icon name="arrow-right" class="inline-block w-5 h-3" />
-                                <x-badge flat slate label="ARV" />
+                                <x-mary-icon name="o-arrow-right" class="inline-block w-5 h-3" />
+                                <x-mary-badge label="ARV" />
                                 {{ $arrivalAirportName }} ({{ $arrivalAirportCode }})
-                                </span></div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 mt-2">
                             <div class="col-span-1">
@@ -509,15 +502,12 @@ new class extends Component
                             <div></div>
                         </div>
                         <!-- Display Log Details -->
-                        <p class="mb-2 text-gray-700 text-md">Aircraft: {{ $aircraftName }}</p>
-                        <p class="mb-2 text-gray-700 text-md">Registration: {{ $registration }}</p>
-                        <p class="mb-2 text-gray-700 text-md">Airline: {{ $airlineName }} {{ $flightNumber }}</p>
+                        <p class="mb-2 text-md">Aircraft: {{ $aircraftName }}</p>
+                        <p class="mb-2 text-md">Registration: {{ $registration }}</p>
+                        <p class="mb-2 text-md">Airline: {{ $airlineName }} {{ $flightNumber }}</p>
                     @endif
                 </div>
             </div>
-
-            <!-- Modal Content -->
-
         </div>
     </div>
     @endif

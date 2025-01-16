@@ -9,10 +9,6 @@ export default {
 		 './storage/framework/views/*.php',
 		 './resources/views/**/*.blade.php',
 		 "./vendor/robsontenorio/mary/src/View/Components/**/*.php",
-         "./vendor/wireui/wireui/src/*.php",
-        "./vendor/wireui/wireui/ts/**/*.ts",
-        "./vendor/wireui/wireui/src/WireUi/**/*.php",
-        "./vendor/wireui/wireui/src/Components/**/*.php"
 	],
     theme: {
         extend: {
@@ -27,7 +23,6 @@ export default {
       },
 
     plugins: [
-		forms,
 		require("daisyui")
 	],
 };

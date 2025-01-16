@@ -112,55 +112,48 @@ new class extends Component
 
 <div class="w-full h-full select-none">
     <div class="max-w-6xl mx-auto">
-        <!-- Filters Dropdown -->
-        <div class="flex justify-end mb-4">
-            <x-dropdown height="6xl" width="6xl" position="bottom-end" persistent="true">
-                <x-slot name="trigger">
-                    <x-button class="bg-cyan-800" label="Filters" primary />
-                </x-slot>
-
-                <!-- Dropdown Content -->
-                <div class="p-4 space-y-4">
-                    <div>
-                        <x-select
-                            label="Airline"
-                            placeholder="Search airline"
-                            :async-data="route('airlines')"
-                            option-label="name"
-                            option-value="id"
-                            wire:model.live="selectedAirline"
-                            searchable="true"
-                            min-items-for-search="2"
-                        />
-                    </div>
-
-                    <div>
-                        <x-select
-                            label="Aircraft"
-                            placeholder="Search aircraft"
-                            :async-data="route('aircraft')"
-                            option-label="name"
-                            option-value="id"
-                            wire:model.live="selectedAircraftType"
-                            searchable="true"
-                            min-items-for-search="2"
-                        />
-                    </div>
-                    <div>
-                        <x-select
-                            label="Airport"
-                            placeholder="Search airport or IATA code"
-                            wire:model.live="selectedAirport"
-                            :async-data="route('airports')"
-                            option-label="name"
-                            option-value="id"
-                            searchable="true"
-                            min-items-for-search="2"
-                        />
-                    </div>
-                </div>
-            </x-dropdown>
-        </div>
+        <!-- Filters -->
+        <x-mary-collapse>
+            <x-slot:heading>
+                Filters
+            </x-slot:heading>
+            <x-slot:content>
+                <x-wire-select
+                    label="Airline"
+                    placeholder="Search airline"
+                    :async-data="route('airlines')"
+                    option-label="name"
+                    option-value="id"
+                    wire:model.live="selectedAirline"
+                    searchable="true"
+                    min-items-for-search="2"
+                />
+            </x-slot:content>
+            <x-slot:content>
+                <x-wire-select
+                    label="Aircraft"
+                    placeholder="Search aircraft"
+                    :async-data="route('aircraft')"
+                    option-label="name"
+                    option-value="id"
+                    wire:model.live="selectedAircraftType"
+                    searchable="true"
+                    min-items-for-search="2"
+                />
+            </x-slot:content>
+            {{-- <x-slot:content>
+                <x-wire-select
+                    label="Airport"
+                    placeholder="Search airport or IATA code"
+                    wire:model.live="selectedAirport"
+                    :async-data="route('airports')"
+                    option-label="name"
+                    option-value="id"
+                    searchable="true"
+                    min-items-for-search="2"
+                />
+            </x-slot:content> --}}
+        </x-mary-collapse>
 
         <!-- Logs -->
         <div class="duration-1000 delay-300 opacity-0 select-none ease animate-fade-in-view" style="opacity: 1;">

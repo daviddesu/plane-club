@@ -56,8 +56,6 @@
 
             gtag('config', 'AW-16786194088');
         </script>
-        <wireui:scripts />
-
     </head>
     <body class="font-sans antialiased">
 
@@ -93,10 +91,9 @@
 
                 {{-- Activates the menu item when a route matches the `link` property --}}
                 <x-mary-menu activate-by-route>
-                    <x-mary-menu-item title="Add sighting" icon="o-plus"  />
+                    <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create"  />
                     <x-mary-menu-separator />
                     <x-mary-menu-item title="Signtings" icon="o-camera" link="/logs" />
-
                 </x-mary-menu>
 
                 {{-- User --}}

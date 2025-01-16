@@ -26,22 +26,33 @@ $login = function () {
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form wire:submit="login">
+    <x-mary-form wire:submit="login">
         <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block w-full mt-1" type="email" name="email" required autofocus autocomplete="username" />
+            <x-mary-input
+                label="Email"
+                wire:model="form.email"
+                id="email"
+                class="block w-full mt-1"
+                name="email"
+                required
+                autofocus
+                autocomplete="username"
+            />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input wire:model="form.password" id="password" class="block w-full mt-1"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <x-mary-password
+                label="Password"
+                wire:model="form.password"
+                id="password"
+                class="block w-full mt-1"
+                name="password"
+                required autocomplete="current-password" right
+            />
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
@@ -49,8 +60,7 @@ $login = function () {
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="text-indigo-600 border-gray-300 rounded shadow-sm dark:bg-gray-900 dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="text-sm text-gray-600 ms-2 dark:text-gray-400">{{ __('Remember me') }}</span>
+                <x-mary-checkbox label="Remeber me" wire:model="form.remember" />
             </label>
         </div>
 
@@ -61,9 +71,12 @@ $login = function () {
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            <x-mary-button
+                label="Log in"
+                type="submit"
+                class="ms-3"
+                class="btn-primary"
+            />
         </div>
-    </form>
+    </x-mary-form>
 </div>
