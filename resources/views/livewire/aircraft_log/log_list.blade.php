@@ -117,42 +117,12 @@ new class extends Component
             <x-slot:heading>
                 Filters
             </x-slot:heading>
-            <x-slot:content>
-                <x-wire-select
-                    label="Airline"
-                    placeholder="Search airline"
-                    :async-data="route('airlines')"
-                    option-label="name"
-                    option-value="id"
-                    wire:model.live="selectedAirline"
-                    searchable="true"
-                    min-items-for-search="2"
-                />
+            <x-slot:content class="flex flex-col gap-4">
+                <livewire:aircraft_log.components.airport_search wire:model="selectedAirport" label="Airport" />
+                <livewire:aircraft_log.components.airline_search wire:model="selectedAirline" />
+                <livewire:aircraft_log.components.aircraft_search wire:model="selectedAircraftType" />
             </x-slot:content>
-            <x-slot:content>
-                <x-wire-select
-                    label="Aircraft"
-                    placeholder="Search aircraft"
-                    :async-data="route('aircraft')"
-                    option-label="name"
-                    option-value="id"
-                    wire:model.live="selectedAircraftType"
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-            </x-slot:content>
-            {{-- <x-slot:content>
-                <x-wire-select
-                    label="Airport"
-                    placeholder="Search airport or IATA code"
-                    wire:model.live="selectedAirport"
-                    :async-data="route('airports')"
-                    option-label="name"
-                    option-value="id"
-                    searchable="true"
-                    min-items-for-search="2"
-                />
-            </x-slot:content> --}}
+
         </x-mary-collapse>
 
         <!-- Logs -->

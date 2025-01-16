@@ -16,7 +16,7 @@ Volt::route('/sighting/create', 'aircraft_log.create')
     ->middleware(['auth', 'verified'])
     ->name('sighting_create');
 
-Route::get('/logs', [AircraftLogController::class, 'index'])
+Route::get('/sightings', [AircraftLogController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('aircraft_logs');
 

@@ -7,7 +7,7 @@ use App\Models\Airport;
 new class extends Component{
 
     #[Modelable]
-    public ?string $airport;
+    public ?string $airport = null;
     public array $airports;
     public string $label;
 

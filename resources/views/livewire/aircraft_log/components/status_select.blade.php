@@ -7,7 +7,7 @@ use App\Enums\FlyingStatus;
 new class extends Component{
 
     #[Modelable]
-    public ?string $status;
+    public ?string $status = null;
     public array $statuses;
 
     public function mount()

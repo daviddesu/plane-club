@@ -7,7 +7,7 @@ use App\Models\Aircraft;
 new class extends Component{
 
     #[Modelable]
-    public ?string $aircraft;
+    public ?string $aircraft = null;
     public array $aircrafts;
 
     public function mount()

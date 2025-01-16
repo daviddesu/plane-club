@@ -396,81 +396,24 @@ new class extends Component
                         <!-- Edit Form -->
                         <x-mary-form wire:submit.prevent='update'>
                             <!-- Date Field -->
-                            <div class="mb-2">
-                                <x-mary-datetime label="Date" wire:model="loggedAt" icon="o-calendar" />
-                            </div>
-                            <!-- Status Field -->
-                            <div class="mb-2">
-                                <x-wire-select
-                                    class="pd-2"
-                                    label="Status"
-                                    placeholder="Please select"
-                                    wire:model='status'
-                                >
-                                    <x-wire-select.option value="{{ FlyingStatus::DEPARTING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::DEPARTING->value) }}" />
-                                    <x-wire-select.option value="{{ FlyingStatus::ARRIVING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ARRIVING->value) }}" />
-                                    <x-wire-select.option value="{{ FlyingStatus::IN_FLIGHT->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::IN_FLIGHT->value) }}" />
-                                    <x-wire-select.option value="{{ FlyingStatus::ON_STAND->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::ON_STAND->value) }}" />
-                                    <x-wire-select.option value="{{ FlyingStatus::TAXIING->value }}" label="{{ FlyingStatus::getNameByStatus(FlyingStatus::TAXIING->value) }}" />
-                                </x-wire-select>
-                            </div>
-                            <!-- Departure Airport Field -->
-                            {{-- <x-wire-select
-                                label="Departure airport"
-                                placeholder="Search airport or IATA code"
-                                :async-data="route('airports')"
-                                option-label="name"
-                                option-value="id"
-                                wire:model='departure_airport_id'
-                                :selected="$departure_airport_id"
-                                searchable
-                                min-items-for-search="2"
+                            <x-mary-datetime
+                                label="Date"
+                                wire:model="loggedAt"
+                                icon="o-calendar"
                             />
+                            <livewire:aircraft_log.components.status_select wire:model="status" />
+                            <livewire:aircraft_log.components.airport_search wire:model="departure_airport_id" label="Departure airport" />
+                            <livewire:aircraft_log.components.airport_search wire:model="arrival_airport_id" label="Arrival airport" />
+                            <livewire:aircraft_log.components.airline_search wire:model="airline_id" />
+                            <livewire:aircraft_log.components.aircraft_search wire:model="aircraft_id" />
 
-                            <x-wire-select
-                                label="Arrival airport"
-                                placeholder="Search airport or IATA code"
-                                :async-data="route('airports')"
-                                option-label="name"
-                                option-value="id"
-                                wire:model='arrival_airport_id'
-                                :selected="$arrival_airport_id"
-                                searchable
-                                min-items-for-search="2"
-                            /> --}}
-                            <x-wire-select
-                                label="Airline"
-                                placeholder="Search airline"
-                                :async-data="route('airlines')"
-                                option-label="name"
-                                option-value="id"
-                                wire:model='airline_id'
-                                :selected="$airline_id"
-                                searchable
-                                min-items-for-search="2"
-                            />
-
-                            <!-- Aircraft Field -->
-                            <x-wire-select
-                                label="Aircraft"
-                                placeholder="Search aircraft"
-                                :async-data="route('aircraft')"
-                                option-label="name"
-                                option-value="id"
-                                wire:model='aircraft_id'
-                                :selected="$aircraft_id"
-                                searchable
-                                min-items-for-search="2"
-                            />
-
-                            <!-- Flight number field -->
                             <x-mary-input
                                 label="Flight Number"
                                 placeholder="BA1234"
                                 wire:model='flightNumber'
                                 style="text-transform: uppercase"
                             />
-                            <!-- Registration Field -->
+
                             <x-mary-input
                                 label="Registration"
                                 placeholder="G-PNCB"
