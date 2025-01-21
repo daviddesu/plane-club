@@ -78,38 +78,44 @@
 
             {{-- Right side actions --}}
             <x-slot:actions>
-                <x-mary-button label="Notifications" icon="o-bell" link="###" class="btn-ghost btn-sm" responsive />
+                @if(Auth::user())
+                    <x-mary-button label="Notifications" icon="o-bell" link="###" class="btn-ghost btn-sm" responsive />
+                @else
+                    <x-mary-button label="Login" link="/login" class="btn-ghost btn-sm" responsive />
+                    <x-mary-button label="Register" link="/register" class="btn-ghost btn-sm" responsive />
+                @endif
             </x-slot:actions>
         </x-mary-nav>
 
         {{-- The main content with `full-width` --}}
         <x-mary-main with-nav full-width>
+            @if(Auth::user())
+                {{-- This is a sidebar that works also as a drawer on small screens --}}
+                {{-- Notice the `main-drawer` reference here --}}
+                <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
 
-            {{-- This is a sidebar that works also as a drawer on small screens --}}
-            {{-- Notice the `main-drawer` reference here --}}
-            <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
-
-                {{-- Activates the menu item when a route matches the `link` property --}}
-                <x-mary-menu activate-by-route>
-                    <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create"  />
-                    <x-mary-menu-separator />
-                    <x-mary-menu-item title="Signtings" icon="o-camera" link="/logs" />
-                </x-mary-menu>
-
-                {{-- User --}}
-                @if($user = auth()->user())
-                    <x-mary-menu-separator />
+                    {{-- Activates the menu item when a route matches the `link` property --}}
                     <x-mary-menu activate-by-route>
-                        <x-mary-menu-item title="Logout" icon="o-arrow-left-end-on-rectangle" link="/logout" />
+                        <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create"  />
+                        <x-mary-menu-separator />
+                        <x-mary-menu-item title="Signtings" icon="o-camera" link="/logs" />
                     </x-mary-menu>
-                    <x-mary-list-item icon="o-user" :item="$user" value="name" sub-value="email" no-separator no-hover class="-mx-2 !-my-2 rounded">
-                        <x-slot:actions>
-                            <x-mary-theme-toggle class="btn-circle btn-ghost btn-xs" tooltip="Light/Dark theme"/>
-                            <x-mary-button icon="o-cog-6-tooth" class="btn-circle btn-ghost btn-xs" tooltip-left="profile" no-wire-navigate link="/profile" />
-                        </x-slot:actions>
-                    </x-mary-list-item>
-                @endif
-            </x-slot:sidebar>
+
+                    {{-- User --}}
+                    @if($user = auth()->user())
+                        <x-mary-menu-separator />
+                        <x-mary-menu activate-by-route>
+                            <x-mary-menu-item title="Logout" icon="o-arrow-left-end-on-rectangle" link="/logout" />
+                        </x-mary-menu>
+                        <x-mary-list-item icon="o-user" :item="$user" value="name" sub-value="email" no-separator no-hover class="-mx-2 !-my-2 rounded">
+                            <x-slot:actions>
+                                <x-mary-theme-toggle class="btn-circle btn-ghost btn-xs" tooltip="Light/Dark theme"/>
+                                <x-mary-button icon="o-cog-6-tooth" class="btn-circle btn-ghost btn-xs" tooltip-left="profile" no-wire-navigate link="/profile" />
+                            </x-slot:actions>
+                        </x-mary-list-item>
+                    @endif
+                </x-slot:sidebar>
+            @endif
 
             {{-- The `$slot` goes here --}}
             <x-slot:content>

@@ -10,13 +10,25 @@ use Mary\Traits\Toast;
 
 new class extends Component {
 
-    #[Validate('required|string|current_password')]
+    #[Validate('required', 'string', 'current_password')]
     public string $currentPassword;
 
-    #[Validate('required|string|Password::defaults()|confirmed')]
+    #[Validate('required', 'string')]
     public string $password;
 
     public string $passwordConfirmation;
+
+    public function rules()
+    {
+        return [
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Rules\Password::defaults()
+            ],
+        ];
+    }
 
     public function updatePassword() {
         try {

@@ -17,18 +17,44 @@ class extends Component {
     #[Validate('required', 'string', 'max:255')]
     public string $name;
 
-    #[Validate('required', 'string', 'max:255', 'unique:users,username')]
+    #[Validate(['required', 'string', 'max:255'])]
     public string $username;
 
-    #[Validate('required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class)]
+    #[Validate(['required', 'string', 'lowercase', 'email', 'max:255'])]
     public string $email;
 
-    #[Validate('required', 'string', 'confirmed', Rules\Password::defaults())]
+    #[Validate(['required', 'string', 'confirmed'])]
     public string $password;
     public string $password_confirmation;
 
     #[Validate('accepted', 'string', 'confirmed')]
     public bool $marketingPreferences = false;
+
+    public function rules()
+    {
+        return [
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'username'),
+            ],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email'),
+            ],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Rules\Password::defaults()
+            ],
+        ];
+    }
 
 
     public function register() {
