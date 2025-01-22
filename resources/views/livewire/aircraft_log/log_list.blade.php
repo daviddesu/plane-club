@@ -113,7 +113,7 @@ new class extends Component
 <div class="w-full h-full select-none">
     <div class="max-w-6xl mx-auto">
         <!-- Filters -->
-        <x-mary-collapse>
+        <x-mary-collapse class="mb-5">
             <x-slot:heading>
                 Filters
             </x-slot:heading>
@@ -122,7 +122,6 @@ new class extends Component
                 <livewire:aircraft_log.components.airline_search wire:model="selectedAirline" />
                 <livewire:aircraft_log.components.aircraft_search wire:model="selectedAircraftType" />
             </x-slot:content>
-
         </x-mary-collapse>
 
         <!-- Logs -->
@@ -130,13 +129,12 @@ new class extends Component
             <ul
                 x-ref="gallery"
                 id="gallery"
-                class="grid grid-cols-1 gap-5 md:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5"
-                style="grid-auto-rows: 1fr;"
+                class="flex flex-col gap-4"
             >
 
 
                 @foreach($this->aircraftLogIds as $aircraftLogId)
-                    <li class="flex h-full" wire:key="aircraftLog-item-{{ $aircraftLogId }}">
+                    <li wire:key="aircraftLog-item-{{ $aircraftLogId }}">
                         <livewire:aircraft_log.log_card
                             wire:key="aircraftLog-{{ $aircraftLogId }}"
                             :aircraftLogId="$aircraftLogId"

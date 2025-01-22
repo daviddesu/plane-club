@@ -42,17 +42,52 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    #[Validate('file|max:548576')]
-    public $media; // 500mb in kilobytes
+    public $media; // 4mb in kilobytes
 
     public array $statuses;
 
-    public function boot(MediaService $mediaService){}
+    private MediaService $mediaService;
+
+    public function boot(MediaService $mediaService){
+        $this->mediaService = $mediaService;
+    }
 
     public function mount()
     {
         $user = auth()->user();
         $this->storageLimitExceeded = $user->hasExceededStorageLimit();
+    }
+
+    public function rules()
+    {
+        $user = Auth::user();
+
+        // Default plan: up to 4 MB
+        $maxSizeKB = 4096;
+        // Default plan: images only
+        $mimeRule = 'mimetypes:image/*';
+
+        if ($user->isPro()) {
+            // Pro plan: up to 500 MB
+            $maxSizeKB = 512000;
+            // Pro plan: images or videos
+            $mimeRule = 'mimetypes:image/*,video/*';
+        }
+
+        return [
+            'media' => ['nullable', 'file', 'max:'.$maxSizeKB, $mimeRule],
+        ];
+    }
+
+    /**
+    * Custom validation error messages.
+    */
+    public function messages()
+    {
+        return [
+            'media.max' => 'Your file may not be larger than :max KB.',
+            'media.mimetypes' => 'Free users can only upload images. Pro users can upload images and videos.',
+        ];
     }
 
     public function store()
@@ -76,23 +111,21 @@ new class extends Component
         if($this->media){
             $mediaFilePath = $this->media->getRealPath();
             $fileSizeInBytes = filesize($mediaFilePath);
-            $mimeType = $this->imageService->getMimeType($mediaFilePath);
+            $mimeType = $this->mediaService->getMimeType($mediaFilePath);
 
             // Plan-Specific Rules:
             if (str_contains($mimeType, 'video')) {
-                // If hobby: no video allowed
-                if ($user->isHobby()) {
-                    $this->warning('Your current plan does not allow video uploads. Please upgrade.');
-                    return redirect()->back();
-                }
 
                 // If aviator: max 500MB for video
-                if ($plan === 'aviator') {
-                    $maxAviatorVideoBytes = 500 * 1024 * 1024; // 500MB
+                if ($user->isPro()) {
+                    $maxAviatorVideoBytes = 512000; // 500MB
                     if ($fileSizeInBytes > $maxAviatorVideoBytes) {
-                        $this->warning('Video exceeds the 500MB limit for your plan. Please upgrade to the Pro plan or choose a smaller video.');
+                        $this->warning('Video exceeds the 500MB limit for your plan. Please choose a smaller video.');
                         return redirect()->back();
                     }
+                }else{
+                    $this->warning('Your current plan does not allow video uploads. Please upgrade.');
+                    return redirect()->back();
                 }
             }
 
@@ -114,10 +147,11 @@ new class extends Component
 
 
             if (str_contains($mimeType, 'image')) {
-                $this->mediaService->storeImage($mediaFilePath, $newAircraftLog->id);
+                $this->mediaService->createImage($mediaFilePath, $newAircraftLog->id);
                 $this->info('Log created successfully.');
             } elseif (str_contains($mimeType, 'video')) {
-                $this->mediaService->storeVideo($mediaFilePath, $newAircraftLog->id);
+
+                $this->mediaService->createVideo($mediaFilePath, $newAircraftLog->id);
             } else {
                 // Unsupported media type
                 $this->warning('Unsupported media type uploaded.');
@@ -128,7 +162,7 @@ new class extends Component
             $user->used_disk = $newTotalStorageInBytes;
             $user->save();
 
-            $this->redirect('/sightings');
+            $this->redirect('/sightings', navigate: true);
         }
     }
 
@@ -154,20 +188,10 @@ new class extends Component
         <x-mary-form wire:submit='store()'>
             <div class="grid grid-cols-1 gap-4">
                 {{-- File upload for images and videos --}}
-                @if (!$media)
                     <x-mary-file wire:model="media" label="Choose an image or video" hint="Video uploads available on the Pro plan" spinner />
-                    @error('media.*')
+                    @error('media')
                         <span class="error">{{ $message }}</span>
                     @enderror
-                @endif
-
-                {{-- Media Preview --}}
-                @if ($media)
-                <div class="max-w-6xl mx-auto duration-1000 delay-300 select-none ease animate-fade-in-view">
-                    <p>File: {{ $media->getClientOriginalName() }}</p>
-                </div>
-                @endif
-                <!-- Existing Form Inputs -->
                 <div class="flex flex-col gap-y-6">
 
                     <x-mary-datetime

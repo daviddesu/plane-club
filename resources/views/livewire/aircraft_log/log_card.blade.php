@@ -83,67 +83,71 @@ new class extends Component
 
 ?>
 
-<x-card padding="none" class="flex flex-col h-full">
+<x-mary-card class="flex flex-col w-full p-0 overflow-hidden bg-white rounded shadow-md">
     @if($aircraftLogId)
-    {{-- Media Container with rectangular aspect ratio --}}
-    <div
-        x-on:click="$wire.dispatch('open_aircraft_log', {id: {{ $aircraftLogId }}});"
-        class="relative w-full bg-gray-200 rounded cursor-pointer overflow-hidden aspect-[4/3]"
-    >
-        @if($isVideo && $isProcessing)
-        <p class="text-center text-cyan-800">Processing</p>
-        @elseif ($isVideo)
-            <div
-                class="relative w-full h-full"
-            >
-                <img class="object-cover w-full h-full select-none"
-                src={{ $thumbnailPath }}
-                />
-                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                    <x-icon name="play-circle" class="w-12 h-12 text-white" />
+        <!-- Log Details -->
+        <div class="flex flex-col flex-1 gap-2 p-3">
+            <!-- Airports Row -->
+            <div class="space-x-2 text-sm">
+                @if($departureAirportName)
+                    <x-mary-badge flat slate value="DEP" />
+                    <span>{{ $departureAirportName }}</span>
+                @endif
+
+                @if($departureAirportName && $arrivalAirportName)
+                    <x-mary-icon name="o-arrow-long-right" class="inline-block w-5 h-5 text-gray-600" />
+                @endif
+
+                @if($arrivalAirportName)
+                    <x-mary-badge flat slate value="ARV" />
+                    <span>{{ $arrivalAirportName }}</span>
+                @endif
+            </div>
+
+            <!-- Additional Info -->
+            <div class="flex justify-between text-sm">
+                <div class="space-y-1">
+                    <div>{{ $loggedAt }}</div>
+                    <div>{{ $airlineName }}</div>
+                </div>
+                <div class="space-y-1 text-right">
+                    <div>{{ \App\Enums\FlyingStatus::getNameByStatus($status) }}</div>
+                    <div>{{ $aircraftType }}</div>
                 </div>
             </div>
-        @else
-            <img
-                src="{{ $mediaPath }}"
-                alt=""
-                loading="lazy"
-                class="object-cover w-full h-full select-none"
+        </div>
+        <x-slot:figure>
+            @if($mediaPath)
+            <!-- Media Container with a 4:3 aspect ratio -->
+            <div
+                x-on:click="$wire.dispatch('open_aircraft_log', { id: {{ $aircraftLogId }} })"
+                class="relative w-full h-0 pb-[75%] cursor-pointer overflow-hidden bg-gray-200"
             >
+                @if($isVideo && $isProcessing)
+                    <p class="absolute inset-0 flex items-center justify-center text-cyan-800">
+                        Processing
+                    </p>
+                @elseif ($isVideo)
+                    <img
+                        class="absolute top-0 left-0 object-cover w-full h-full"
+                        src="{{ $thumbnailPath }}"
+                        alt="Video Thumbnail"
+                    />
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <!-- Using MaryUI icon -->
+                        <x-mary-icon name="o-play-circle" class="w-12 h-12 text-white" />
+                    </div>
+                @else
+                    <img
+                        src="{{ $mediaPath }}"
+                        alt="Sighting Image"
+                        loading="lazy"
+                        class="absolute top-0 left-0 object-cover w-full h-full"
+                    />
+                @endif
+            </div>
         @endif
-    </div>
-
-    {{-- Log Details --}}
-    <div class="p-4">
-    <div>
-        <div><span class="text-gray-800">
-            <x-badge flat slate label="DEP" />
-                {{ $departureAirportName }}
-            <x-icon name="arrow-right" class="inline-block w-5 h-3" />
-            <x-badge flat slate label="ARV" />
-                {{ $arrivalAirportName }}
-            </span></div>
-    </div>
-    <div class="grid grid-cols-3 mt-2">
-        <div class="col-span-1">
-            <div>
-                <small class="text-xs text-gray-600">{{ $loggedAt }}</small>
-            </div>
-            <div>
-                <small class="text-xs text-gray-600">{{ $airlineName ?? '&nbsp;' }}</small>
-            </div>
-        </div>
-        <div class="col-span-2">
-            <div>
-                <small class="text-xs text-gray-600">
-                    {{ \App\Enums\FlyingStatus::getNameByStatus($status) }}
-                </small>
-            </div>
-            <div>
-                <small class="text-xs text-gray-600">{{ $aircraftType ?? '&nbsp;' }}</small>
-            </div>
-        </div>
-    </div>
-    </div>
+        </x-slot:figure>
     @endif
-</x-card>
+</x-mary-card>
+

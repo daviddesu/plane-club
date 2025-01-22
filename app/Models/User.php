@@ -77,35 +77,18 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($subscription && $subscription->valid()) {
             switch ($subscription->stripe_price) {
                 case env('STRIPE_PRICE_ID_TIER1'):
-                    return 1000; // 1TB
-                case env('STRIPE_PRICE_ID_TIER2'):
-                    return 3000; // 3TB
-                case env('STRIPE_PRICE_ID_TIER3'):
-                    return 5000; // 5TB
-                default:
-                    return 0;
+                    return 1000;
             }
         }
 
-        return 0;
-    }
-
-    public function isHobby()
-    {
-        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
-        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER1');
-    }
-
-    public function isAviator()
-    {
-        $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
-        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER2');
+        return 5;
     }
 
     public function isPro()
     {
         $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
-        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER3');
+        if(!$subscription) return false;
+        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER1');
     }
 
     public function hasExceededStorageLimit()

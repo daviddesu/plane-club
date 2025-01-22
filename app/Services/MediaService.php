@@ -70,6 +70,8 @@ class MediaService {
             throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
         }
 
+        $fileSizeInBytes = filesize($mediaFilePath);
+
         // Upload processed file to b2
         $storedFilePath = Storage::disk(getenv('FILESYSTEM_DISK'))
             ->putFile(
@@ -90,9 +92,6 @@ class MediaService {
             unlink($mediaFilePath);
         }
 
-        $fileSizeInBytes = filesize($mediaFilePath);
-
-
         // Save media record
         $mediaItem = Auth::user()->mediaItems()->create([
             "path" => $storedFilePath,
@@ -107,6 +106,8 @@ class MediaService {
 
     public function createVideo($mediaFilePath, $sightingId)
     {
+        $fileSizeInBytes = filesize($mediaFilePath);
+
         // Upload raw video file to S3
         $rawVideoPath = Storage::disk(getenv('FILESYSTEM_DISK'))
             ->putFile(
@@ -122,9 +123,6 @@ class MediaService {
         if (file_exists($mediaFilePath)) {
             unlink($mediaFilePath);
         }
-
-        $fileSizeInBytes = filesize($mediaFilePath);
-
 
         // Save media record with status 'processing'
         $mediaItem = Auth::user()->mediaItems()->create([

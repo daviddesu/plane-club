@@ -70,7 +70,7 @@
 
                 {{-- Brand --}}
                     <!-- Logo -->
-                        <a href="{{ route('aircraft_logs') }}" wire:navigate>
+                        <a href="{{ route('aircraft_logs') }}" wire:navigate.hover>
                             <img alt="Light Mode Logo" class="block w-auto h-12 fill-current [[data-theme=dark]_&]:hidden" src="/logo.png" />
                             <img alt="Dark Mode Logo" class="block w-auto h-12 fill-current dark:block [[data-theme=light]_&]:hidden" src="/logo-white.png" />
                         </a>
@@ -96,9 +96,9 @@
 
                     {{-- Activates the menu item when a route matches the `link` property --}}
                     <x-mary-menu activate-by-route>
-                        <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create"  />
+                        <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create" wire:navigate.hover  />
                         <x-mary-menu-separator />
-                        <x-mary-menu-item title="Signtings" icon="o-camera" link="/logs" />
+                        <x-mary-menu-item title="Signtings" icon="o-camera" link="/sightings" wire:navigate.hover />
                     </x-mary-menu>
 
                     {{-- User --}}
