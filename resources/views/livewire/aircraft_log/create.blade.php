@@ -6,12 +6,16 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use App\Services\MediaService;
 use Mary\Traits\Toast;
+use App\Models\AircraftLog;
+use App\Traits\WithMedia;
+use Illuminate\Support\Facades\Auth;
 
 
 new class extends Component
 {
     use WithFileUploads;
     use Toast;
+    use WithMedia;
 
     public bool $storageLimitExceeded = false;
 
@@ -42,20 +46,12 @@ new class extends Component
     #[Validate]
     public string $flightNumber = "";
 
-    public $media; // 4mb in kilobytes
-
     public array $statuses;
-
-    private MediaService $mediaService;
-
-    public function boot(MediaService $mediaService){
-        $this->mediaService = $mediaService;
-    }
 
     public function mount()
     {
-        $user = auth()->user();
-        $this->storageLimitExceeded = $user->hasExceededStorageLimit();
+        $this->checkStorageLimits();
+        $this->loggedAt = now()->format('Y-m-d H:i');
     }
 
     public function rules()
@@ -92,83 +88,40 @@ new class extends Component
 
     public function store()
     {
-        $validated = $this->validate();
+        $validated = $this->validate(array_merge(
+            $this->rules(),
+            [
+                'loggedAt' => 'required|date',
+                'status' => 'required',
+                'aircraft' => 'required',
+                'airline' => 'nullable',
+                'departureAirport' => 'nullable',
+                'arrivalAirport' => 'nullable',
+            ]
+        ));
 
-        $user = auth()->user();
-
-        $newAircraftLog = auth()->user()->aircraftLogs()->create([
-            "arrival_airport_id" => $this->arrivalAirport,
-            "departure_airport_id" => $this->departureAirport,
-            "status" => $this->status,
-            "logged_at" => $this->loggedAt,
-            "description" => $this->description,
-            "airline_id" => $this->airline,
-            "registration" => strtoupper($this->registration),
-            "aircraft_id" => $this->aircraft,
-            "flight_number" => $this->flightNumber,
+        $aircraftLog = AircraftLog::create([
+            'user_id' => auth()->id(),
+            'logged_at' => $this->loggedAt,
+            'status' => $this->status,
+            'aircraft_id' => $this->aircraft,
+            'airline_id' => $this->airline,
+            'departure_airport_id' => $this->departureAirport,
+            'arrival_airport_id' => $this->arrivalAirport,
         ]);
 
-        if($this->media){
-            $mediaFilePath = $this->media->getRealPath();
-            $fileSizeInBytes = filesize($mediaFilePath);
-            $mimeType = $this->mediaService->getMimeType($mediaFilePath);
-
-            // Plan-Specific Rules:
-            if (str_contains($mimeType, 'video')) {
-
-                // If aviator: max 500MB for video
-                if ($user->isPro()) {
-                    $maxAviatorVideoBytes = 512000; // 500MB
-                    if ($fileSizeInBytes > $maxAviatorVideoBytes) {
-                        $this->warning('Video exceeds the 500MB limit for your plan. Please choose a smaller video.');
-                        return redirect()->back();
-                    }
-                }else{
-                    $this->warning('Your current plan does not allow video uploads. Please upgrade.');
-                    return redirect()->back();
-                }
-            }
-
-            $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
-            $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
-
-            if ($newTotalStorageInGB > $user->getStorageLimitInGBAttribute()) {
-                // Exceeded storage limit
-                $this->warning('You have reached your storage limit. Please upgrade your subscription.');
-                return redirect()->back();
-            }
-
-            if (!$mimeType) {
-                $this->warning('Unable to determine the MIME type of the uploaded file.');
-                throw new \RuntimeException("Unable to determine the MIME type of the uploaded file.");
-            }
-
-
-
-
-            if (str_contains($mimeType, 'image')) {
-                $this->mediaService->createImage($mediaFilePath, $newAircraftLog->id);
-                $this->info('Log created successfully.');
-            } elseif (str_contains($mimeType, 'video')) {
-
-                $this->mediaService->createVideo($mediaFilePath, $newAircraftLog->id);
-            } else {
-                // Unsupported media type
-                $this->warning('Unsupported media type uploaded.');
-                throw new \RuntimeException("Unsupported media type uploaded.");
-            }
-
-            // Update user's used_disk
-            $user->used_disk = $newTotalStorageInBytes;
-            $user->save();
-
-            $this->redirect('/sightings', navigate: true);
+        if (!$this->validateAndProcessMedia($aircraftLog->id)) {
+            $aircraftLog->delete();
+            return;
         }
+
+        $this->success('Sighting created successfully');
+        $this->redirect('/sightings', navigate: true);
     }
 
     public function removeUploadedMedia()
     {
-        $this->media = nulll;
+        $this->media = null;
     }
 }
 ?>

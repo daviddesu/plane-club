@@ -85,6 +85,84 @@ new class extends Component
 
 <x-mary-card class="flex flex-col w-full p-0 overflow-hidden bg-white rounded shadow-md">
     @if($aircraftLogId)
+        <x-slot:figure>
+            @if($mediaPath)
+            <!-- Media Container with a 4:3 aspect ratio -->
+            <div
+                x-data="{
+                    showModal: false,
+                    stopVideo() {
+                        const video = this.$refs.videoPlayer;
+                        if (video) {
+                            video.pause();
+                            video.currentTime = 0;
+                        }
+                    }
+                }"
+                x-on:keydown.escape.window="showModal = false"
+                class="relative w-full h-0 pb-[75%] bg-gray-200 overflow-hidden cursor-pointer"
+            >
+                @if($isVideo && $isProcessing)
+                    <p class="absolute inset-0 flex items-center justify-center">
+                        Processing
+                    </p>
+                @elseif ($isVideo)
+                    <video
+                        x-ref="videoPlayer"
+                        src="{{ $mediaPath }}"
+                        controls
+                        class="absolute top-0 left-0 object-cover w-full h-full"
+                    ></video>
+                @else
+                    <div x-on:click="showModal = true" class="absolute inset-0">
+                        <img
+                            src="{{ $mediaPath }}"
+                            alt="Sighting Image"
+                            loading="lazy"
+                            class="absolute top-0 left-0 object-cover w-full h-full"
+                        />
+                    </div>
+
+                    <!-- Image Modal -->
+                    <div
+                        x-show="showModal"
+                        x-cloak
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+                        @click.self="showModal = false"
+                    >
+                        <!-- Close Button -->
+                        <button
+                            @click="showModal = false"
+                            class="absolute text-3xl font-bold text-white top-5 right-5"
+                        >
+                            &times;
+                        </button>
+
+                        <img
+                            src="{{ $mediaPath }}"
+                            alt="Fullscreen Sighting Image"
+                            class="max-w-full max-h-full rounded"
+                        />
+                    </div>
+                @endif
+            </div>
+            @endif
+        </x-slot:figure>
+
+        <!-- Edit Button -->
+        <div class="flex justify-end px-3 py-2 border-b">
+            <x-mary-button
+                href="/sighting/{{ $aircraftLogId }}/edit"
+                wire:navigate.hover
+                icon="o-pencil"
+                class="text-sm"
+                size="sm"
+                flat
+            >
+                Edit
+            </x-mary-button>
+        </div>
+
         <!-- Log Details -->
         <div class="flex flex-col flex-1 gap-2 p-3">
             <!-- Airports Row -->
@@ -116,38 +194,7 @@ new class extends Component
                 </div>
             </div>
         </div>
-        <x-slot:figure>
-            @if($mediaPath)
-            <!-- Media Container with a 4:3 aspect ratio -->
-            <div
-                x-on:click="$wire.dispatch('open_aircraft_log', { id: {{ $aircraftLogId }} })"
-                class="relative w-full h-0 pb-[75%] cursor-pointer overflow-hidden bg-gray-200"
-            >
-                @if($isVideo && $isProcessing)
-                    <p class="absolute inset-0 flex items-center justify-center text-cyan-800">
-                        Processing
-                    </p>
-                @elseif ($isVideo)
-                    <img
-                        class="absolute top-0 left-0 object-cover w-full h-full"
-                        src="{{ $thumbnailPath }}"
-                        alt="Video Thumbnail"
-                    />
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <!-- Using MaryUI icon -->
-                        <x-mary-icon name="o-play-circle" class="w-12 h-12 text-white" />
-                    </div>
-                @else
-                    <img
-                        src="{{ $mediaPath }}"
-                        alt="Sighting Image"
-                        loading="lazy"
-                        class="absolute top-0 left-0 object-cover w-full h-full"
-                    />
-                @endif
-            </div>
-        @endif
-        </x-slot:figure>
     @endif
+
 </x-mary-card>
 

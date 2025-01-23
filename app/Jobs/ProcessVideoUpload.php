@@ -148,11 +148,12 @@ class ProcessVideoUpload implements ShouldQueue
             $output = [];
             $returnVar = 0;
 
+            Log::info('FFmpeg command:', ['cmd' => $cmd]);
+
             // Execute the command and capture the output
             exec($cmd, $output, $returnVar);
 
             // Log the command and output for debugging
-            Log::info('FFmpeg command:', ['cmd' => $cmd]);
             Log::info('FFmpeg output:', ['output' => $output]);
 
             if ($returnVar !== 0) {
