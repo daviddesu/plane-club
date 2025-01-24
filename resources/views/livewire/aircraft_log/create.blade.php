@@ -19,7 +19,7 @@ new class extends Component
 
     public bool $storageLimitExceeded = false;
 
-    #[Validate('required')]
+    #[Validate('required|date')]
     public ?string $loggedAt;
 
     #[Validate('required')]
@@ -31,19 +31,19 @@ new class extends Component
     #[Validate('required_if:status,2,3')]
     public ?string $arrivalAirport = null;
 
-    #[Validate]
+    #[Validate('nullable')]
     public ?string $airline = null;
 
-    #[Validate]
+    #[Validate('nullable')]
     public ?string $aircraft = null;
 
-    #[Validate]
+    #[Validate('nullable|string')]
     public string $description = "";
 
-    #[Validate]
+    #[Validate('nullable|string')]
     public string $registration = "";
 
-    #[Validate]
+    #[Validate('nullable|string')]
     public string $flightNumber = "";
 
     public array $statuses;
@@ -54,26 +54,7 @@ new class extends Component
         $this->loggedAt = now()->format('Y-m-d H:i');
     }
 
-    public function rules()
-    {
-        $user = Auth::user();
 
-        // Default plan: up to 4 MB
-        $maxSizeKB = 4096;
-        // Default plan: images only
-        $mimeRule = 'mimetypes:image/*';
-
-        if ($user->isPro()) {
-            // Pro plan: up to 500 MB
-            $maxSizeKB = 512000;
-            // Pro plan: images or videos
-            $mimeRule = 'mimetypes:image/*,video/*';
-        }
-
-        return [
-            'media' => ['nullable', 'file', 'max:'.$maxSizeKB, $mimeRule],
-        ];
-    }
 
     /**
     * Custom validation error messages.
@@ -88,26 +69,18 @@ new class extends Component
 
     public function store()
     {
-        $validated = $this->validate(array_merge(
-            $this->rules(),
-            [
-                'loggedAt' => 'required|date',
-                'status' => 'required',
-                'aircraft' => 'required',
-                'airline' => 'nullable',
-                'departureAirport' => 'nullable',
-                'arrivalAirport' => 'nullable',
-            ]
-        ));
+        $this->validate($this->rules());
 
-        $aircraftLog = AircraftLog::create([
-            'user_id' => auth()->id(),
+        $aircraftLog = auth()->user()->aircraftLogs()->create([
             'logged_at' => $this->loggedAt,
             'status' => $this->status,
             'aircraft_id' => $this->aircraft,
             'airline_id' => $this->airline,
             'departure_airport_id' => $this->departureAirport,
             'arrival_airport_id' => $this->arrivalAirport,
+            'description' => $this->description,
+            'registration' => $this->registration,
+            'flight_number' => $this->flightNumber,
         ]);
 
         if (!$this->validateAndProcessMedia($aircraftLog->id)) {

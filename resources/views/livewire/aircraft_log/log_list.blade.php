@@ -136,6 +136,7 @@ new class extends Component
                 @foreach($this->aircraftLogIds as $aircraftLogId)
                     <li wire:key="aircraftLog-item-{{ $aircraftLogId }}">
                         <livewire:aircraft_log.log_card
+                            lazy
                             wire:key="aircraftLog-{{ $aircraftLogId }}"
                             :aircraftLogId="$aircraftLogId"
                         />

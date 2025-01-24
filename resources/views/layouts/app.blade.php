@@ -64,13 +64,15 @@
 
             <x-slot:brand>
                 {{-- Drawer toggle for "main-drawer" --}}
-                <label for="main-drawer" class="mr-3 lg:hidden">
-                    <x-mary-icon name="o-bars-3" class="cursor-pointer" />
-                </label>
+                @if($user = Auth::user())
+                    <label for="main-drawer" class="mr-3 lg:hidden">
+                        <x-mary-icon name="o-bars-3" class="cursor-pointer" />
+                    </label>
+                @endif
 
                 {{-- Brand --}}
                     <!-- Logo -->
-                        <a href="{{ route('aircraft_logs') }}" wire:navigate.hover>
+                        <a href="/" wire:navigate.hover>
                             <img alt="Light Mode Logo" class="block w-auto h-12 fill-current [[data-theme=dark]_&]:hidden" src="/logo.png" />
                             <img alt="Dark Mode Logo" class="block w-auto h-12 fill-current dark:block [[data-theme=light]_&]:hidden" src="/logo-white.png" />
                         </a>
@@ -78,31 +80,24 @@
 
             {{-- Right side actions --}}
             <x-slot:actions>
-                @if(Auth::user())
-                    <x-mary-button label="Notifications" icon="o-bell" link="###" class="btn-ghost btn-sm" responsive />
-                @else
-                    <x-mary-button label="Login" link="/login" class="btn-ghost btn-sm" responsive />
-                    <x-mary-button label="Register" link="/register" class="btn-ghost btn-sm" responsive />
-                @endif
+
             </x-slot:actions>
         </x-mary-nav>
 
         {{-- The main content with `full-width` --}}
         <x-mary-main with-nav full-width>
-            @if(Auth::user())
                 {{-- This is a sidebar that works also as a drawer on small screens --}}
                 {{-- Notice the `main-drawer` reference here --}}
-                <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
+                @if($user = Auth::user())
+                    <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-200">
+                        {{-- Activates the menu item when a route matches the `link` property --}}
+                        <x-mary-menu activate-by-route>
+                            <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create" wire:navigate.hover  />
+                            <x-mary-menu-separator />
+                            <x-mary-menu-item title="Signtings" icon="o-camera" link="/sightings" wire:navigate.hover />
+                        </x-mary-menu>
 
-                    {{-- Activates the menu item when a route matches the `link` property --}}
-                    <x-mary-menu activate-by-route>
-                        <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create" wire:navigate.hover  />
-                        <x-mary-menu-separator />
-                        <x-mary-menu-item title="Signtings" icon="o-camera" link="/sightings" wire:navigate.hover />
-                    </x-mary-menu>
-
-                    {{-- User --}}
-                    @if($user = auth()->user())
+                        {{-- User --}}
                         <x-mary-menu-separator />
                         <x-mary-menu activate-by-route>
                             <x-mary-menu-item title="Logout" icon="o-arrow-left-end-on-rectangle" link="/logout" />
@@ -113,14 +108,13 @@
                                 <x-mary-button icon="o-cog-6-tooth" class="btn-circle btn-ghost btn-xs" tooltip-left="profile" no-wire-navigate link="/profile" />
                             </x-slot:actions>
                         </x-mary-list-item>
-                    @endif
-                </x-slot:sidebar>
-            @endif
+                    </x-slot:sidebar>
+                @endif
 
-            {{-- The `$slot` goes here --}}
-            <x-slot:content>
-                {{ $slot }}
-            </x-slot:content>
+                {{-- The `$slot` goes here --}}
+                <x-slot:content>
+                    {{ $slot }}
+                </x-slot:content>
         </x-mary-main>
 
         {{--  TOAST area --}}

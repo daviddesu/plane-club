@@ -17,6 +17,8 @@ new class extends Component
     public ?string $status = null;
     public ?string $aircraftType = null;
     public ?string $airlineName = null;
+    public ?string $registration = null;
+    public ?string $flightNumber = null;
 
     public bool $isVideo = false;
     public bool $isProcessing = false;
@@ -46,6 +48,8 @@ new class extends Component
             $this->loggedAt = $aircraftLog->logged_at ? $aircraftLog->logged_at->format('d/m/Y') : '';
             $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
             $this->airlineName = $aircraftLog->airline?->name ?? '';
+            $this->registration = $aircraftLog->aircraft?->registration ?? '';
+            $this->flightNumber = $aircraftLog->aircraft?->flight_number ?? '';
     }
 
 
@@ -83,7 +87,7 @@ new class extends Component
 
 ?>
 
-<x-mary-card class="flex flex-col w-full p-0 overflow-hidden bg-white rounded shadow-md">
+<x-mary-card class="flex flex-col w-full p-0 overflow-hidden rounded shadow">
     @if($aircraftLogId)
         <x-slot:figure>
             @if($mediaPath)
@@ -100,7 +104,7 @@ new class extends Component
                     }
                 }"
                 x-on:keydown.escape.window="showModal = false"
-                class="relative w-full h-0 pb-[75%] bg-gray-200 overflow-hidden cursor-pointer"
+                class="relative w-full h-0 pb-[75%] overflow-hidden cursor-pointer"
             >
                 @if($isVideo && $isProcessing)
                     <p class="absolute inset-0 flex items-center justify-center">
@@ -149,51 +153,75 @@ new class extends Component
             @endif
         </x-slot:figure>
 
-        <!-- Edit Button -->
-        <div class="flex justify-end px-3 py-2 border-b">
-            <x-mary-button
-                href="/sighting/{{ $aircraftLogId }}/edit"
-                wire:navigate.hover
-                icon="o-pencil"
-                class="text-sm"
-                size="sm"
-                flat
-            >
-                Edit
-            </x-mary-button>
-        </div>
-
-        <!-- Log Details -->
-        <div class="flex flex-col flex-1 gap-2 p-3">
-            <!-- Airports Row -->
-            <div class="space-x-2 text-sm">
-                @if($departureAirportName)
-                    <x-mary-badge flat slate value="DEP" />
-                    <span>{{ $departureAirportName }}</span>
-                @endif
-
-                @if($departureAirportName && $arrivalAirportName)
-                    <x-mary-icon name="o-arrow-long-right" class="inline-block w-5 h-5 text-gray-600" />
-                @endif
-
-                @if($arrivalAirportName)
-                    <x-mary-badge flat slate value="ARV" />
-                    <span>{{ $arrivalAirportName }}</span>
-                @endif
-            </div>
-
-            <!-- Additional Info -->
-            <div class="flex justify-between text-sm">
-                <div class="space-y-1">
-                    <div>{{ $loggedAt }}</div>
-                    <div>{{ $airlineName }}</div>
+        <!-- Clickable Content Area -->
+        <a
+            href="/sighting/{{ $aircraftLogId }}/edit"
+            wire:navigate.hover
+            class="flex-1 transition-colors duration-200 hover:cursor-pointer"
+        >
+            <!-- Log Details -->
+            <div class="flex flex-col flex-1 gap-3 p-4">
+                <!-- Date and Status -->
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-1">
+                        <x-mary-icon name="o-calendar" class="w-4 h-4" />
+                        {{ $loggedAt }}
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <x-mary-icon name="o-signal" class="w-4 h-4" />
+                        {{ \App\Enums\FlyingStatus::getNameByStatus($status) }}
+                    </div>
                 </div>
-                <div class="space-y-1 text-right">
-                    <div>{{ \App\Enums\FlyingStatus::getNameByStatus($status) }}</div>
-                    <div>{{ $aircraftType }}</div>
+
+                <!-- Airports -->
+                <div class="flex flex-col space-y-4">
+                    @if($departureAirportName)
+                        <div class="flex items-center gap-3">
+                            <div class="shrink-0 w-14">
+                                <x-mary-badge flat slate value="DEP" />
+                            </div>
+                            <span class="flex-1">{{ $departureAirportName }}</span>
+                        </div>
+                    @endif
+
+                    @if($arrivalAirportName)
+                        <div class="flex items-center gap-3">
+                            <div class="shrink-0 w-14">
+                                <x-mary-badge flat slate value="ARV" />
+                            </div>
+                            <span class="flex-1">{{ $arrivalAirportName }}</span>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Aircraft and Airline Info -->
+                <div class="grid grid-cols-1 pt-3 mt-2 text-sm border-t gap-y-2">
+                    @if($aircraftType)
+                        <div class="flex items-center gap-2">
+                            <x-mary-icon name="o-paper-airplane" class="w-4 h-4 text-gray-600 shrink-0" />
+                            <span>{{ $aircraftType }}</span>
+                        </div>
+                    @endif
+
+                    @if($airlineName)
+                        <div class="flex items-center gap-2">
+                            <x-mary-icon name="o-building-office" class="w-4 h-4 text-gray-600 shrink-0" />
+                            <span>{{ $airlineName }}</span>
+                            @if($flightNumber)
+                                <span class="text-gray-600">{{ $flightNumber }}</span>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if($registration)
+                        <div class="flex items-center gap-2">
+                            <x-mary-icon name="o-identification" class="w-4 h-4 text-gray-600 shrink-0" />
+                            <span>{{ $registration }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
-        </div>
+        </a>
     @endif
 
 </x-mary-card>
