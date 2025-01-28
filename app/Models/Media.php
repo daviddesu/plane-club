@@ -13,7 +13,7 @@ class Media extends Model
     protected $fillable = [
         'path',
         'type',
-        'aircraft_log_id',
+        'sighting_id',
         'thumbnail_path',
         'status',
         'raw_video_path',
@@ -28,9 +28,9 @@ class Media extends Model
     /**
      * Get the post that owns the comment.
      */
-    public function aircraftLog(): BelongsTo
+    public function sighting(): BelongsTo
     {
-        return $this->belongsTo(AircraftLog::class);
+        return $this->belongsTo(Sighting::class);
     }
 
     public function isVideo(): bool

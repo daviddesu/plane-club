@@ -6,7 +6,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use App\Services\MediaService;
 use Mary\Traits\Toast;
-use App\Models\AircraftLog;
+use App\Models\Sighting;
 use App\Traits\WithMedia;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,7 +71,7 @@ new class extends Component
     {
         $this->validate($this->rules());
 
-        $aircraftLog = auth()->user()->aircraftLogs()->create([
+        $sighting = auth()->user()->sightings()->create([
             'logged_at' => $this->loggedAt,
             'status' => $this->status,
             'aircraft_id' => $this->aircraft,
@@ -83,8 +83,8 @@ new class extends Component
             'flight_number' => $this->flightNumber,
         ]);
 
-        if (!$this->validateAndProcessMedia($aircraftLog->id)) {
-            $aircraftLog->delete();
+        if (!$this->validateAndProcessMedia($sighting->id)) {
+            $sighting->delete();
             return;
         }
 
@@ -126,11 +126,11 @@ new class extends Component
                         icon="o-calendar"
                     />
 
-                    <livewire:aircraft_log.components.status_select wire:model="status" />
-                    <livewire:aircraft_log.components.airport_search wire:model="departureAirport" label="Departure airport" />
-                    <livewire:aircraft_log.components.airport_search wire:model="arrivalAirport" label="Arrival airport" />
-                    <livewire:aircraft_log.components.airline_search wire:model="airline" />
-                    <livewire:aircraft_log.components.aircraft_search wire:model="aircraft" />
+                    <livewire:sightings.components.status_select wire:model="status" />
+                    <livewire:sightings.components.airport_search wire:model="departureAirport" label="Departure airport" />
+                    <livewire:sightings.components.airport_search wire:model="arrivalAirport" label="Arrival airport" />
+                    <livewire:sightings.components.airline_search wire:model="airline" />
+                    <livewire:sightings.components.aircraft_search wire:model="aircraft" />
 
                     <x-mary-input
                         label="Flight Number"

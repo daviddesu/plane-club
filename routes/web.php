@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\AircraftController;
-use App\Http\Controllers\AircraftLogController;
-use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\Subscribed;
@@ -12,17 +9,17 @@ use Livewire\Volt\Volt;
 Route::get('/', [SalesController::class, 'index'])
     ->name('signup');
 
-Volt::route('/sighting/create', 'aircraft_log.create')
+Volt::route('/sighting/create', 'sightings.create')
     ->middleware(['auth', 'verified'])
     ->name('sighting_create');
 
-Volt::route('/sighting/{id}/edit', 'aircraft_log.edit')
+Volt::route('/sighting/{id}/edit', 'sightings.edit')
     ->middleware(['auth', 'verified'])
     ->name('sighting_edit');
 
-Route::get('/sightings', [AircraftLogController::class, 'index'])
+Volt::route('/sightings', 'sightings.list')
     ->middleware(['auth', 'verified'])
-    ->name('aircraft_logs');
+    ->name('sightings');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

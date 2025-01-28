@@ -14,7 +14,7 @@ class SalesController extends Controller
     public function index(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('aircraft_logs');
+            return redirect()->route('sightings');
         }
         return view('signup', []);
     }

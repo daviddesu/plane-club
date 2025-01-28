@@ -4,6 +4,8 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
@@ -92,7 +94,9 @@ class extends Component {
                 autofocus
                 autocomplete="name"
             />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            @error('name')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Username -->
@@ -105,7 +109,9 @@ class extends Component {
                 required
                 autofocus
             />
-            <x-input-error :messages="$errors->get('username')" class="mt-2" />
+            @error('username')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Email Address -->
@@ -119,30 +125,37 @@ class extends Component {
                 autofocus
                 autocomplete="email"
             />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            @error('email')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-mary-password label="Password" wire:model="password" clearable autocomplete="new-password" right />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <x-mary-password label="Password" wire:model="password" autocomplete="new-password" right />
+            @error('password')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-mary-password label="Confirm Password" wire:model="password_confirmation" clearable autocomplete="new-password" right />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            <x-mary-password label="Confirm Password" wire:model="password_confirmation" autocomplete="new-password" right />
+            @error('password_confirmation')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Marketing Preferences Checkbox -->
         <div class="mt-4">
-            <x-mary-checkbox wire:model="marketing_preferences" class="self-start">
+            <x-mary-checkbox wire:model="marketingPreferences" class="self-start">
                 <x-slot:label>
                     <div>I have read and understand the <a class="underline" href="/privacy-policy" target="_blank">privacy</a> and <a class="underline" href="/cookie-policy" target="_blank">cookies</a> policies and agree to receive marketing communications.</div>
                 </x-slot:label>
             </x-mary-checkbox>
-
-            <x-input-error :messages="$errors->get('marketing_preferences')" class="mt-2" />
+            @error('marketingPreferences')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="flex items-center justify-end mt-4">

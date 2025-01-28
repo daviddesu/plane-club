@@ -10,8 +10,8 @@ class Airline extends Model
 {
     use HasFactory;
 
-    public function aircraftLogs(): HasMany
+    public function sightings(): HasMany
     {
-        return $this->hasMany(AircraftLog::class);
+        return $this->hasMany(Sighting::class);
     }
 }

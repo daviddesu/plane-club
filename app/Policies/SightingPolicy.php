@@ -2,26 +2,25 @@
 
 namespace App\Policies;
 
-use App\Models\AircraftLog;
+use App\Models\Sighting;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
-class AircraftLogPolicy
+class SightingPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        //
+        return false;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, AircraftLog $aircraftLog): bool
+    public function view(User $user, Sighting $sighting): bool
     {
-        //
+        return $sighting->user()->is($user);
     }
 
     /**
@@ -29,38 +28,38 @@ class AircraftLogPolicy
      */
     public function create(User $user): bool
     {
-        //
+        return true;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, AircraftLog $aircraftLog): bool
+    public function update(User $user, Sighting $sighting): bool
     {
-        return $aircraftLog->user()->is($user);
+        return $sighting->user()->is($user);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, AircraftLog $aircraftLog): bool
+    public function delete(User $user, Sighting $sighting): bool
     {
-        //
+        return $sighting->user()->is($user);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, AircraftLog $aircraftLog): bool
+    public function restore(User $user, Sighting $sighting): bool
     {
-        //
+        return $sighting->user()->is($user);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, AircraftLog $aircraftLog): bool
+    public function forceDelete(User $user, Sighting $sighting): bool
     {
-        //
+        return $sighting->user()->is($user);
     }
 }

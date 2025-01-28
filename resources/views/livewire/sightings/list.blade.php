@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\AircraftLog;
+use App\Models\Sighting;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
@@ -11,7 +11,7 @@ use Livewire\Attributes\On;
 
 new class extends Component
 {
-    public Collection $aircraftLogIds;
+    public Collection $ids;
 
     public ?int $selectedAircraftType = null;
     public ?int $selectedAirline = null;
@@ -25,19 +25,19 @@ new class extends Component
 
     public function mount(): void
     {
-        $this->aircraftLogIds = collect();
-        $this->getAircraftLogs(true);
+        $this->ids = collect();
+        $this->getSightings(true);
     }
 
-    public function getAircraftLogs(bool $reset = false): void
+    public function getSightings(bool $reset = false): void
     {
         if ($reset) {
             $this->page = 1;
-            $this->aircraftLogIds = collect();
+            $this->ids = collect();
             $this->hasMorePages = true;
         }
 
-        $query = auth()->user()->aircraftLogs()->latest();
+        $query = auth()->user()->sightings()->latest();
 
         if ($this->selectedAircraftType) {
             $query->where('aircraft_id', $this->selectedAircraftType);
@@ -52,56 +52,44 @@ new class extends Component
             ->orWhere('departure_airport_id', $this->selectedAirport);
         }
 
-        $logs = $query->skip($this->perPage * ($this->page - 1))
+        $sightings = $query->skip($this->perPage * ($this->page - 1))
                     ->take($this->perPage + 1)
                     ->pluck('id');
 
-        if ($logs->count() > $this->perPage) {
+        if ($sightings->count() > $this->perPage) {
             $this->hasMorePages = true;
-            $logs = $logs->slice(0, $this->perPage);
+            $sightings = $sightings->slice(0, $this->perPage);
         } else {
             $this->hasMorePages = false;
         }
 
-        $this->aircraftLogIds = $this->aircraftLogIds->concat($logs);
+        $this->ids = $this->ids->concat($sightings);
         $this->page++;
-    }
-
-    #[On('aircraft_log-created')]
-    public function aircraftLogCreated()
-    {
-        $this->getAircraftLogs(true);
-    }
-
-    #[On('aircraft_log-deleted')]
-    public function aircraftLogDeleted($id): void
-    {
-        $this->aircraftLogIds = $this->aircraftLogIds->diff([$id]);
     }
 
     public function updatedSelectedAircraftType($value): void
     {
         $this->selectedAircraftType = $value ?: null;
-        $this->getAircraftLogs(true);
+        $this->getSightings(true);
     }
 
     public function updatedSelectedAirline($value): void
     {
         $this->selectedAirline = $value ?: null;
-        $this->getAircraftLogs(true);
+        $this->getSightings(true);
     }
 
     public function updatedSelectedAirport($value): void
     {
         $this->selectedAirport = $value ?: null;
-        $this->getAircraftLogs(true);
+        $this->getSightings(true);
     }
 
     public function loadMore(): void
     {
         if ($this->hasMorePages && !$this->isLoading) {
             $this->isLoading = true;
-            $this->getAircraftLogs();
+            $this->getSightings();
             $this->isLoading = false;
         }
     }
@@ -118,9 +106,9 @@ new class extends Component
                 Filters
             </x-slot:heading>
             <x-slot:content class="flex flex-col gap-4">
-                <livewire:aircraft_log.components.airport_search wire:model="selectedAirport" label="Airport" />
-                <livewire:aircraft_log.components.airline_search wire:model="selectedAirline" />
-                <livewire:aircraft_log.components.aircraft_search wire:model="selectedAircraftType" />
+                <livewire:sightings.components.airport_search wire:model="selectedAirport" label="Airport" />
+                <livewire:sightings.components.airline_search wire:model="selectedAirline" />
+                <livewire:sightings.components.aircraft_search wire:model="selectedAircraftType" />
             </x-slot:content>
         </x-mary-collapse>
 
@@ -133,19 +121,18 @@ new class extends Component
             >
 
 
-                @foreach($this->aircraftLogIds as $aircraftLogId)
-                    <li wire:key="aircraftLog-item-{{ $aircraftLogId }}">
-                        <livewire:aircraft_log.log_card
-                            lazy
-                            wire:key="aircraftLog-{{ $aircraftLogId }}"
-                            :aircraftLogId="$aircraftLogId"
+                @foreach($this->ids as $id)
+                    <li wire:key="sighting-item-{{ $id }}">
+                        <livewire:sightings.card
+                            wire:key="sighting-{{ $id }}"
+                            :id="$id"
                         />
                     </li>
                 @endforeach
             </ul>
 
 
-            @if ($this->aircraftLogIds && $hasMorePages)
+            @if ($this->ids && $hasMorePages)
                 <div
                     x-data
                     x-intersect:enter="$wire.loadMore()"

@@ -3,13 +3,14 @@
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Validate;
-use App\Models\AircraftLog;
+use App\Models\Sighting;
 use App\Models\Media;
 use App\Services\MediaService;
 use Masmerise\Toaster\Toaster;
 use App\Traits\WithMedia;
 use Mary\Traits\Toast;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     use WithFileUploads;
@@ -48,6 +49,11 @@ new class extends Component {
 
     public string $fileName = '';
 
+    public bool $showFullscreen = false;
+    public ?string $mediaPath = null;
+    public ?string $thumbnailPath = null;
+    public bool $isVideo = false;
+
     protected function getCachedMediaUrl($mediaPath): ?string
     {
         if (!$mediaPath) {
@@ -67,7 +73,7 @@ new class extends Component {
 
     protected function getExistingMedia(): ?Media
     {
-        return AircraftLog::find($this->id)?->media;
+        return Sighting::find($this->id)?->media;
     }
 
     public function generateFileName()
@@ -75,19 +81,19 @@ new class extends Component {
         $name = "Plane-club-";
         $name .= (new \DateTime($this->loggedAt))->format("Y-m-d");
 
-        $aircraftLog = AircraftLog::with(['departureAirport', 'arrivalAirport', 'aircraft'])
+        $sighting = Sighting::with(['departureAirport', 'arrivalAirport', 'aircraft'])
             ->find($this->id);
 
-        if($aircraftLog->departureAirport){
-            $name .= "-{$aircraftLog->departureAirport->code}";
+        if($sighting->departureAirport){
+            $name .= "-{$sighting->departureAirport->code}";
         }
 
-        if($aircraftLog->arrivalAirport){
-            $name .= "-{$aircraftLog->arrivalAirport->code}";
+        if($sighting->arrivalAirport){
+            $name .= "-{$sighting->arrivalAirport->code}";
         }
 
-        if($aircraftLog->aircraft){
-            $name .= "-{$aircraftLog->aircraft->getFormattedName()}";
+        if($sighting->aircraft){
+            $name .= "-{$sighting->aircraft->getFormattedName()}";
         }
 
         // Add file extension based on media type
@@ -102,20 +108,20 @@ new class extends Component {
 
     public function mount($id)
     {
-        $aircraftLog = AircraftLog::with(['media', 'aircraft', 'airline', 'departureAirport', 'arrivalAirport'])
+        $sighting = Sighting::with(['media', 'aircraft', 'airline', 'departureAirport', 'arrivalAirport'])
             ->findOrFail($id);
 
-        $this->authorize('update', $aircraftLog);
+        $this->authorize('update', $sighting);
 
-        $this->aircraft = $aircraftLog->aircraft?->id;
-        $this->airline = $aircraftLog->airline?->id;
-        $this->departureAirport = $aircraftLog->departureAirport?->id;
-        $this->arrivalAirport = $aircraftLog->arrivalAirport?->id;
-        $this->status = $aircraftLog->status;
-        $this->loggedAt = $aircraftLog->logged_at?->format('Y-m-d H:i');
-        $this->description = $aircraftLog->description ?? '';
-        $this->registration = $aircraftLog->registration ?? '';
-        $this->flightNumber = $aircraftLog->flight_number ?? '';
+        $this->aircraft = $sighting->aircraft?->id;
+        $this->airline = $sighting->airline?->id;
+        $this->departureAirport = $sighting->departureAirport?->id;
+        $this->arrivalAirport = $sighting->arrivalAirport?->id;
+        $this->status = $sighting->status;
+        $this->loggedAt = $sighting->logged_at?->format('Y-m-d');
+        $this->description = $sighting->description ?? '';
+        $this->registration = $sighting->registration ?? '';
+        $this->flightNumber = $sighting->flight_number ?? '';
 
         $this->checkStorageLimits();
         $this->fileName = $this->generateFileName();
@@ -136,13 +142,13 @@ new class extends Component {
 
     public function update()
     {
-        $this->authorize('update', AircraftLog::find($this->id));
+        $this->authorize('update', Sighting::find($this->id));
 
         $validated = $this->validate();
 
-        $aircraftLog = AircraftLog::find($this->id);
+        $sighting = Sighting::find($this->id);
 
-        $aircraftLog->update([
+        $sighting->update([
             'logged_at' => $this->loggedAt,
             'status' => $this->status,
             'aircraft_id' => $this->aircraft,
@@ -251,11 +257,11 @@ new class extends Component {
                         wire:model="loggedAt"
                         icon="o-calendar"
                     />
-                    <livewire:aircraft_log.components.status_select wire:model="status" />
-                    <livewire:aircraft_log.components.airport_search wire:model="departureAirport" label="Departure Airport" />
-                    <livewire:aircraft_log.components.airport_search wire:model="arrivalAirport" label="Arrival Airport" />
-                    <livewire:aircraft_log.components.airline_search wire:model="airline" />
-                    <livewire:aircraft_log.components.aircraft_search wire:model="aircraft" />
+                    <livewire:sightings.components.status_select wire:model="status" />
+                    <livewire:sightings.components.airport_search wire:model="departureAirport" label="Departure Airport" />
+                    <livewire:sightings.components.airport_search wire:model="arrivalAirport" label="Arrival Airport" />
+                    <livewire:sightings.components.airline_search wire:model="airline" />
+                    <livewire:sightings.components.aircraft_search wire:model="aircraft" />
 
                     <x-mary-input
                         label="Flight Number"
@@ -271,6 +277,59 @@ new class extends Component {
                         style="text-transform: uppercase"
                     />
                 </div>
+
+                {{-- Image Preview --}}
+                @if($mediaPath)
+                    <div class="relative">
+                        {{-- Fullscreen Modal --}}
+                        <x-mary-modal
+                            wire:model="showFullscreen"
+                            class="w-screen h-screen p-0 bg-black"
+                            blur
+                            separator
+                        >
+                            <div class="relative flex items-center justify-center w-full h-full">
+                                @if($isVideo)
+                                    <video
+                                        controls
+                                        class="max-h-screen"
+                                        src="{{ Storage::url($mediaPath) }}"
+                                    ></video>
+                                @else
+                                    <img
+                                        class="max-h-screen"
+                                        src="{{ Storage::url($mediaPath) }}"
+                                        alt="Full size image"
+                                    />
+                                @endif
+                                <button
+                                    wire:click="$toggle('showFullscreen')"
+                                    class="absolute p-2 text-white transition-colors duration-200 rounded-full top-4 right-4 hover:bg-white/20"
+                                >
+                                    <x-mary-icon name="o-x-mark" class="w-6 h-6" />
+                                </button>
+                            </div>
+                        </x-mary-modal>
+
+                        {{-- Thumbnail --}}
+                        <div class="overflow-hidden rounded-lg aspect-video">
+                            @if($isVideo)
+                                <video
+                                    class="object-cover w-full h-full cursor-pointer"
+                                    wire:click="$toggle('showFullscreen')"
+                                    src="{{ Storage::url($mediaPath) }}"
+                                ></video>
+                            @else
+                                <img
+                                    class="object-cover w-full h-full cursor-pointer"
+                                    wire:click="$toggle('showFullscreen')"
+                                    src="{{ Storage::url($thumbnailPath) }}"
+                                    alt="Thumbnail"
+                                />
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <div class="flex justify-end gap-x-4">
                     <x-mary-button label="Cancel" link="/sightings" wire:navigate flat />

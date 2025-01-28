@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\AircraftLog;
+use App\Models\Sighting;
 use App\Enums\FlyingStatus;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Storage;
@@ -9,7 +9,7 @@ use Livewire\Attributes\On;
 
 new class extends Component
 {
-    public int $aircraftLogId;
+    public int $id;
     public string $loggedAt;
 
     public ?string $arrivalAirportName = null;
@@ -25,9 +25,9 @@ new class extends Component
     public ?string $thumbnailPath = null;
     public ?string $mediaPath = null;
 
-    protected function loadAircraftLog(int $aircraftLogId): void
+    protected function loadSighting(int $id): void
     {
-        $aircraftLog = AircraftLog::with([
+        $sighting = Sighting::with([
                 'user',
                 'media',
                 'airline',
@@ -35,34 +35,33 @@ new class extends Component
                 'departureAirport',
                 'aircraft'
             ])
-            ->find($aircraftLogId);
+            ->find($id);
 
-            $this->aircraftLogId = $aircraftLog->id;
-            $this->isVideo = $aircraftLog->media?->isVideo() ?? false;
-            $this->isProcessing = $aircraftLog->media?->isProcessing() ?? false;
-            $this->thumbnailPath = $this->getCachedMediaUrl($aircraftLog->media?->thumbnail_path);
-            $this->mediaPath = $this->getCachedMediaUrl($aircraftLog->media?->path);
-            $this->arrivalAirportName = $aircraftLog->arrivalAirport?->name ?? '';
-            $this->departureAirportName = $aircraftLog->departureAirport?->name ?? '';
-            $this->status = $aircraftLog->status ? (string)$aircraftLog->status : '';
-            $this->loggedAt = $aircraftLog->logged_at ? $aircraftLog->logged_at->format('d/m/Y') : '';
-            $this->aircraftType = $aircraftLog->aircraft?->getFormattedName() ?? '';
-            $this->airlineName = $aircraftLog->airline?->name ?? '';
-            $this->registration = $aircraftLog->aircraft?->registration ?? '';
-            $this->flightNumber = $aircraftLog->aircraft?->flight_number ?? '';
+            $this->id = $sighting->id;
+            $this->isVideo = $sighting->media?->isVideo() ?? false;
+            $this->isProcessing = $sighting->media?->isProcessing() ?? false;
+            $this->thumbnailPath = $this->getCachedMediaUrl($sighting->media?->thumbnail_path);
+            $this->mediaPath = $this->getCachedMediaUrl($sighting->media?->path);
+            $this->arrivalAirportName = $sighting->arrivalAirport?->name ?? '';
+            $this->departureAirportName = $sighting->departureAirport?->name ?? '';
+            $this->status = $sighting->status ? (string)$sighting->status : '';
+            $this->loggedAt = $sighting->logged_at ? $sighting->logged_at->format('d/m/Y') : '';
+            $this->aircraftType = $sighting->aircraft?->getFormattedName() ?? '';
+            $this->airlineName = $sighting->airline?->name ?? '';
+            $this->registration = $sighting->aircraft?->registration ?? '';
+            $this->flightNumber = $sighting->aircraft?->flight_number ?? '';
     }
 
 
-    public function mount(int $aircraftLogId): void
+    public function mount(int $id): void
     {
-        $this->loadAircraftLog($aircraftLogId);
+        $this->loadSighting($id);
     }
 
-    #[On('aircraft_log-updated')]
-    public function refreshIfNeeded($aircraftLogId)
+    public function refreshIfNeeded($id)
     {
-        if ($this->aircraftLogId == $aircraftLogId) {
-            $this->loadAircraftLog($aircraftLogId);
+        if ($this->id == $id) {
+            $this->loadSighting($id);
         }
     }
 
@@ -88,7 +87,7 @@ new class extends Component
 ?>
 
 <x-mary-card class="flex flex-col w-full p-0 overflow-hidden rounded shadow">
-    @if($aircraftLogId)
+    @if($id)
         <x-slot:figure>
             @if($mediaPath)
             <!-- Media Container with a 4:3 aspect ratio -->
@@ -155,7 +154,7 @@ new class extends Component
 
         <!-- Clickable Content Area -->
         <a
-            href="/sighting/{{ $aircraftLogId }}/edit"
+            href="/sighting/{{ $id }}/edit"
             wire:navigate.hover
             class="flex-1 transition-colors duration-200 hover:cursor-pointer"
         >

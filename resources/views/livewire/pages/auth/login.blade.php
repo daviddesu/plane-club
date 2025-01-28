@@ -17,7 +17,7 @@ $login = function () {
 
     Session::regenerate();
 
-    $this->redirectIntended(default: route('aircraft_logs', absolute: false), navigate: true);
+    $this->redirectIntended(default: route('sightings', absolute: false), navigate: true);
 };
 
 ?>

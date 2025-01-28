@@ -95,7 +95,7 @@ class MediaService {
         // Save media record
         $mediaItem = Auth::user()->mediaItems()->create([
             "path" => $storedFilePath,
-            "aircraft_log_id" => $sightingId,
+            "sighting_id" => $sightingId,
             "type" => Media::IMAGE->value,
             "thumbnail_path" => null,
             'status' => 'processed',
@@ -127,7 +127,7 @@ class MediaService {
         // Save media record with status 'processing'
         $mediaItem = Auth::user()->mediaItems()->create([
             "path" => "",
-            "aircraft_log_id" => $sightingId,
+            "sighting_id" => $sightingId,
             "type" => Media::VIDEO->value,
             "thumbnail_path" => null,
             'status' => 'processing',

@@ -50,9 +50,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function aircraftLogs(): HasMany
+    public function sightings()
     {
-        return $this->hasMany(AircraftLog::class);
+        return $this->hasMany(Sighting::class);
     }
 
     public function mediaItems(): HasMany

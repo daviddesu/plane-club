@@ -17,7 +17,7 @@ $logout = function (Logout $logout) {
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex items-center shrink-0">
-                    <a href="{{ route('aircraft_logs') }}" wire:navigate>
+                    <a href="{{ route('sightings') }}" wire:navigate>
                         <img alt="Light Mode Logo" class="block w-auto h-16 fill-current [[data-theme=dark]_&]:hidden" src="/logo.png" />
                         <img alt="Dark Mode Logo" class="block w-auto h-16 fill-current dark:block [[data-theme=light]_&]:hidden" src="/logo-white.png" />
                     </a>
