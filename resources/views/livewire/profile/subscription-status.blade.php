@@ -14,7 +14,6 @@ new class extends Component {
     {
         $user = auth()->user();
         $this->subscription = $user->subscription(env('STRIPE_PRODUCT_ID'));
-        $this->completeSubPlanId = "tier1";
 
         // Get the current plan ID
         if ($this->subscription && $this->subscription->valid()) {
@@ -96,13 +95,32 @@ new class extends Component {
             </div>
         @elseif ($subscription && $subscription->valid())
             <div class="mt-6 space-y-6">
-                <p>Your Pro subscription is <x-mary-badge positive label="active" /></p>
+                <p>Pro subscription<x-mary-badge class="badge-success" value="active" /></p>
                 <p>Next Billing Date: {{ date('Y-m-d', $subscription->asStripeSubscription()->current_period_end) }}</p>
                 <x-mary-button wire:click="cancelSubscription" class="mt-4 btn-error" label="Cancel Subscription" />
             </div>
         @else
             <div class="mt-6 space-y-6">
-                <p>Your Free subscription is <x-mary-badge positive label="active" /></p>
+                <p>Free subscription <x-mary-badge class="badge-warning" value="active" /></p>
+
+                <div class="p-4 rounded-lg">
+                    <h3 class="mb-3 font-semibold">Upgrade to Pro and get:</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2">
+                            <x-mary-icon name="o-video-camera" class="w-4 h-4 text-primary" />
+                            <span>Video uploads</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <x-mary-icon name="o-photo" class="w-4 h-4 text-primary" />
+                            <span>Larger file uploads</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <x-mary-icon name="o-bolt" class="w-4 h-4 text-primary" />
+                            <span>Unlimited sightings</span>
+                        </li>
+                    </ul>
+                </div>
+
                 <x-mary-button wire:click="upgradePro" class="btn-primary" label="Upgrade to Pro" />
             </div>
         @endif

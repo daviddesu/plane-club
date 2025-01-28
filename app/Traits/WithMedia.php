@@ -50,6 +50,7 @@ trait WithMedia
         }
 
         $mediaService = app(MediaService::class);
+        /** @var User $user */
         $user = Auth::user();
         $mediaFilePath = $this->media->getRealPath();
         $fileSizeInBytes = filesize($mediaFilePath);
@@ -64,7 +65,7 @@ trait WithMedia
                     return false;
                 }
             } else {
-                $this->warning('Your current plan does not allow video uploads. Please upgrade.');
+                $this->warning('Your current plan does not allow video uploads. <a href="/checkout">Please upgrade to Plane ClubPro</a> for unlimited video and image.');
                 return false;
             }
         }
@@ -72,8 +73,8 @@ trait WithMedia
         $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
         $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
 
-        if ($newTotalStorageInGB > $user->getStorageLimitInGBAttribute()) {
-            $this->warning('You have reached your storage limit. Please upgrade your subscription.');
+        if ($newTotalStorageInGB > $user->hasExceededUploadLimit()) {
+            $this->warning('You have reached your upload limit for this month. <a href="/checkout">Please upgrade to Plane ClubPro</a> for unlimited video and image uploads.');
             return false;
         }
 
@@ -100,6 +101,6 @@ trait WithMedia
 
     protected function checkStorageLimits(): void
     {
-        $this->storageLimitExceeded = auth()->user()->hasExceededStorageLimit();
+        $this->storageLimitExceeded = Auth::user()->hasExceededUploadLimit();
     }
 }

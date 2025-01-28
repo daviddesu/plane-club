@@ -65,11 +65,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->subscribed(env('STRIPE_PRODUCT_ID'));
     }
 
-    public function getTotalStorageInGB()
-    {
-        return $this->used_disk / (1024 * 1024 * 1024);
-    }
-
     public function getStorageLimitInGBAttribute()
     {
         $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
@@ -92,8 +87,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER1');
     }
 
-    public function hasExceededStorageLimit()
+    public function hasExceededUploadLimit()
     {
-        return $this->getTotalStorageInGB() > $this->getStorageLimitInGBAttribute();
+        if ($this->isPro()) return false;
+
+        return $this->sightings()
+            ->whereHas('media')
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count() >= 30;
     }
 }

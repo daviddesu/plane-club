@@ -108,7 +108,7 @@ new class extends Component
     </x-slot>
     @if($storageLimitExceeded)
         <div class="text-center">
-            You have reached your storage limit. Please <a href="/profile" class="text-blue-500 underline">upgrade your subscription</a>
+            You have reached the limit of 30 sightings with images for this month. Please <a href="/profile" class="text-blue-500 underline">upgrade to Pro</a> for unlimited sightings with images and videos, or wait until next month for your limit to reset.
         </div>
     @else
         <x-mary-form wire:submit='store()'>

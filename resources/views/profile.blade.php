@@ -18,8 +18,6 @@
             <!-- Update Profile Information -->
             <div class="p-4 sm:rounded-lg">
                 <div class="max-w-xl">
-                    <p>Your current storage usage: {{ number_format(Auth::user()->used_disk / (1024 * 1024 * 1024), 2) }} GB of {{ Auth::user()->getStorageLimitInGBAttribute() }} GB</p>
-                    <br>
                     <livewire:profile.update-profile-information-form />
                 </div>
             </div>
