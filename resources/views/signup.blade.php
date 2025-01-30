@@ -6,7 +6,7 @@
         <!-- Overlay -->
         <div class="absolute inset-0"></div>
 
-        <div class="relative z-10 max-w-3xl px-6 text-center text-white">
+        <div class="relative z-10 max-w-3xl px-6 text-center">
             <h1 class="mb-4 text-4xl font-extrabold md:text-6xl">
                 Your Personal Sighting Logbook
             </h1>

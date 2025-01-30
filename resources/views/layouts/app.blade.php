@@ -80,6 +80,7 @@
 
             {{-- Right side actions --}}
             <x-slot:actions>
+                <x-mary-theme-toggle class="btn-ghost btn-sm" />
 
             </x-slot:actions>
         </x-mary-nav>
@@ -95,22 +96,30 @@
                             <x-mary-menu-item title="Add sighting" icon="o-plus" link="/sighting/create" wire:navigate.hover  />
                             <x-mary-menu-separator />
                             <x-mary-menu-item title="Signtings" icon="o-camera" link="/sightings" wire:navigate.hover />
-                        </x-mary-menu>
+                            <x-mary-menu-separator />
+                            <x-mary-menu-item icon="o-user" link="/profile" wire:navigate.hover>
+                                {{ $user->name }}
+                                @if($user->isPro())
+                                    <x-mary-badge value="Pro" class="badge-primary" />
+                                @else
+                                    <x-mary-badge value="Free" class="badge-neutral" />
+                                @endif
+                            </x-mary-menu-item>
+                                @if(!$user->isPro())
+                                    <x-mary-button
+                                        link="/checkout"
+                                        class="mt-3 ml-2 btn-xs btn-primary"
+                                        label="Upgrade"
+                                        icon="o-arrow-up-circle"
+                                        no-wire-navigate
+                                    />
+                                @endif
+                            <x-mary-menu-separator />
+                            <x-mary-menu-item title="Logout" icon="o-arrow-left-on-rectangle" link="/logout" no-wire-navigate />
 
-                        {{-- User --}}
-                        <x-mary-menu-separator />
-                        <x-mary-menu activate-by-route>
-                            <x-mary-menu-item title="Logout" icon="o-arrow-left-end-on-rectangle" link="/logout" />
                         </x-mary-menu>
-                        <x-mary-list-item icon="o-user" :item="$user" value="name" sub-value="email" no-separator no-hover class="-mx-2 !-my-2 rounded">
-                            <x-slot:actions>
-                                <x-mary-theme-toggle class="btn-circle btn-ghost btn-xs" tooltip="Light/Dark theme"/>
-                                <x-mary-button icon="o-cog-6-tooth" class="btn-circle btn-ghost btn-xs" tooltip-left="profile" no-wire-navigate link="/profile" />
-                            </x-slot:actions>
-                        </x-mary-list-item>
                     </x-slot:sidebar>
                 @endif
-
                 {{-- The `$slot` goes here --}}
                 <x-slot:content>
                     {{ $slot }}

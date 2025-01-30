@@ -103,8 +103,11 @@ new class extends Component {
             <div class="mt-6 space-y-6">
                 <p>Free subscription <x-mary-badge class="badge-warning" value="active" /></p>
 
-                <div class="p-4 rounded-lg">
-                    <h3 class="mb-3 font-semibold">Upgrade to Pro and get:</h3>
+                <div class="p-4 rounded-lg bg-base-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold">Upgrade to Pro:</h3>
+
+                    </div>
                     <ul class="space-y-2">
                         <li class="flex items-center gap-2">
                             <x-mary-icon name="o-video-camera" class="w-4 h-4 text-primary" />

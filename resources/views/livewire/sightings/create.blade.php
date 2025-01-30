@@ -114,7 +114,12 @@ new class extends Component
         <x-mary-form wire:submit='store()'>
             <div class="grid grid-cols-1 gap-4">
                 {{-- File upload for images and videos --}}
-                    <x-mary-file wire:model="media" label="Choose an image or video" hint="Video uploads available on the Pro plan" spinner />
+                    <x-mary-file
+                        wire:model="media"
+                        label="Choose an image or video"
+                        hint="{{ Auth::user()->isPro() ? 'Max file size upload of 500MB' : 'Video uploads available on the Pro plan' }}"
+                        spinner
+                    />
                     @error('media')
                         <span class="error">{{ $message }}</span>
                     @enderror
