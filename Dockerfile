@@ -21,8 +21,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PHP_ERROR_REPORTING=22527 \
     PHP_MEMORY_LIMIT=256M \
     PHP_MAX_EXECUTION_TIME=90 \
-    PHP_POST_MAX_SIZE=1024M \
-    PHP_UPLOAD_MAX_FILE_SIZE=1024M \
+    PHP_POST_MAX_SIZE=512M \
+    PHP_UPLOAD_MAX_FILE_SIZE=512M \
     PHP_ALLOW_URL_FOPEN=Off
 
 # Prepare base container:
@@ -124,11 +124,11 @@ RUN rsync -ar /var/www/html/public-npm/ /var/www/html/public/ \
     && chown -R www-data:www-data /var/www/html/public
 
 # Update PHP upload limits:
-RUN echo "upload_max_filesize = 1024M" > /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini \
-&& echo "post_max_size = 1024M" >> /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini
+RUN echo "upload_max_filesize = 512M" > /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini \
+&& echo "post_max_size = 512M" >> /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini
 
 # Update Nginx client_max_body_size
-RUN echo "client_max_body_size 1024M;" > /etc/nginx/conf.d/upload.conf
+RUN echo "client_max_body_size 512M;" > /etc/nginx/conf.d/upload.conf
 
 # 5. Setup Entrypoint
 EXPOSE 8080
