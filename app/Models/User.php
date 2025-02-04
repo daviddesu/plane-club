@@ -82,8 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isPro()
     {
         $subscription = $this->subscription(env('STRIPE_PRODUCT_ID'));
-        if(!$subscription || !$subscription->valid()) return false;
-        return $subscription->stripe_price == env('STRIPE_PRICE_ID_TIER1');
+        return ($subscription && $subscription->valid());
     }
 
     public function hasExceededUploadLimit()

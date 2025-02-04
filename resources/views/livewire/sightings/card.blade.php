@@ -11,6 +11,7 @@ new class extends Component
 {
     public int $id;
     public string $loggedAt;
+    public bool $showFullscreen = false;
 
     public ?string $arrivalAirportName = null;
     public ?string $departureAirportName = null;
@@ -87,141 +88,107 @@ new class extends Component
 ?>
 
 <x-mary-card class="flex flex-col w-full p-0 overflow-hidden rounded shadow">
-    @if($id)
-        <x-slot:figure>
-            @if($mediaPath)
-            <!-- Media Container with a 4:3 aspect ratio -->
-            <div
-                x-data="{
-                    showModal: false,
-                    stopVideo() {
-                        const video = this.$refs.videoPlayer;
-                        if (video) {
-                            video.pause();
-                            video.currentTime = 0;
-                        }
-                    }
-                }"
-                x-on:keydown.escape.window="showModal = false"
-                class="relative w-full h-0 pb-[75%] overflow-hidden cursor-pointer"
-            >
-                @if($isVideo && $isProcessing)
-                    <p class="absolute inset-0 flex items-center justify-center">
-                        Processing
-                    </p>
-                @elseif ($isVideo)
+    <!-- Media Section -->
+    @if($mediaPath || $isProcessing)
+        <div class="relative overflow-hidden rounded-lg aspect-video">
+            @if($isProcessing)
+                <div class="flex flex-col items-center justify-center w-full h-full bg-base-200">
+                    <div class="flex items-center gap-2 mb-2">
+                        <x-mary-icon name="o-video-camera" class="w-6 h-6 animate-pulse" />
+                        <span class="text-sm font-medium">Processing video...</span>
+                    </div>
+                    <div class="w-48 h-2 overflow-hidden rounded-full bg-base-300">
+                        <div class="h-2 bg-primary animate-[loading_1s_ease-in-out_infinite]"></div>
+                    </div>
+                </div>
+            @else
+                @if($isVideo)
                     <video
-                        x-ref="videoPlayer"
+                        class="object-cover w-full h-full cursor-pointer"
+                        wire:click="$toggle('showFullscreen')"
                         src="{{ $mediaPath }}"
                         controls
-                        class="absolute top-0 left-0 object-cover w-full h-full"
                     ></video>
                 @else
-                    <div x-on:click="showModal = true" class="absolute inset-0">
-                        <img
-                            src="{{ $mediaPath }}"
-                            alt="Sighting Image"
-                            loading="lazy"
-                            class="absolute top-0 left-0 object-cover w-full h-full"
-                        />
+                    <img
+                        class="object-cover w-full h-full cursor-pointer"
+                        wire:click="$toggle('showFullscreen')"
+                        src="{{ $mediaPath }}"
+                        alt="Sighting thumbnail"
+                    />
+                @endif
+            @endif
+        </div>
+    @endif
+
+    <!-- Clickable Content Area -->
+    <a
+        href="/sighting/{{ $id }}/edit"
+        wire:navigate.hover
+        class="flex-1 transition-colors duration-200 hover:cursor-pointer"
+    >
+        <!-- Log Details -->
+        <div class="flex flex-col flex-1 gap-3 p-4">
+            <!-- Date and Status -->
+            <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-1">
+                    <x-mary-icon name="o-calendar" class="w-4 h-4" />
+                    {{ $loggedAt }}
+                </div>
+                <div class="flex items-center gap-1">
+                    <x-mary-icon name="o-signal" class="w-4 h-4" />
+                    {{ \App\Enums\FlyingStatus::getNameByStatus($status) }}
+                </div>
+            </div>
+
+            <!-- Airports -->
+            <div class="flex flex-col space-y-4">
+                @if($departureAirportName)
+                    <div class="flex items-center gap-3">
+                        <div class="shrink-0 w-14">
+                            <x-mary-badge flat slate value="DEP" />
+                        </div>
+                        <span class="flex-1">{{ $departureAirportName }}</span>
                     </div>
+                @endif
 
-                    <!-- Image Modal -->
-                    <div
-                        x-show="showModal"
-                        x-cloak
-                        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-                        @click.self="showModal = false"
-                    >
-                        <!-- Close Button -->
-                        <button
-                            @click="showModal = false"
-                            class="absolute text-3xl font-bold text-white top-5 right-5"
-                        >
-                            &times;
-                        </button>
-
-                        <img
-                            src="{{ $mediaPath }}"
-                            alt="Fullscreen Sighting Image"
-                            class="max-w-full max-h-full rounded"
-                        />
+                @if($arrivalAirportName)
+                    <div class="flex items-center gap-3">
+                        <div class="shrink-0 w-14">
+                            <x-mary-badge flat slate value="ARV" />
+                        </div>
+                        <span class="flex-1">{{ $arrivalAirportName }}</span>
                     </div>
                 @endif
             </div>
-            @endif
-        </x-slot:figure>
 
-        <!-- Clickable Content Area -->
-        <a
-            href="/sighting/{{ $id }}/edit"
-            wire:navigate.hover
-            class="flex-1 transition-colors duration-200 hover:cursor-pointer"
-        >
-            <!-- Log Details -->
-            <div class="flex flex-col flex-1 gap-3 p-4">
-                <!-- Date and Status -->
-                <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center gap-1">
-                        <x-mary-icon name="o-calendar" class="w-4 h-4" />
-                        {{ $loggedAt }}
+            <!-- Aircraft and Airline Info -->
+            <div class="grid grid-cols-1 pt-3 mt-2 text-sm border-t gap-y-2">
+                @if($aircraftType)
+                    <div class="flex items-center gap-2">
+                        <x-mary-icon name="o-paper-airplane" class="w-4 h-4 text-gray-600 shrink-0" />
+                        <span>{{ $aircraftType }}</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <x-mary-icon name="o-signal" class="w-4 h-4" />
-                        {{ \App\Enums\FlyingStatus::getNameByStatus($status) }}
+                @endif
+
+                @if($airlineName)
+                    <div class="flex items-center gap-2">
+                        <x-mary-icon name="o-building-office" class="w-4 h-4 text-gray-600 shrink-0" />
+                        <span>{{ $airlineName }}</span>
+                        @if($flightNumber)
+                            <span class="text-gray-600">{{ $flightNumber }}</span>
+                        @endif
                     </div>
-                </div>
+                @endif
 
-                <!-- Airports -->
-                <div class="flex flex-col space-y-4">
-                    @if($departureAirportName)
-                        <div class="flex items-center gap-3">
-                            <div class="shrink-0 w-14">
-                                <x-mary-badge flat slate value="DEP" />
-                            </div>
-                            <span class="flex-1">{{ $departureAirportName }}</span>
-                        </div>
-                    @endif
-
-                    @if($arrivalAirportName)
-                        <div class="flex items-center gap-3">
-                            <div class="shrink-0 w-14">
-                                <x-mary-badge flat slate value="ARV" />
-                            </div>
-                            <span class="flex-1">{{ $arrivalAirportName }}</span>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Aircraft and Airline Info -->
-                <div class="grid grid-cols-1 pt-3 mt-2 text-sm border-t gap-y-2">
-                    @if($aircraftType)
-                        <div class="flex items-center gap-2">
-                            <x-mary-icon name="o-paper-airplane" class="w-4 h-4 text-gray-600 shrink-0" />
-                            <span>{{ $aircraftType }}</span>
-                        </div>
-                    @endif
-
-                    @if($airlineName)
-                        <div class="flex items-center gap-2">
-                            <x-mary-icon name="o-building-office" class="w-4 h-4 text-gray-600 shrink-0" />
-                            <span>{{ $airlineName }}</span>
-                            @if($flightNumber)
-                                <span class="text-gray-600">{{ $flightNumber }}</span>
-                            @endif
-                        </div>
-                    @endif
-
-                    @if($registration)
-                        <div class="flex items-center gap-2">
-                            <x-mary-icon name="o-identification" class="w-4 h-4 text-gray-600 shrink-0" />
-                            <span>{{ $registration }}</span>
-                        </div>
-                    @endif
-                </div>
+                @if($registration)
+                    <div class="flex items-center gap-2">
+                        <x-mary-icon name="o-identification" class="w-4 h-4 text-gray-600 shrink-0" />
+                        <span>{{ $registration }}</span>
+                    </div>
+                @endif
             </div>
-        </a>
-    @endif
-
+        </div>
+    </a>
 </x-mary-card>
 

@@ -71,9 +71,8 @@ trait WithMedia
         }
 
         $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
-        $newTotalStorageInGB = $newTotalStorageInBytes / (1024 * 1024 * 1024);
 
-        if ($newTotalStorageInGB > $user->hasExceededUploadLimit()) {
+        if ($user->hasExceededUploadLimit()) {
             $this->warning('You have reached your upload limit for this month. <a href="/checkout">Please upgrade to Plane ClubPro</a> for unlimited video and image uploads.');
             return false;
         }

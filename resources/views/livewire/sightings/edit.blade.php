@@ -18,7 +18,6 @@ new class extends Component {
     use Toast;
 
     public int $id;
-    public bool $storageLimitExceeded = false;
 
     #[Validate('required')]
     public ?string $loggedAt = null;

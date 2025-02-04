@@ -99,7 +99,7 @@ new class extends Component
 
 
 <div class="items-center w-full h-full select-none">
-    <div class="mx-auto md:w-4/5" xl:w-3/4>
+    <div class="mx-auto md:w-4/6" xl:w-3/4>
         <!-- Filters -->
         <x-mary-collapse class="mb-5">
             <x-slot:heading>
