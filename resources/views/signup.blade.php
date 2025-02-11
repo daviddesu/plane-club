@@ -20,7 +20,7 @@
                 <x-mary-button class="px-3 font-semibold ext-lg p btn-primary" link="/register">
                     Sign Up for Free ✈️
                 </x-mary-button>
-                <x-mary-button class="px-6 py-3 text-lg font-semibold" link="/login">
+                <x-mary-button class="px-6 text-lg font-semibold" link="/login">
                     Login
                 </x-mary-button>
             </div>
