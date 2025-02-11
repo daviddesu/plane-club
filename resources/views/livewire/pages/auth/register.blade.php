@@ -19,13 +19,10 @@ class extends Component {
     #[Validate('required', 'string', 'max:255')]
     public string $name;
 
-    #[Validate(['required', 'string', 'max:255'])]
     public string $username;
 
-    #[Validate(['required', 'string', 'lowercase', 'email', 'max:255'])]
     public string $email;
 
-    #[Validate(['required', 'string', 'confirmed'])]
     public string $password;
     public string $password_confirmation;
 
