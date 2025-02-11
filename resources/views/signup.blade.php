@@ -37,7 +37,7 @@
 
     <!-- Footer -->
     <footer class="py-6">
-        <div class="container grid grid-cols-2 gap-4 px-6 mx-auto text-sm text-center md:grid-cols-4">
+        <div class="container grid grid-cols-2 gap-4 px-6 mx-auto text-xs text-center md:grid-cols-43">
             <div>
                 <a class="hover:underline" href="/privacy-policy">Privacy Policy</a>
             </div>
@@ -51,6 +51,15 @@
                 <a class="hover:underline termly-display-preferences" href="#">
                     Consent Preferences
                 </a>
+            </div>
+            <div>
+                <a class="hover:underline" href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Data Subject Access Request (DSAR) Form</a>
+            </div>
+            <div>
+                <a class="hover:underline" href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Do Not Sell or Share My Personal information</a>
+            </div>
+            <div>
+                <a class="hover:underline" href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Limit the Use Of My Sensitive Personal Information</a>
             </div>
         </div>
         <div class="container px-6 pt-4 mx-auto mt-4 text-center">

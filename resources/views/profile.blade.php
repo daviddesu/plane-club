@@ -61,7 +61,10 @@
                     <a href="/privacy-policy">Privacy Policy</a><br>
                     <a href="/terms-conditions">Terms of Service</a><br>
                     <a href="/cookie-policy">Cookie Policy</a><br>
-                </div>
+                    <a href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Data Subject Access Request (DSAR) Form</a><br>
+                    <a href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Do Not Sell or Share My Personal information</a><br>
+                    <a href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Limit the Use Of My Sensitive Personal Information</a><br>
+                 </div>
             </div>
         </div>
     </div>
