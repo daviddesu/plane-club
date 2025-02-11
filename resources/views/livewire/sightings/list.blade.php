@@ -106,9 +106,9 @@ new class extends Component
                 Filters
             </x-slot:heading>
             <x-slot:content class="flex flex-col gap-4">
-                <livewire:sightings.components.airport_search wire:model="selectedAirport" label="Airport" />
-                <livewire:sightings.components.airline_search wire:model="selectedAirline" />
-                <livewire:sightings.components.aircraft_search wire:model="selectedAircraftType" />
+                <livewire:sightings.components.airport_search wire:model.live="selectedAirport" label="Airport" />
+                <livewire:sightings.components.airline_search wire:model.live="selectedAirline" />
+                <livewire:sightings.components.aircraft_search wire:model.live="selectedAircraftType" />
             </x-slot:content>
         </x-mary-collapse>
 
