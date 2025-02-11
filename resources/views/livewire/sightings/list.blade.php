@@ -124,7 +124,7 @@ new class extends Component
                 @foreach($this->ids as $id)
                     <li wire:key="sighting-item-{{ $id }}">
                         <livewire:sightings.card
-                            wire:key="sighting-{{ $id }}"
+                            wire:key="sighting-card-{{ $id }}"
                             :id="$id"
                         />
                     </li>

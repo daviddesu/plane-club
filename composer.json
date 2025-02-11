@@ -14,6 +14,7 @@
         "livewire/livewire": "^3.5",
         "livewire/volt": "^1.0",
         "masmerise/livewire-toaster": "^2.3",
+        "owenvoke/blade-fontawesome": "^2.8",
         "pbmedia/laravel-ffmpeg": "^8.5",
         "posthog/posthog-php": "^3.3",
         "predis/predis": "^2.2",
