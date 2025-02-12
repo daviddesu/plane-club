@@ -1,7 +1,7 @@
 <x-app-layout>
     <!-- Hero Section -->
     <section
-        class="relative flex items-center justify-center min-h-screen bg-center bg-cover"
+        class="relative flex items-center justify-center min-h-screen -m-5 bg-center bg-cover"
         style="background-image: url('/ryanair-737-hero.jpeg');"
     >
         <div class="absolute inset-0 bg-black opacity-50"></div>
