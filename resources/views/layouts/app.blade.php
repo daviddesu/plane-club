@@ -56,6 +56,7 @@
 
                     gtag('config', 'AW-16786194088');
                 </script>
+                <style>.drawer-content {padding: 0!important;}</style>
     </head>
     <body class="font-sans antialiased">
 
