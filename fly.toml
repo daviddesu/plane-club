@@ -14,7 +14,7 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [processes]
   app = ""
-  queue = "php artisan queue:work --sleep=3 --tries=3 --timeout=3600"
+  # queue = "php artisan queue:work --sleep=3 --tries=3 --timeout=3600"
 
 [env]
   APP_ENV='production'
