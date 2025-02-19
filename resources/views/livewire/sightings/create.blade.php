@@ -127,14 +127,14 @@ new class extends Component
                     <x-mary-datetime
                         label="Date"
                         wire:model="loggedAt"
-                        icon="o-calendar"
+                        icon="o-calendar-days"
                     />
 
-                    <livewire:sightings.components.status_select wire:model="status" lazy />
-                    <livewire:sightings.components.airport_search wire:model="departureAirport" label="Departure airport" lazy />
-                    <livewire:sightings.components.airport_search wire:model="arrivalAirport" label="Arrival airport" lazy />
-                    <livewire:sightings.components.airline_search wire:model="airline" lazy />
-                    <livewire:sightings.components.aircraft_search wire:model="aircraft" lazy />
+                    <livewire:sightings.components.status_select wire:model="status" />
+                    <livewire:sightings.components.airport_search wire:model="departureAirport" label="Departure airport" />
+                    <livewire:sightings.components.airport_search wire:model="arrivalAirport" label="Arrival airport" />
+                    <livewire:sightings.components.airline_search wire:model="airline" />
+                    <livewire:sightings.components.aircraft_search wire:model="aircraft" />
 
                     <x-mary-input
                         label="Flight Number"

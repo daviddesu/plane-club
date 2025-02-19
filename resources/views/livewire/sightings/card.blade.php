@@ -108,7 +108,7 @@ new class extends Component
             <!-- Date and Status -->
             <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-1">
-                    <x-mary-icon name="fas.calendar-days" class="w-4 h-4" />
+                    <x-mary-icon icon="o-calendar-days" class="w-4 h-4" />
                     {{ $loggedAt }}
                 </div>
                 <div class="flex items-center gap-1">
@@ -142,14 +142,14 @@ new class extends Component
             <div class="grid grid-cols-1 pt-3 mt-2 text-sm border-t gap-y-2">
                 @if($aircraftType)
                     <div class="flex items-center gap-2">
-                        <x-mary-icon name="fas.plane" class="w-4 h-4 text-gray-600 shrink-0" />
+                        <x-mary-icon name="o-paper-airplane" class="w-4 h-4 text-gray-600 shrink-0" />
                         <span>{{ $aircraftType }}</span>
                     </div>
                 @endif
 
                 @if($airlineName)
                     <div class="flex items-center gap-2">
-                        <x-mary-icon name="fas.tag" class="w-4 h-4 text-gray-600 shrink-0" />
+                        <x-mary-icon name="o-ticket" class="w-4 h-4 text-gray-600 shrink-0" />
                         <span>{{ $airlineName }}</span>
                         @if($flightNumber)
                             <span class="text-gray-600">{{ $flightNumber }}</span>
