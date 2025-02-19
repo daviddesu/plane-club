@@ -33,7 +33,7 @@ ADD .fly/php/packages/${PHP_VERSION}.txt /tmp/php-packages.txt
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg imagemagick gnupg2 ca-certificates git-core curl zip unzip \
-    rsync vim-tiny htop sqlite3 nginx supervisor cron \
+                                                  rsync vim-tiny htop sqlite3 nginx supervisor cron \
     && ln -sf /usr/bin/vim.tiny /etc/alternatives/vim \
     && ln -sf /etc/alternatives/vim /usr/bin/vim \
     && echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
@@ -68,7 +68,7 @@ RUN composer install --optimize-autoloader --no-dev \
     && chown -R www-data:www-data /var/www/html \
     && echo "MAILTO=\"\"\n* * * * * www-data /usr/bin/php /var/www/html/artisan schedule:run" > /etc/cron.d/laravel \
     && sed -i='' '/->withMiddleware(function (Middleware \$middleware) {/a\
-    \$middleware->trustProxies(at: "*");\
+        \$middleware->trustProxies(at: "*");\
     ' bootstrap/app.php; \
     if [ -d .fly ]; then cp .fly/entrypoint.sh /entrypoint; chmod +x /entrypoint; fi;
 
@@ -91,23 +91,23 @@ COPY --from=base /var/www/html/vendor /app/vendor
 # NPM if no lock file is found.
 # Note: We run "production" for Mix and "build" for Vite
 RUN if [ -f "vite.config.js" ]; then \
-    ASSET_CMD="build"; \
+        ASSET_CMD="build"; \
     else \
-    ASSET_CMD="production"; \
+        ASSET_CMD="production"; \
     fi; \
     if [ -f "yarn.lock" ]; then \
-    yarn install --frozen-lockfile; \
-    yarn $ASSET_CMD; \
+        yarn install --frozen-lockfile; \
+        yarn $ASSET_CMD; \
     elif [ -f "pnpm-lock.yaml" ]; then \
-    corepack enable && corepack prepare pnpm@latest-8 --activate; \
-    pnpm install --frozen-lockfile; \
-    pnpm run $ASSET_CMD; \
+        corepack enable && corepack prepare pnpm@latest-8 --activate; \
+        pnpm install --frozen-lockfile; \
+        pnpm run $ASSET_CMD; \
     elif [ -f "package-lock.json" ]; then \
-    npm ci --no-audit; \
-    npm run $ASSET_CMD; \
+        npm ci --no-audit; \
+        npm run $ASSET_CMD; \
     else \
-    npm install; \
-    npm run $ASSET_CMD; \
+        npm install; \
+        npm run $ASSET_CMD; \
     fi;
 
 # From our base container created above, we
@@ -125,7 +125,7 @@ RUN rsync -ar /var/www/html/public-npm/ /var/www/html/public/ \
 
 # Update PHP upload limits:
 RUN echo "upload_max_filesize = 512M" > /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini \
-    && echo "post_max_size = 512M" >> /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini
+&& echo "post_max_size = 512M" >> /etc/php/${PHP_VERSION}/fpm/conf.d/99-upload.ini
 
 # Update Nginx client_max_body_size
 RUN echo "client_max_body_size 512M;" > /etc/nginx/conf.d/upload.conf
