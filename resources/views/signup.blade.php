@@ -48,18 +48,18 @@
                 </div>
 
                 <div class="flex flex-col items-center text-center">
-                    <x-mary-icon name="o-magnifying-glass" class="w-12 h-12 mb-4 text-primary" />
-                    <h3 class="mb-2 text-xl font-semibold">Smart Search & Stats</h3>
-                    <p>
-                        Instantly find past sightings
-                    </p>
-                </div>
-
-                <div class="flex flex-col items-center text-center">
                     <x-mary-icon name="o-lock-closed" class="w-12 h-12 mb-4 text-primary" />
                     <h3 class="mb-2 text-xl font-semibold">Private by Default</h3>
                     <p>
                         You’re in control. Enjoy complete privacy over your data and gallery
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-center text-center">
+                    <x-mary-icon name="o-magnifying-glass" class="w-12 h-12 mb-4 text-primary" />
+                    <h3 class="mb-2 text-xl font-semibold">Smart Search & Stats</h3>
+                    <p>
+                        Instantly find past sightings
                     </p>
                 </div>
             </div>
