@@ -106,9 +106,9 @@ new class extends Component
                 Filters
             </x-slot:heading>
             <x-slot:content class="flex flex-col gap-4">
-                <livewire:sightings.components.airport_search wire:model.live="selectedAirport" label="Airport" />
-                <livewire:sightings.components.airline_search wire:model.live="selectedAirline" />
-                <livewire:sightings.components.aircraft_search wire:model.live="selectedAircraftType" />
+                <livewire:sightings.components.airport_search wire:model.live="selectedAirport" label="Airport"  lazy/>
+                <livewire:sightings.components.airline_search wire:model.live="selectedAirline" lazy />
+                <livewire:sightings.components.aircraft_search wire:model.live="selectedAircraftType" lazy />
             </x-slot:content>
         </x-mary-collapse>
 
@@ -126,6 +126,7 @@ new class extends Component
                         <livewire:sightings.card
                             wire:key="sighting-card-{{ $id }}"
                             :id="$id"
+                            lazy
                         />
                     </li>
                 @endforeach
