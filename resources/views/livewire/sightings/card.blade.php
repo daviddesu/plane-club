@@ -108,7 +108,7 @@ new class extends Component
             <!-- Date and Status -->
             <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-1">
-                    <x-mary-icon icon="o-calendar-days" class="w-4 h-4" />
+                    <x-mary-icon name="o-calendar-days" class="w-4 h-4" />
                     {{ $loggedAt }}
                 </div>
                 <div class="flex items-center gap-1">
