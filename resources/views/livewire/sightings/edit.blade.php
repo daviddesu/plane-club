@@ -51,7 +51,6 @@ new class extends Component {
     public bool $showFullscreen = false;
     public ?string $mediaPath = null;
     public ?string $thumbnailPath = null;
-    public bool $isVideo = false;
 
     protected function getCachedMediaUrl($mediaPath): ?string
     {
@@ -98,8 +97,7 @@ new class extends Component {
         // Add file extension based on media type
         $media = $this->getExistingMedia();
         if ($media) {
-            $extension = $media->isVideo() ? '.mp4' : '.jpg';
-            $name .= $extension;
+            $name .= '.jpg';
         }
 
         return $name;
@@ -184,7 +182,7 @@ new class extends Component {
                 },
                 $this->fileName,
                 [
-                    'Content-Type' => $media->isVideo() ? 'video/mp4' : 'image/jpeg',
+                    'Content-Type' => 'image/jpeg',
                     'Content-Disposition' => 'attachment'
                 ]
             );
@@ -211,18 +209,11 @@ new class extends Component {
                 {{-- Current Media Display --}}
                 @if($this->getExistingMedia())
                     <div class="relative">
-                        @if($this->getExistingMedia()->isVideo())
-                            <video controls class="object-contain w-full max-h-80">
-                                <source src="{{ $this->getCachedMediaUrl($this->getExistingMedia()->path) }}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        @else
-                            <img
-                                src="{{ $this->getCachedMediaUrl($this->getExistingMedia()->path) }}"
-                                class="object-contain w-full max-h-80"
-                                alt="Current media"
-                            >
-                        @endif
+                        <img
+                            src="{{ $this->getCachedMediaUrl($this->getExistingMedia()->path) }}"
+                            class="object-contain w-full max-h-80"
+                            alt="Current media"
+                        >
                         <div class="absolute flex gap-2 top-2 right-2">
                             <x-mary-button
                                 wire:click="downloadMedia"
@@ -242,8 +233,7 @@ new class extends Component {
                 {{-- File upload for new media --}}
                 <x-mary-file
                     wire:model="media"
-                    label="Choose new image or video"
-                    hint="Video uploads available on the Pro plan"
+                    label="Choose new image"
                     spinner
                 />
                 @error('media')
@@ -288,19 +278,11 @@ new class extends Component {
                             separator
                         >
                             <div class="relative flex items-center justify-center w-full h-full">
-                                @if($isVideo)
-                                    <video
-                                        controls
-                                        class="max-h-screen"
-                                        src="{{ Storage::url($mediaPath) }}"
-                                    ></video>
-                                @else
-                                    <img
-                                        class="max-h-screen"
-                                        src="{{ Storage::url($mediaPath) }}"
-                                        alt="Full size image"
-                                    />
-                                @endif
+                                <img
+                                    class="max-h-screen"
+                                    src="{{ Storage::url($mediaPath) }}"
+                                    alt="Full size image"
+                                />
                                 <button
                                     wire:click="$toggle('showFullscreen')"
                                     class="absolute p-2 text-white transition-colors duration-200 rounded-full top-4 right-4 hover:bg-white/20"
@@ -312,20 +294,12 @@ new class extends Component {
 
                         {{-- Thumbnail --}}
                         <div class="overflow-hidden rounded-lg aspect-video">
-                            @if($isVideo)
-                                <video
-                                    class="object-cover w-full h-full cursor-pointer"
-                                    wire:click="$toggle('showFullscreen')"
-                                    src="{{ Storage::url($mediaPath) }}"
-                                ></video>
-                            @else
-                                <img
-                                    class="object-cover w-full h-full cursor-pointer"
-                                    wire:click="$toggle('showFullscreen')"
-                                    src="{{ Storage::url($thumbnailPath) }}"
-                                    alt="Thumbnail"
-                                />
-                            @endif
+                            <img
+                                class="object-cover w-full h-full cursor-pointer"
+                                wire:click="$toggle('showFullscreen')"
+                                src="{{ Storage::url($thumbnailPath) }}"
+                                alt="Thumbnail"
+                            />
                         </div>
                     </div>
                 @endif

@@ -63,7 +63,6 @@ new class extends Component
     {
         return [
             'media.max' => 'Your file may not be larger than :max KB.',
-            'media.mimetypes' => 'Free users can only upload images. Pro users can upload images and videos.',
         ];
     }
 
@@ -113,11 +112,11 @@ new class extends Component
     @else
         <x-mary-form wire:submit='store()'>
             <div class="grid grid-cols-1 gap-4">
-                {{-- File upload for images and videos --}}
+                {{-- File upload for images --}}
                     <x-mary-file
                         wire:model="media"
-                        label="Choose an image or video"
-                        hint="{{ Auth::user()->isPro() ? 'Max file size upload of 500MB' : 'Video uploads available on the Pro plan' }}"
+                        label="Choose an image"
+                        hint="{{ Auth::user()->isPro() ? 'Max file size upload of 500MB' : 'Larger image uploads available with Pro' }}"
                         spinner
                     />
                     @error('media')

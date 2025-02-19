@@ -20,14 +20,11 @@ trait WithMedia
 
         // Default plan: up to 4 MB
         $maxSizeKB = 4096;
-        // Default plan: images only
         $mimeRule = 'mimetypes:image/*';
 
         if ($user->isPro()) {
             // Pro plan: up to 500 MB
             $maxSizeKB = 512000;
-            // Pro plan: images or videos
-            $mimeRule = 'mimetypes:image/*,video/*';
         }
 
         return [
@@ -39,7 +36,6 @@ trait WithMedia
     {
         return [
             'media.max' => 'Your file may not be larger than :max KB.',
-            'media.mimetypes' => 'Free users can only upload images. Pro users can upload images and videos.',
         ];
     }
 
@@ -57,18 +53,18 @@ trait WithMedia
         $mimeType = $mediaService->getMimeType($mediaFilePath);
 
         // Plan-Specific Rules:
-        if (str_contains($mimeType, 'video')) {
             if ($user->isPro()) {
-                $maxVideoBytes = 524288000; // 500 MB
-                if ($fileSizeInBytes > $maxVideoBytes) {
-                    $this->warning('Video exceeds the 500MB limit for your plan. Please choose a smaller video.');
+                $maxImageBytes = 524288000; // 500MB
+                if ($fileSizeInBytes > $maxImageBytes) {
+                    $this->warning('Image exceeds the 500MB limit for your plan. Please choose a smaller Image.');
                     return false;
                 }
             } else {
-                $this->warning('Your current plan does not allow video uploads. <a href="/checkout">Please upgrade to Plane ClubPro</a> for unlimited video and image.');
+                $maxImageBytes = 4194304; // 4MB
+                $this->warning('Image exceeds the 4MB limit for your plan. Please choose a smaller Image.');
                 return false;
             }
-        }
+
 
         $newTotalStorageInBytes = $user->used_disk + $fileSizeInBytes;
 
@@ -82,14 +78,12 @@ trait WithMedia
             return false;
         }
 
-        if (str_contains($mimeType, 'image')) {
-            $mediaService->createImage($mediaFilePath, $id);
-        } elseif (str_contains($mimeType, 'video')) {
-            $mediaService->createVideo($mediaFilePath, $id);
-        } else {
+        if (!str_contains($mimeType, 'image')) {
             $this->warning('Unsupported media type uploaded.');
             return false;
         }
+
+        $mediaService->createImage($mediaFilePath, $id);
 
         // Update user's used_disk
         $user->used_disk = $newTotalStorageInBytes;

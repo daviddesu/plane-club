@@ -110,8 +110,8 @@ new class extends Component {
                     </div>
                     <ul class="space-y-2">
                         <li class="flex items-center gap-2">
-                            <x-mary-icon name="o-video-camera" class="w-4 h-4 text-primary" />
-                            <span>Video uploads</span>
+                            <x-mary-icon name="o-no-symbol" class="w-4 h-4 text-primary" />
+                            <span>No adverts</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <x-mary-icon name="o-photo" class="w-4 h-4 text-primary" />

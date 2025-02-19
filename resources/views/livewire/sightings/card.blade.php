@@ -21,8 +21,6 @@ new class extends Component
     public ?string $registration = null;
     public ?string $flightNumber = null;
 
-    public bool $isVideo = false;
-    public bool $isProcessing = false;
     public ?string $thumbnailPath = null;
     public ?string $mediaPath = null;
 
@@ -39,8 +37,6 @@ new class extends Component
             ->find($id);
 
             $this->id = $sighting->id;
-            $this->isVideo = $sighting->media?->isVideo() ?? false;
-            $this->isProcessing = $sighting->media?->isProcessing() ?? false;
             $this->thumbnailPath = $this->getCachedMediaUrl($sighting->media?->thumbnail_path);
             $this->mediaPath = $this->getCachedMediaUrl($sighting->media?->path);
             $this->arrivalAirportName = $sighting->arrivalAirport?->name ?? '';
@@ -90,35 +86,14 @@ new class extends Component
 <div>
 <x-mary-card class="flex flex-col w-full p-0 overflow-hidden rounded shadow">
     <!-- Media Section -->
-    @if($mediaPath || $isProcessing)
+    @if($mediaPath)
         <div class="relative overflow-hidden rounded-lg aspect-video">
-            @if($isProcessing)
-                <div class="flex flex-col items-center justify-center w-full h-full bg-base-200">
-                    <div class="flex items-center gap-2 mb-2">
-                        <x-mary-icon name="o-video-camera" class="w-6 h-6 animate-pulse" />
-                        <span class="text-sm font-medium">Processing video...</span>
-                    </div>
-                    <div class="w-48 h-2 overflow-hidden rounded-full bg-base-300">
-                        <div class="h-2 bg-primary animate-[loading_1s_ease-in-out_infinite]"></div>
-                    </div>
-                </div>
-            @else
-                @if($isVideo)
-                    <video
-                        class="object-cover w-full h-full cursor-pointer"
-                        wire:click="$toggle('showFullscreen')"
-                        src="{{ $mediaPath }}"
-                        controls
-                    ></video>
-                @else
-                    <img
-                        class="object-cover w-full h-full cursor-pointer"
-                        wire:click="$toggle('showFullscreen')"
-                        src="{{ $mediaPath }}"
-                        alt="Sighting thumbnail"
-                    />
-                @endif
-            @endif
+            <img
+                class="object-cover w-full h-full cursor-pointer"
+                wire:click="$toggle('showFullscreen')"
+                src="{{ $mediaPath }}"
+                alt="Sighting thumbnail"
+            />
         </div>
     @endif
 

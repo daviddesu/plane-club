@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\Media;
-use App\Jobs\ProcessVideoUpload;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -64,7 +63,6 @@ class MediaService {
 
     public function createImage($mediaFilePath, $sightingId)
     {
-        // Process image synchronously (since it's quick)
         $filePath = $this->convertImagetoJPEG($mediaFilePath);
         if (!$filePath) {
             throw new \RuntimeException("The uploaded image could not be processed and converted to JPG.");
@@ -99,49 +97,7 @@ class MediaService {
             "type" => Media::IMAGE->value,
             "thumbnail_path" => null,
             'status' => 'processed',
-            'raw_video_path' => null,
             'size' => $fileSizeInBytes,
         ]);
-    }
-
-    public function createVideo($mediaFilePath, $sightingId)
-    {
-        $fileSizeInBytes = filesize($mediaFilePath);
-
-        // Upload raw video file to S3
-        $rawVideoPath = Storage::disk(getenv('FILESYSTEM_DISK'))
-            ->putFile(
-            'aircraft/raw_videos',
-                new \Illuminate\Http\File($mediaFilePath),
-                [
-                    'CacheControl' => 'public, max-age=31536000, immutable',
-                    'ACL' => 'public-read',
-                ]
-            );
-
-        // Clean up the local temporary file
-        if (file_exists($mediaFilePath)) {
-            unlink($mediaFilePath);
-        }
-
-        // Save media record with status 'processing'
-        $mediaItem = Auth::user()->mediaItems()->create([
-            "path" => "",
-            "sighting_id" => $sightingId,
-            "type" => Media::VIDEO->value,
-            "thumbnail_path" => null,
-            'status' => 'processing',
-            'raw_video_path' => $rawVideoPath,
-            'size' => $fileSizeInBytes,
-        ]);
-
-        // Dispatch job to process video
-        try {
-            ProcessVideoUpload::dispatch($mediaItem->id);
-            Log::info('Dispatched ProcessVideoUpload job for Media Item ID: ' . $mediaItem->id);
-        } catch (\Exception $e) {
-            Log::error('Failed to dispatch ProcessVideoUpload job: ' . $e->getMessage());
-            throw $e;
-        }
     }
 }

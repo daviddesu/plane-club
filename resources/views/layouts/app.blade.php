@@ -56,6 +56,7 @@
 
                     gtag('config', 'AW-16786194088');
                 </script>
+                <meta name="ezoic-site-verification" content="46InrUmUsKXP5FiEn6q3SXPMhI09EP" />
     </head>
     <body class="font-sans antialiased">
 
