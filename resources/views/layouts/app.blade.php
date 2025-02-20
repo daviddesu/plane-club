@@ -57,6 +57,8 @@
                     gtag('config', 'AW-16786194088');
                 </script>
                 <meta name="ezoic-site-verification" content="46InrUmUsKXP5FiEn6q3SXPMhI09EP" />
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2697384818615740"
+     crossorigin="anonymous"></script>
     </head>
     <body class="font-sans antialiased">
 
