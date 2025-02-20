@@ -121,7 +121,14 @@ new class extends Component
             >
 
 
-                @foreach($this->ids as $id)
+                @foreach($this->ids as $index => $id)
+                    @if($id % 5 == 0 && !Auth::user()->isPro()){
+                        <li wire:key="sighting-ad-{{ $index }}">
+                            <livewire:ads.card
+                                wire:key="ad-card-{{ $index }}"
+                                lazy
+                        </li>
+                    @endif
                     <li wire:key="sighting-item-{{ $id }}">
                         <livewire:sightings.card
                             wire:key="sighting-card-{{ $id }}"
