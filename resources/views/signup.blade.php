@@ -100,9 +100,7 @@
                 <a class="hover:underline" href="/cookie-policy">Cookie Policy</a>
             </div>
             <div>
-                <a class="hover:underline termly-display-preferences" href="#">
-                    Consent Preferences
-                </a>
+                <a href="#" class="termly-display-preferences">Consent Preferences</a>
             </div>
             <div>
                 <a class="hover:underline" href="https://app.termly.io/notify/f18e572b-567a-4704-b52c-0b6fdd7d9ab6">Data Subject Access Request (DSAR) Form</a>

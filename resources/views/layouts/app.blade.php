@@ -25,7 +25,7 @@
         @if(!Auth::check())
         <script
             type="text/javascript"
-            src="https://app.termly.io/resource-blocker/a569d0d4-62c0-484c-976d-d4892e3c0026?autoBlock=on"
+            src="https://app.termly.io/resource-blocker/ee7de677-a9dc-4757-a8f5-f872ea8b086c?autoBlock=on"
             ></script>
         @endif
 
