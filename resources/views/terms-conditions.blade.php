@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div name="termly-embed" data-id="4edaad11-d025-4ba0-b93f-4e7e2e6ca794"></div>
+    <div name="termly-embed" data-id="2d69d689-0fc5-4349-8bdd-c40500c7d06f"></div>
 <script type="text/javascript">(function(d, s, id) {
   var js, tjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
