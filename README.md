@@ -14,7 +14,7 @@ Plane Club is a web application for plane spotters and aviation enthusiasts. Use
 ---
 
 ## Using Plane Club in Production
-* Visit the Production URL: [https://planeclub.example.com](https://planeclub.app/)
+* Visit the Production URL: [https://planeclub.app](https://planeclub.app/)
 * Sign Up: Click on Signup and complete the form with your email, password, and any required details.
 * Confirm Email: Check your inbox and verify your account.
 * Explore: Start uploading photos of your plane sightings, tagging them, and managing your gallery.
@@ -51,15 +51,15 @@ Plane Club is a web application for plane spotters and aviation enthusiasts. Use
 
 3. Install Front-End Dependencies
 
-```bash
-npm install
-npm run build  # or: npm run dev
-```
+    ```bash
+    npm install
+    npm run build  # or: npm run dev
+    ```
 
 4. Create and Configure Your .env File
 
 * Duplicate the .env.example file and rename it to .env.
-*Update the environment variables (e.g., DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+* Update the environment variables (e.g., DB_DATABASE, DB_USERNAME, DB_PASSWORD).
 
 5. Run Database Migrations
 
