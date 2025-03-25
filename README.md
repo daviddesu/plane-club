@@ -2,7 +2,7 @@
 
 Plane Club is a web application for plane spotters and aviation enthusiasts. Users can upload their own sightings and photos to build a personalised gallery.
 
---
+---
 
 ## Tech Stack
 
@@ -27,8 +27,6 @@ Plane Club is a web application for plane spotters and aviation enthusiasts. Use
 ---
 
 ## Getting Started (Local Setup)
-
-> **Note:** This repository is **not open source**. These instructions are provided only for demonstration in a portfolio context.
 
 ### Prerequisites
 
